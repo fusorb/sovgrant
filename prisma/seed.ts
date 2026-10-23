@@ -37,7 +37,7 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 const SYSTEM_TENANT_ID = "SYSTEM";
-const DIRECT_CLIENT_ID = process.env.ARCID_DIRECT_CLIENT_ID ?? "arcid-direct";
+const DIRECT_CLIENT_ID = process.env.SG_DIRECT_CLIENT_ID ?? "sg-direct";
 const API_BASE = process.env.API_BASE_URL ?? "http://localhost:4000";
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "admin@arcevocirqle.com.ng";
@@ -50,12 +50,12 @@ if (process.env.NODE_ENV === "production" && !process.env.ADMIN_PASSWORD) {
   process.exit(1);
 }
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "ArcID@Dev2025!";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "SovGrant@Dev2025!";
 
 if (process.env.NODE_ENV === "production") {
   // Defense in depth - even if ADMIN_PASSWORD is set, reject the known
   // dev default so a copy-pasted .env.example value can't slip through.
-  if (ADMIN_PASSWORD === "ArcID@Dev2025!") {
+  if (ADMIN_PASSWORD === "SovGrant@Dev2025!") {
     console.error(
       "[seed] ADMIN_PASSWORD is set to the known development default. " +
         "Set a unique, strong password before seeding production.",
@@ -78,7 +78,7 @@ function deriveDidWeb(base: string): string {
 }
 
 async function main() {
-  console.log("🌱 ArcID seed starting...\n");
+  console.log("🌱 SovGrant seed starting...\n");
 
   // ── 1. System Tenant ──────────────────────────────────────────────────────
   await prisma.tenant.upsert({
@@ -404,7 +404,7 @@ async function main() {
       data: {
         clientId: DIRECT_CLIENT_ID,
         tenantId: SYSTEM_TENANT_ID,
-        name: "ArcID Native Authentication Portal",
+        name: "SovGrant Native Authentication Portal",
         public: false,
         requirePkce: true,
         grantTypes: [
@@ -420,7 +420,7 @@ async function main() {
             { uri: `${API_BASE}/api/oauth/callback` },
             { uri: "http://localhost:3000/api/auth/callback" },
             { uri: "http://localhost:3000/api/oauth/callback" },
-            { uri: "arcid://oauth/callback" },
+            { uri: "sg://oauth/callback" },
           ],
         },
       },

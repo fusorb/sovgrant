@@ -1001,7 +1001,7 @@ model WebhookEndpoint {
   id         String   @id @default(cuid())
   tenantId   String
   url        String
-  secret     String // HMAC secret for X-ArcID-Signature validation by receiver
+  secret     String // HMAC secret for X-SovGrant-Signature validation by receiver
   eventTypes String[] // empty = all events; non-empty = filter to these AuditLogAction values
   enabled    Boolean  @default(true)
   createdAt  DateTime @default(now())

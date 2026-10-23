@@ -17,8 +17,8 @@
 // dedicated `test:rollback` script (see .github/workflows/ci.yml and the
 // README). Run locally against a scratch DB:
 //   ARC_ID_ROLLBACK_TEST=1 \
-//     DATABASE_URL=postgresql://user:pass@localhost:5432/arcid_rollback_test \
-//     SHADOW_DATABASE_URL=postgresql://user:pass@localhost:5432/arcid_rollback_shadow \
+//     DATABASE_URL=postgresql://user:pass@localhost:5432/sovgrant_rollback_test \
+//     SHADOW_DATABASE_URL=postgresql://user:pass@localhost:5432/sovgrant_rollback_shadow \
 //     pnpm vitest run prisma/migrations/rollback.test.ts
 
 import { describe, it, expect, beforeAll } from "vitest";
