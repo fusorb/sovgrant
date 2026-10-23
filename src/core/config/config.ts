@@ -15,7 +15,7 @@ export const config = {
     url: rawEnv.DATABASE_URL,
   },
   oauth: {
-    directClientId: rawEnv.ARCID_DIRECT_CLIENT_ID,
+    directClientId: rawEnv.SG_DIRECT_CLIENT_ID,
   },
   social: {
     google: {
@@ -39,7 +39,7 @@ export const config = {
     },
   },
   integration: {
-    arcbaseWebhookUrl: rawEnv.ARCBASE_WEBHOOK_URL,
+    arcbaseWebhookUrl: rawEnv.SOVGRANT_WEBHOOK_URL,
   },
   security: {
     cookieSecret: rawEnv.COOKIE_SECRET,

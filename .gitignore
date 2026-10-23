@@ -58,5 +58,5 @@ ArcevoCirqle_Design_Standards_Manual_v1.0..txt
 # local e2e harness
 /scratch-e2e/
 
-# arc-id generated codebase snapshot (tooling output - regenerate via gen-snapshot.js)
-arcid_codebase_snapshot.txt
+# sovgrant generated codebase snapshot (tooling output - regenerate via gen-snapshot.js)
+sovgrant_codebase_snapshot.txt

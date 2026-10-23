@@ -11,11 +11,11 @@ export const envSchema = z
     DATABASE_URL: z.string().url(),
 
     // OAuth / Gateways
-    ARCID_DIRECT_CLIENT_ID: z.string().default("arcid-direct"),
-    ARCBASE_WEBHOOK_URL: z
+    SG_DIRECT_CLIENT_ID: z.string().default("sg-direct"),
+    SOVGRANT_WEBHOOK_URL: z
       .string()
       .url()
-      .default("http://localhost:3000/api/webhooks/arcid"),
+      .default("http://localhost:3000/api/webhooks/sovgrant"),
     API_BASE_URL: z.string().url().default("http://localhost:4000"),
     ALLOWED_ORIGINS: z.string().default("http://localhost:3000"),
 
@@ -34,13 +34,13 @@ export const envSchema = z
 
     // JWT Config Tokens
     JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
-    JWT_ISSUER: z.string().default("arcid"),
+    JWT_ISSUER: z.string().default("sovgrant"),
     JWT_ACCESS_TTL: z.string().default("15m"),
     JWT_REFRESH_TTL: z.string().default("7d"),
 
     // Passkey / WebAuthn Options
     WEBAUTHN_RP_ID: z.string().default("localhost"),
-    WEBAUTHN_RP_NAME: z.string().default("ArcID"),
+    WEBAUTHN_RP_NAME: z.string().default("SovGrant"),
     WEBAUTHN_ORIGIN: z.string().url().default("http://localhost:3000"),
 
     // Upstash Redis Token Cache Layer (optional - falls back to in-memory)
@@ -49,11 +49,11 @@ export const envSchema = z
 
     // Mail Delivery Communication Vector
     RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),
-    EMAIL_FROM: z.string().default("ArcID <noreply@arcevocirqle.com.ng>"),
+    EMAIL_FROM: z.string().default("SovGrant <noreply@arcevocirqle.com.ng>"),
 
     // SMS Gateway - SKIPPED for now (Brevo costs too much at MVP stage)
     BREVO_API_KEY: z.string().optional(),
-    SMS_SENDER: z.string().default("ArcID"),
+    SMS_SENDER: z.string().default("SovGrant"),
 
     // Webhooks Outbox Key Signature
     WEBHOOK_SIGNING_SECRET: z

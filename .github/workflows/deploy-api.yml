@@ -62,7 +62,7 @@ jobs:
           script: |
             set -e
 
-            cd /opt/arcid
+            cd /opt/sg
 
             # Pull the latest image
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login $REGISTRY -u ${{ github.actor }} --password-stdin

@@ -4,7 +4,7 @@
 // renders without throwing through the facet-emails renderer.
 import { TEMPLATE_REGISTRY, TEMPLATE_NAMES } from "../src/core/mail/preview/template-registry";
 import { compileMailTree } from "../src/core/mail/mail.engine";
-import { renderEmailText } from "@arcevo/facet-emails";
+import { renderEmailText } from "@fusorb/facet-emails";
 
 let pass = 0;
 let fail = 0;

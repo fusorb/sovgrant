@@ -13,7 +13,7 @@ const IGNORED_ITEMS = new Set([
   ".DS_Store",
   "generated",
   "repo_structure.txt",
-  "arcid_codebase_snapshot.txt",
+  "sovgrant_codebase_snapshot.txt",
   "scripts",
   "gen-structure.js",
   "pnpm-lock.yaml",
@@ -132,10 +132,10 @@ const visualTree = `${path.basename(rootDir)}/\n${generateTree(rootDir)}`;
 const fileContentsDump = extractContents(rootDir, rootDir);
 
 fs.writeFileSync(
-  "arcid_codebase_snapshot.txt",
+  "sovgrant_codebase_snapshot.txt",
   `=== STRUCTURE ===\n${visualTree}\n=== CONTENTS ===\n${fileContentsDump}`,
   "utf-8",
 );
 console.log(
-  "✨ Success! Structure and all contents written to arcid_codebase_snapshot.txt",
+  "✨ Success! Structure and all contents written to sovgrant_codebase_snapshot.txt",
 );

@@ -22,7 +22,7 @@ try {
   shadowEnv = undefined;
 }
 const shadowDatabaseUrl =
-  process.env.SHADOW_DATABASE_URL || shadowEnv || databaseUrl.replace(/\/[^/]*\?/, "/arcid_shadow?");
+  process.env.SHADOW_DATABASE_URL || shadowEnv || databaseUrl.replace(/\/[^/]*\?/, "/sg_shadow?");
 
 export default defineConfig({
   schema: "prisma/schema.prisma",

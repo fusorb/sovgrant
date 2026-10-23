@@ -31,7 +31,7 @@ jobs:
           envs: NEXT_PUBLIC_API_URL
           script: |
             set -e
-            cd /opt/arcid
+            cd /opt/sg
 
             # Pull latest code
             git pull origin main
@@ -41,4 +41,4 @@ jobs:
             pnpm build:web
 
             # Restart the web process (PM2)
-            pm2 restart arcid-web || pm2 start pnpm --name arcid-web -- start:web
+            pm2 restart sg-web || pm2 start pnpm --name sg-web -- start:web

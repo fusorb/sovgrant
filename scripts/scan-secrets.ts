@@ -1,6 +1,6 @@
 // scripts/scan-secrets.ts
 //
-// Secrets / PII log scan for the arc-id repo.
+// Secrets / PII log scan for the sovgrant repo.
 //
 // Usage:  pnpm scan:secrets
 // Exit:   0 = clean, 1 = findings
