@@ -1,4 +1,4 @@
-# ArcID - Claude Code Handbook
+# SovGrant - Claude Code Handbook
 
 > Verified against actual source on 2026-08-21. Do not trust claims from
 > prior docs that aren't re-confirmed below - every status line here was
@@ -6,9 +6,9 @@
 
 ---
 
-## What ArcID is
+## What SovGrant is
    
-ArcID is a sovereign, multi-tenant identity and access management backend.
+SovGrant is a sovereign, multi-tenant identity and access management backend.
 Fastify + Prisma + Next.js 16 monorepo (pnpm, ESM-only).
 
 **What it does today (0.1.0, pre-release):**
@@ -30,7 +30,7 @@ Fastify + Prisma + Next.js 16 monorepo (pnpm, ESM-only).
 ## Repository layout
 
 ```
-arc-id/
+sovgrant/
 ├── src/
 │   ├── api/           # Fastify server - plugins, routes, server entrypoints
 │   │   ├── plugins/   # auth-guard, jwt, db, rate-limit, swagger, cors
@@ -57,7 +57,7 @@ arc-id/
 │   │   └── webhooks/  # endpoint config + delivery event routes
 │   │   ├── api-key/   # CRUD flows + routes, SHA-256 hashed bearer tokens
 │   ├── providers/     # React context - ThemeProvider, AuthProvider
-│   ├── sdk/           # Thin singleton wiring over @arcevo/facet-sdk (index.ts only)
+│   ├── sdk/           # Thin singleton wiring over @fusorb/facet-sdk (index.ts only)
 │   ├── store/         # Zustand stores - auth, tenant, ui
 │   └── types/         # Shared TypeScript types
 ├── prisma/
@@ -66,9 +66,9 @@ arc-id/
 │   └── migrations/    # Never hand-edit - always `pnpm prisma:migrate`
 ├── docs/
 │   ├── planning/     # Planning documents
-│   │   ├── arcid-v2-roadmap.md       # Operative roadmap (v2)
+│   │   ├── sovgrant-v2-roadmap.md       # Operative roadmap (v2)
 │   │   ├── testing-guide.MD          # Manual API test matrix (65 checks)
-│   │   ├── arcid-cli-design.md       # CLI basis (planned)
+│   │   ├── sovgrant-cli-design.md       # CLI basis (planned)
 │   │   ├── client-core-architecture-analysis.md  # Canonical client-core conventions
 │   │   └── presentation-envelope-design.md       # Presentation endpoint design (built, ref)
 ├── .github/workflows/
@@ -222,13 +222,13 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 | Email templates | ✅ 13 templates | All registered in `notification.service.ts`, compiled via React Email + Resend |
 | CI pipeline | ✅ 3 workflows (rewritten 2026-07-28) | `ci.yml` (self-hosted Postgres 17 service, no external DB), `deploy-api.yml` (GHCR push → SSH Docker Compose on target VM), `deploy-web.yml` (SSH git pull → pnpm build:web → PM2 restart) |
 | `GET /tenants` route | ✅ 100% | `list-tenants.route.ts` - returns all tenants the user has ACTIVE membership in, with role + plan |
-| SDK layer | ✅ **Migrated to `@arcevo/facet-sdk@1.1.0`** | `src/sdk/` is now `index.ts` only - an `ArcIdClient` singleton (401 auto-refresh wired to the Zustand auth store) re-exporting the facet domain SDK classes (`AuthSdk`, `TenantSdk`, `VcSdk`, …). Old factory-pattern `src/sdk/*.sdk.ts` deleted (2026-08-05). |
-| UI components | ✅ **Migrated to `@arcevo/facet-components@1.10.0`** | shadcn/ui primitives purged; `src/components/ui/` retains 3 app-specific wrappers (`icon.tsx` tree-shaken `<Icon>`, `typewriter-text.tsx`, `icons.generated.tsx`). `src/lib/ui/icon-registry.ts` + `navigation.ts` deleted as duplicates. `cn` re-exported from `@/lib/utils`. Verified typecheck + 342 tests green (2026-08-20). |
-| Auth UI | ✅ **Migrated to `@arcevo/facet-auth@1.2.2`** | Login/register/mfa pages use `SignIn`/`SignUp`/`MfaDialog`; `ArcProvider` bridged to the Zustand store via `zustandTokenStorage` (commit `d6f6707`). In-repo `login-form`/`register-form`/`mfa-form` deleted; forgot/reset password forms now on `@arcevo/facet-auth` (ForgotPasswordForm/ResetPasswordForm). |
-| Layout | ✅ **Migrated to `@arcevo/facet-layout@1.4.1`** | `(auth)` group uses `AuthLayout`, `console/` directory uses `ConsoleLayout`; in-repo sidebar/topbar/tenant-switcher deleted. |
-| CSS tokens | ✅ **Migrated to `@arcevo/facet-tokens@1.1.4`** | `tokens.css` imported before `globals.css` in `layout.tsx`; `:root` block removed from globals.css; arc-id keeps its indigo primary via override. |
-| Mail templates | ✅ **Migrated to `@arcevo/facet-emails@^1.1.1`** (Phase 7) | `src/core/mail` rewired to `toTemplateTree`/`EmailBrand`; 13 templates via facet-emails; preview server on `:3888`. |
-| Stores | ✅ **Migrated to `@arcevo/facet-store@^0.1.0`** (Phase 8) | `src/store/` deleted; `useAuthStore`/`useTenantStore` from `@arcevo/facet-store` across ~26 hook sites. |
+| SDK layer | ✅ **Migrated to `@fusorb/facet-sdk@1.1.0`** | `src/sdk/` is now `index.ts` only - an `SgClient` singleton (401 auto-refresh wired to the Zustand auth store) re-exporting the facet domain SDK classes (`AuthSdk`, `TenantSdk`, `VcSdk`, …). Old factory-pattern `src/sdk/*.sdk.ts` deleted (2026-08-05). |
+| UI components | ✅ **Migrated to `@fusorb/facet-components@1.10.0`** | shadcn/ui primitives purged; `src/components/ui/` retains 3 app-specific wrappers (`icon.tsx` tree-shaken `<Icon>`, `typewriter-text.tsx`, `icons.generated.tsx`). `src/lib/ui/icon-registry.ts` + `navigation.ts` deleted as duplicates. `cn` re-exported from `@/lib/utils`. Verified typecheck + 342 tests green (2026-08-20). |
+| Auth UI | ✅ **Migrated to `@fusorb/facet-auth@1.2.2`** | Login/register/mfa pages use `SignIn`/`SignUp`/`MfaDialog`; `SgProvider` bridged to the Zustand store via `zustandTokenStorage` (commit `d6f6707`). In-repo `login-form`/`register-form`/`mfa-form` deleted; forgot/reset password forms now on `@fusorb/facet-auth` (ForgotPasswordForm/ResetPasswordForm). |
+| Layout | ✅ **Migrated to `@fusorb/facet-layout@1.4.1`** | `(auth)` group uses `AuthLayout`, `console/` directory uses `ConsoleLayout`; in-repo sidebar/topbar/tenant-switcher deleted. |
+| CSS tokens | ✅ **Migrated to `@fusorb/facet-tokens@1.1.4`** | `tokens.css` imported before `globals.css` in `layout.tsx`; `:root` block removed from globals.css; sovgrant keeps its indigo primary via override. |
+| Mail templates | ✅ **Migrated to `@fusorb/facet-emails@^1.1.1`** (Phase 7) | `src/core/mail` rewired to `toTemplateTree`/`EmailBrand`; 13 templates via facet-emails; preview server on `:3888`. |
+| Stores | ✅ **Migrated to `@fusorb/facet-store@^0.1.0`** (Phase 8) | `src/store/` deleted; `useAuthStore`/`useTenantStore` from `@fusorb/facet-store` across ~26 hook sites. |
 | Tenant store hydration | ✅ Wired | `AuthProvider` calls `tenants.list()` on mount, populates `useTenantStore` with enriched tenant data |
 | Tenant switcher UI | ✅ Built | `TenantSwitcher` component in Topbar - visible when user has 2+ tenants, triggers context switch |
 
@@ -236,16 +236,16 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 
 | Priority | Item | Why now |
 |----------|------|---------|
-| **P0** | Facet migration Phases 0–8 + Phase E | **Phases 0–8 + Phase E done (2026-08-19).** Phase 1: `src/sdk/` is a thin `ArcIdClient` singleton wiring over `@arcevo/facet-sdk@1.1.0`. Phase 2: `@arcevo/facet-tokens/tokens.css` imported before `globals.css` in `layout.tsx`. Phase 3: shadcn/ui primitives purged from `src/components/ui/` (3 app-specific wrappers retained); all consumers import `@arcevo/facet-components@1.10.0`. Phase 4: auth pages on `@arcevo/facet-auth@1.2.2` via `ArcProvider` + `zustandTokenStorage` bridge (commit `d6f6707`). Phase 5: layouts on `@arcevo/facet-layout@1.4.1`. **Done:** Phase 6 purge FULLY complete — forgot/reset password forms now on `@arcevo/facet-auth`; `src/components/auth/` + `src/components/layout/` deleted; shadcn/ui primitives purged from `src/components/ui/` (3 app-specific wrappers retained) (2026-08-19). |
+| **P0** | Facet migration Phases 0–8 + Phase E | **Phases 0–8 + Phase E done (2026-08-19).** Phase 1: `src/sdk/` is a thin `SgClient` singleton wiring over `@fusorb/facet-sdk@1.1.0`. Phase 2: `@fusorb/facet-tokens/tokens.css` imported before `globals.css` in `layout.tsx`. Phase 3: shadcn/ui primitives purged from `src/components/ui/` (3 app-specific wrappers retained); all consumers import `@fusorb/facet-components@1.10.0`. Phase 4: auth pages on `@fusorb/facet-auth@1.2.2` via `SgProvider` + `zustandTokenStorage` bridge (commit `d6f6707`). Phase 5: layouts on `@fusorb/facet-layout@1.4.1`. **Done:** Phase 6 purge FULLY complete — forgot/reset password forms now on `@fusorb/facet-auth`; `src/components/auth/` + `src/components/layout/` deleted; shadcn/ui primitives purged from `src/components/ui/` (3 app-specific wrappers retained) (2026-08-19). |
 | **P1** | Phase 3 - Security hardening | **✅ Closed (2026-07-28).** SSRF (4/4 fixed), CSRF review complete, Redis-backed distributed revocation wired. **Per-session access token revocation**: `AccessToken.sessionId` column + migration + `DELETE /sessions/:id` revokes bound access tokens + blocks JTIs in Redis. Full kill chain: session → refresh → access tokens. JTI blocklist (14 tests, 3 files): in-memory Map fallback, retries every call. Introspect route: Redis + DB dual check. |
 | **P2** | Phase 4 - Observability | **✅ Shipped (2026-07-28).** `requestId` in all error responses + audit log metadata. `@fastify-metrics` at `GET /metrics`. Correlation IDs flow through FlowContext.requestId → auditService.log → DB. Pino structured logs carry traceId on every flow init/ok/fail. |
-| **P3** | CLI + SDK packages | `packages/cli/` extraction after frontend rebuild stabilises API contract. Design basis: `docs/planning/arcid-cli-design.md`. |
+| **P3** | CLI + SDK packages | `packages/cli/` extraction after frontend rebuild stabilises API contract. Design basis: `docs/planning/sovgrant-cli-design.md`. |
 | **P4** | LegalConsent → wire to flow | **✅ Done (2026-08-19).** LegalConsent gate wired into `issue-credential.flow.ts` (E2, lines 62-78) — checks `TenantPolicy.requireLegalConsent` + `legalConsent` table before issuing; throws 403 if no consent recorded. |
 | **P5** | ExternalIdentifier.verified → VC issuance | **✅ Done (2026-08-19).** Verified-identifier gate wired into `issue-credential.flow.ts` (E1, lines 52-60) — subject DID must resolve to an `Identity` with ≥1 verified external identifier (`where: { identityId, verified: true }`). |
 | **P4.1** | Dead audit enum values | **✅ Done (2026-08-22).** `ROLE_*` + `DELEGATION_*` removed from `AuditLogAction` enum (53 → 51 values); migration `20260822000000_remove_dead_audit_enum_values`. `OAUTH_CLIENT_UPDATED` audit call wired in `clients.route.ts`. 100% call-site coverage. |
 | **P4.2** | CI secret + dependency scanning | **✅ Done (2026-08-19).** `scan-secrets.ts` wired to CI (`pnpm scan:secrets` in ci.yml); Trivy dependency/vuln scan added to ci.yml. Secrets/PII-in-logs now scanned in CI. |
 | **P4.3** | SDK `TenantSdk.create()` coverage | ⏸️ **Carried to v2.** `sdk.test.ts` (6 tests) doesn't cover `TenantSdk.create()` or its token-injection fix; no changeset. Low-risk gap, not blocking v1. |
-| **P4.4** | Frontend chain-rule violations | **✅ Done (2026-08-21).** Verified: NO `src/app` page imports the arc-id SDK (`@/sdk`) directly - only `use-*` hooks + `facet-store` hooks + facet UI (`login`/`register` on `@arcevo/facet-auth`, `billing` via `useBilling()`). `src/components/` purged to facet (no frontend `as any`). Chain rule (page → hook → store → SDK) enforced. |
+| **P4.4** | Frontend chain-rule violations | **✅ Done (2026-08-21).** Verified: NO `src/app` page imports the sovgrant SDK (`@/sdk`) directly - only `use-*` hooks + `facet-store` hooks + facet UI (`login`/`register` on `@fusorb/facet-auth`, `billing` via `useBilling()`). `src/components/` purged to facet (no frontend `as any`). Chain rule (page → hook → store → SDK) enforced. |
 
 ### 🔶 Deferred (do not start early)
 
@@ -276,7 +276,7 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 | `webhooks` | 1 | 6 | 4 | webhook-config route |
 | `lib/*` | 8 | 55 | ~15 | url-safety, rbac, password-rules, jws-proof, jti-blocklist (3 files, inc. Redis), kms |
 | `test-utils` | 2 | 5 | 2 | test-infra + sanity |
-| `sdk` | 1 | 4 | 1 | `src/sdk/index.ts` singleton wiring over `@arcevo/facet-sdk` - exports + client token round-trip |
+| `sdk` | 1 | 4 | 1 | `src/sdk/index.ts` singleton wiring over `@fusorb/facet-sdk` - exports + client token round-trip |
 | `root` | 1 | 1 | - | root sanity test |
 
 ### Modules with zero test coverage (14 files, all low-to-medium risk)
@@ -328,7 +328,7 @@ Current: `0.1.0` (package.json). Pre-release - no stability promises.
 - `0.2.0` 🔄 **ACTIVE (v2)** - ArcWallet companion app integration (end-to-end), CLI package extraction, integration tests against real Postgres. **API key management backend ✅ Done** (CRUD flows + routes, SHA-256 hashed bearer tokens, auth guard extension, migration + Tier 1 rollback tests).
 - `1.0.0` — Stable production milestone: full integration test suite, open-source release
 
-_The v1 roadmap was closed (2026-08-22). Active track: `docs/planning/arcid-v2-roadmap.md`._
+_The v1 roadmap was closed (2026-08-22). Active track: `docs/planning/sovgrant-v2-roadmap.md`._
 
 
 ---
@@ -360,4 +360,4 @@ SMS: transactional MFA codes + security alerts via Brevo (`sendMfaCodeSms`, `sen
 ---
 
 _Keep this file current. Any session that closes an item or discovers a new one
-updates CLAUDE.md and docs/planning/arcid-v2-roadmap.md in the same commit._
+updates CLAUDE.md and docs/planning/sovgrant-v2-roadmap.md in the same commit._

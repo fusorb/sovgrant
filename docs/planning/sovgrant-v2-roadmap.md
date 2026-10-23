@@ -1,4 +1,4 @@
-# ArcID v2 Roadmap
+# SovGrant v2 Roadmap
 
 > **Status**: Active development. v1 (0.1.0 backend) is **COMPLETE**.
 > Last updated: 2026-09-01.
@@ -35,10 +35,10 @@ Backend complete. All Phase 0–8 + Phase E shipped. 62 test files / 358 tests /
 | LegalConsent gate | ✅ | Wired in `issue-credential.flow.ts` (E2) |
 | ExternalIdentifier gate | ✅ | Wired in `issue-credential.flow.ts` (E1) |
 | Frontend rebuild | ✅ | Facet migration Phases 0–6 + E complete (2026-08-19) |
-| SDK | ✅ | Published `@arcevo/facet-sdk@1.1.0`, class-based `AuthSdk`/`TenantSdk`/etc. |
-| CLI | ✅ | Package scaffolded (`packages/cli`) on `@arcevo/facet-cli@0.8.0` |
+| SDK | ✅ | Published `@fusorb/facet-sdk@1.1.0`, class-based `AuthSdk`/`TenantSdk`/etc. |
+| CLI | ✅ | Package scaffolded (`packages/cli`) on `@fusorb/facet-cli@0.8.0` |
 
-**v1 is closed.** All items in `arcid-v1-roadmap.md` are resolved. That file
+**v1 is closed.** All items in `sg-v1-roadmap.md` are resolved. That file
 has been removed; this document supersedes it.
 
 ---
@@ -54,7 +54,7 @@ contract stabilized for the CLI package.
 |---|------|----------|--------|
 | 1 | ArcWallet companion app — end-to-end wallet issuance/verify/presentation flow (separate package) | P0 | ⏳ Not started |
 | 2 | API key management backend — CRUD flows + routes (OAuth2 bearer-token style keys) | P1 | ✅ Done — `ApiKey` model + migration, CRUD flows/routes, SHA-256 hashed tokens, auth guard bearer detection + `requirePermission` scope fallback, 16 unit tests + Tier 1 migration check |
-| 3 | CLI package extraction — move `packages/cli` to published `@arcevo/arcid-cli` npm package | P1 | ⏸️ Scaffolded; pending API contract stability |
+| 3 | CLI package extraction — move `packages/cli` to published `@fusorb/sg-cli` npm package | P1 | ⏸️ Scaffolded; pending API contract stability |
 | 4 | Integration tests against real Postgres (`pnpm test:rollback`) | P2 | ✅ Unblocked (facet shipped 2026-08-19); needs Postgres 17 service |
 | 5 | SDK `TenantSdk.create()` test coverage gap (P4.3) | P2 | ⏸️ Not blocking; 6-test `sdk.test.ts` passes |
 | 6 | Console dashboard — final cleanup (remaining SDK-direct imports in pages) | P3 | ⏸️ Pragmatically acceptable |
@@ -107,16 +107,16 @@ contract stabilized for the CLI package.
 
 ## CLI + SDK packages
 
-- **SDK** — published `@arcevo/facet-sdk@1.1.0` (class-based `AuthSdk`,
+- **SDK** — published `@fusorb/facet-sdk@1.1.0` (class-based `AuthSdk`,
   `TenantSdk`, `OAuthSdk`, `CredentialSdk`, `WebhookSdk`). `src/sdk/index.ts`
-  is a thin singleton that owns the `ArcIdClient` + 401 auto-refresh (wired to
+  is a thin singleton that owns the `SgClient` + 401 auto-refresh (wired to
   the Zustand auth store) and re-exports the facet domain SDKs.
-- **CLI** — `packages/cli` scaffolded on `@arcevo/facet-cli@0.8.0`. Pending API
+- **CLI** — `packages/cli` scaffolded on `@fusorb/facet-cli@0.8.0`. Pending API
   contract stability before extracting to its own npm package.
 
 ---
 
-## File: arcid-v2-roadmap.md
+## File: sovgrant-v2-roadmap.md
 
 _Keep this file current. Any session that closes an item or discovers a new one
-updates CLAUDE.md and docs/planning/arcid-v2-roadmap.md in the same commit._
+updates CLAUDE.md and docs/planning/sovgrant-v2-roadmap.md in the same commit._

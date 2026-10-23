@@ -1,4 +1,4 @@
-# ArcID - Agent Instructions
+# SovGrant - Agent Instructions
 
 > Loaded automatically every session. For the full handbook - status tables,
 > rationale, and open work queue - see `CLAUDE.md` in this same root.
@@ -8,7 +8,7 @@
 
 ## What this is
 
-ArcID: sovereign multi-tenant identity/IAM backend. Fastify + Prisma + Next.js
+SovGrant: sovereign multi-tenant identity/IAM backend. Fastify + Prisma + Next.js
 16 monorepo. OAuth2/OIDC provider, WebAuthn passkeys, TOTP MFA, SD-JWT
 Verifiable Credentials, did:web, multi-tenant policy/RBAC, webhook delivery.
 Version `0.1.0` in package.json (pre-release, no stability promises).
@@ -53,7 +53,7 @@ in package.json) - never emit `require()`/`module.exports`.
 `<n>.flow.ts` · `<n>.route.ts` · `<n>.service.ts` ·
 `<n>.repository.ts` · `<n>.schemas.ts` · `<n>.presenter.ts` ·
 `<n>.test.ts` (co-located with source) · `use-<n>.ts` (hooks) ·
-`<n>.store.ts` · SDK classes live in `@arcevo/facet-sdk`
+`<n>.store.ts` · SDK classes live in `@fusorb/facet-sdk`
 
 ## Before writing any code, check
 
@@ -73,9 +73,9 @@ shipped. See `CLAUDE.md` for the full verified status table. Open work:
   `docker-compose.yml` (Postgres 17 + Redis 7 + API + workers), `.dockerignore`,
   auto-migrate entrypoint, `.env.example`. `docker compose up -d` to run.
 - **Frontend rebuild (Prompt 2) - SDK/stores/hooks/providers/layout complete.**
-  SDK layer migrated to the published **`@arcevo/facet-sdk`** package (class-based
+  SDK layer migrated to the published **`@fusorb/facet-sdk`** package (class-based
   `AuthSdk`/`TenantSdk`/etc.) - `src/sdk/index.ts` is now a thin singleton wiring
-  that owns the `ArcIdClient` + 401 auto-refresh (wired to the Zustand auth
+  that owns the `SgClient` + 401 auto-refresh (wired to the Zustand auth
   store) and re-exports the facet domain SDKs. The old in-repo factory-pattern
   `src/sdk/*.sdk.ts` files are deleted. Hooks for credentials, MFA, webhooks
   use the facet SDKs. Pages still need final cleanup (some import
@@ -83,21 +83,21 @@ shipped. See `CLAUDE.md` for the full verified status table. Open work:
   **Tenant list route (`GET /tenants`) + tenant switcher wired (2026-07-28).**
 - **Facet migration** - ✅
   **Phases 1–5 done.** Phase 1: SDK migrated to the published
-  **`@arcevo/facet-sdk@1.1.0`** - `src/sdk/index.ts` is a thin
-  singleton wiring that owns the `ArcIdClient` + 401 auto-refresh (wired
+  **`@fusorb/facet-sdk@1.1.0`** - `src/sdk/index.ts` is a thin
+  singleton wiring that owns the `SgClient` + 401 auto-refresh (wired
   to the Zustand auth store) and re-exports the facet domain SDKs; the
   old in-repo factory-pattern `src/sdk/*.sdk.ts` files are deleted.
-  Phase 2: `@arcevo/facet-tokens/tokens.css` imported before
+  Phase 2: `@fusorb/facet-tokens/tokens.css` imported before
   `globals.css` in `layout.tsx`; `:root` token block removed from
   globals.css. Phase 3: `src/components/ui/` shadcn/ui primitives purged (3 app-specific wrappers `icon.tsx`, `typewriter-text.tsx`, `icons.generated.tsx` retained); all consumers
-  switched to **`@arcevo/facet-components@1.10.0`** (icons use the
+  switched to **`@fusorb/facet-components@1.10.0`** (icons use the
   package's native `<Icon name="…" />` registry - no local icon registry).
-  Phase 4: auth pages on **`@arcevo/facet-auth@1.2.2`** via `ArcProvider` +
+  Phase 4: auth pages on **`@fusorb/facet-auth@1.2.2`** via `SgProvider` +
   `zustandTokenStorage` bridge (commit `d6f6707`); in-repo
   `login-form`/`register-form`/`mfa-form` deleted.
-  Phase 5: layouts on **`@arcevo/facet-layout@1.4.1`** (`AuthLayout` +
+  Phase 5: layouts on **`@fusorb/facet-layout@1.4.1`** (`AuthLayout` +
   `ConsoleLayout`). Phase 6 purge is FULLY done (2026-08-19) - `src/components/auth/` deleted;
-  `forgot-password-form`/`reset-password-form` now on `@arcevo/facet-auth` (ForgotPasswordForm/ResetPasswordForm).
+  `forgot-password-form`/`reset-password-form` now on `@fusorb/facet-auth` (ForgotPasswordForm/ResetPasswordForm).
 All nine facet packages pinned: sdk 1.1.0, auth 1.2.2, components 1.10.0,
    layout 1.4.1, tokens 1.1.4, emails ^1.1.1, store ^0.1.0, cli ^0.8.0, docs 1.4.6 (cli/docs
    installed as the basis for `packages/cli` work, now scaffolded).

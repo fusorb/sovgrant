@@ -1,16 +1,16 @@
-# ArcID
+# SovGrant
 
 > Sovereign, multi-tenant identity and access management engine for the ArcevoCirqle ecosystem.
 
-ArcID is the identity backbone... one person's verified attributes (a national ID, a professional license, an academic transcript) can be issued once, held by them, and reused across sectors, instead of every institution re-verifying the same facts from scratch. It's the foundation layer that ArcevoCirqle's per-sector products (starting with the academic space) build on.
+SovGrant is the identity backbone... one person's verified attributes (a national ID, a professional license, an academic transcript) can be issued once, held by them, and reused across sectors, instead of every institution re-verifying the same facts from scratch. It's the foundation layer that ArcevoCirqle's per-sector products (starting with the academic space) build on.
 
 ## The problem this solves
 
-Identity verification today is siloed per institution. A student re-proves who they are to their school, their bank, their employer, their government portal — each one running its own verification from zero, each one holding a copy of the same sensitive documents. ArcID exists so that verification happens once, by an authoritative issuer, and the resulting proof — a cryptographically signed Verifiable Credential — can be held by the individual and presented anywhere it's trusted, without re-exposing the underlying documents each time.
+Identity verification today is siloed per institution. A student re-proves who they are to their school, their bank, their employer, their government portal — each one running its own verification from zero, each one holding a copy of the same sensitive documents. SovGrant exists so that verification happens once, by an authoritative issuer, and the resulting proof — a cryptographically signed Verifiable Credential — can be held by the individual and presented anywhere it's trusted, without re-exposing the underlying documents each time.
 
 ## What exists today (v0.1.0)
 
-ArcID is a **Fastify + PostgreSQL (Prisma)** backend with a **Next.js 16** admin dashboard. All state below is verified against source and CI.
+SovGrant is a **Fastify + PostgreSQL (Prisma)** backend with a **Next.js 16** admin dashboard. All state below is verified against source and CI.
 
 **Authentication** — email/password (bcrypt), WebAuthn passkey registration & authentication, TOTP MFA, magic links. Per-tenant policy enforcement (session TTL, max concurrent sessions, required MFA, allowed email domains, password rules).
 
@@ -34,7 +34,7 @@ ArcID is a **Fastify + PostgreSQL (Prisma)** backend with a **Next.js 16** admin
 
 **Security hardening** — SSRF protection (`assertSafeUrl` on all user-supplied URLs), CSRF state on OAuth cookies (`sameSite: lax`, `httpOnly`, `secure`), cross-tenant HTTP isolation tested, distributed token revocation (Redis blocklist + sessionId binding).
 
-**Frontend** — full admin dashboard built on published `@arcevo/facet-*` packages: `@arcevo/facet-sdk` (class-based client + singleton wiring), `@arcevo/facet-components` (all UI primitives), `@arcevo/facet-layout` (`AuthLayout` + `ConsoleLayout`), `@arcevo/facet-auth` (auth forms), `@arcevo/facet-tokens` (CSS tokens), `@arcevo/facet-store` (Zustand state). No local UI primitives to maintain.
+**Frontend** — full admin dashboard built on published `@fusorb/facet-*` packages: `@fusorb/facet-sdk` (class-based client + singleton wiring), `@fusorb/facet-components` (all UI primitives), `@fusorb/facet-layout` (`AuthLayout` + `ConsoleLayout`), `@fusorb/facet-auth` (auth forms), `@fusorb/facet-tokens` (CSS tokens), `@fusorb/facet-store` (Zustand state). No local UI primitives to maintain.
 
 ### Verification
 
@@ -45,7 +45,7 @@ ArcID is a **Fastify + PostgreSQL (Prisma)** backend with a **Next.js 16** admin
 
 ## What's next (v2 roadmap)
 
-See `docs/planning/arcid-v2-roadmap.md` for the current planning document. In short:
+See `docs/planning/sovgrant-v2-roadmap.md` for the current planning document. In short:
 
 - **API keys** — backend CRUD routes + Prisma model (frontend UI stub removed; tracked for v2).
 - **CLI & SDK packages** — standalone `packages/cli` for external integrators.

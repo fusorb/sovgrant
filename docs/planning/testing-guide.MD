@@ -1,4 +1,4 @@
-# ArcID API Testing Guide
+# SovGrant API Testing Guide
 
 > **Status: Hybrid (automated unit tests + manual route verification)**
 > Automated coverage via Vitest (see each block's annotation). Manual
@@ -274,7 +274,7 @@ Behavior depends on environment configuration:
   → If unconfigured: throws "X OAuth not configured" (500), not 501.
   → If configured: redirects to provider, then on callback validates
   state/PKCE cookies, links/creates Identity + OAuthAccount, issues
-  ArcID token pair.
+  SovGrant token pair.
 
 - `GET /idp/saml/:tenantSlug/metadata` and `POST /idp/saml/:tenantSlug/callback`
   → SAML2 SP metadata + ACS. Requires an active IdpConnection row

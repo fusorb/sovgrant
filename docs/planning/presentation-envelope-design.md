@@ -14,13 +14,13 @@ that verification to a real-time challenge - without which any
 credential presentation is subject to replay.
 
 A full OIDC4VP / Presentation Exchange implementation is deferred to v2.
-This design covers a lightweight, expressive enough container that ArcID
+This design covers a lightweight, expressive enough container that SovGrant
 can host for ArcWallet via a simple two-step protocol.
 
 ## Flow (conceptual)
 
 ```
-ArcVerify                   ArcID                          ArcWallet
+ArcVerify                   SovGrant                          ArcWallet
    |                          |                               |
    |  1. POST /verify/session |                               |
    |     { credentialRef }    |                               |
@@ -81,7 +81,7 @@ Response: {
 
 2. **The `proof` JWS** wraps the challenge + credential binding. It is signed
    by the holder with their identity-owned `did:key` (registered via the
-   `wallet-did` flow). ArcID:
+   `wallet-did` flow). SovGrant:
    - Looks up the `did:key` in its own DB (fast path).
    - Verifies the JWS signature against the stored public key.
    - Checks the nonce matches a live session (anti-replay).

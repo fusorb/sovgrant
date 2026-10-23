@@ -1,11 +1,11 @@
 ================================================================
-  ArcID - OAuth / Social Login Secrets Setup Guide
+  SovGrant - OAuth / Social Login Secrets Setup Guide
   Updated: 2026-08-14
 ================================================================
 
 WHY
 ---
-The ArcID backend already implements social login (src/modules/auth/
+The SovGrant backend already implements social login (src/modules/auth/
 routes/social.route.ts) for Google, GitHub, Apple, Microsoft via the
 `arctic` library. The UI (login/register forms) already shows GitHub +
 Google buttons pointing at /auth/github and /auth/google. What is
@@ -22,17 +22,17 @@ With API_BASE_URL="http://localhost:4000" (current .env), the callbacks are:
   GitHub:  http://localhost:4000/auth/github/callback
 
 For production you would use your real API domain, e.g.
-  https://api.arcid.dev/auth/google/callback
+  https://api.sg.dev/auth/google/callback
 
 For Expo Go / a phone testing against your LAN, use your machine IP:
   http://<YOUR_LAN_IP>:4000/auth/google/callback
 
 ENV VARIABLES TO FILL (in .env, then restart the API)
 -----------------------------------------------------
-  GOOGLE_CLIENT_ID="<real-google-client-id>"
-  GOOGLE_CLIENT_SECRET="<real-google-client-secret>"
-  GITHUB_CLIENT_ID="<real-github-client-id>"
-  GITHUB_CLIENT_SECRET="<real-github-client-secret>"
+  GOOGLE_CLIENT_ID="<your-google-client-id>"
+  GOOGLE_CLIENT_SECRET="<your-google-client-secret>"
+  GITHUB_CLIENT_ID="<your-github-client-id>"
+  GITHUB_CLIENT_SECRET="<your-github-client-secret>"
 
 ================================================================
 GOOGLE - step by step
@@ -92,7 +92,7 @@ TESTING THE WHOLE FLOW FROM THE UI
    - /console  if they are a general user (no active tenant yet — the
      console prompts them to create or join one).
      (Arc-Wallet is a separate standalone app; /wallet is no longer mounted
-     under arc-id — users always land on /console now.)
+     under sovgrant — users always land on /console now.)
 
 ================================================================
 TROUBLESHOOTING
