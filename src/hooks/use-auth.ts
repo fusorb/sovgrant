@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback } from "react";
-import { useAuthStore } from "@arcevo/facet-store";
-import { auth, arcIdClient, persistSession, clearPersistedSession } from "@/sdk";
+import { useAuthStore } from "@fusorb/facet-store";
+import { auth, sgClient, persistSession, clearPersistedSession } from "@/sdk";
 
 export function useAuth() {
   const { user, isAuthenticated, isLoading, accessToken } = useAuthStore();
@@ -13,7 +13,7 @@ export function useAuth() {
       // MFA-required logins return only sessionId + identity (no tokens).
       if (result.data.accessToken) {
         useAuthStore.getState().setAuth(result.data.identity, result.data.accessToken, result.data.refreshToken ?? "");
-        arcIdClient.setAccessToken(result.data.accessToken);
+        sgClient.setAccessToken(result.data.accessToken);
         persistSession(result.data.identity);
       }
     }
@@ -31,7 +31,7 @@ export function useAuth() {
 
   const logout = useCallback(async (sessionId: string) => {
     await auth.logout(sessionId);
-    arcIdClient.setAccessToken(null);
+    sgClient.setAccessToken(null);
     useAuthStore.getState().clearAuth();
     clearPersistedSession();
   }, []);
@@ -61,7 +61,7 @@ export function useAuth() {
       } else {
         useAuthStore.getState().setTokens(accessToken, refreshToken ?? "");
       }
-      arcIdClient.setAccessToken(accessToken);
+      sgClient.setAccessToken(accessToken);
     }
     return result;
   }, []);
@@ -70,13 +70,13 @@ export function useAuth() {
     const result = await auth.refresh("");
     if (result.data) {
       useAuthStore.getState().setTokens(result.data.accessToken, result.data.refreshToken ?? "");
-      arcIdClient.setAccessToken(result.data.accessToken);
+      sgClient.setAccessToken(result.data.accessToken);
       const { user } = useAuthStore.getState();
       if (user) {
         persistSession(user);
       }
     } else {
-      arcIdClient.setAccessToken(null);
+      sgClient.setAccessToken(null);
       useAuthStore.getState().clearAuth();
       clearPersistedSession();
     }
@@ -91,7 +91,7 @@ export function useAuth() {
     if (result.data?.accessToken) {
       const { identity, accessToken, refreshToken } = result.data;
       useAuthStore.getState().setAuth(identity, accessToken, refreshToken ?? "");
-      arcIdClient.setAccessToken(accessToken);
+      sgClient.setAccessToken(accessToken);
       persistSession(identity);
     }
     return result;
@@ -99,7 +99,7 @@ export function useAuth() {
 
   /** Drop the persisted session on disk (delete-account / hard logout). */
   const clearSession = useCallback(() => {
-    arcIdClient.setAccessToken(null);
+    sgClient.setAccessToken(null);
     useAuthStore.getState().clearAuth();
     clearPersistedSession();
   }, []);
@@ -120,11 +120,11 @@ export function useAuth() {
     requestMagicLink,
     authenticateMagicLink,
     clearSession,
-    client: arcIdClient,
+    client: sgClient,
   };
 }
 
-/** OAuth social login URL against the ArcID API. */
+/** OAuth social login URL against the SovGrant API. */
 export function socialAuthUrl(provider: "google" | "github") {
   const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
   return `${base}/auth/${provider}`;

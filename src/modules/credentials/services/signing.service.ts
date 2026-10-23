@@ -107,9 +107,9 @@ export class SigningService {
       // did.identityId is set instead — an individually-owned DID
       // registered via the wallet-did flow in identity/modules.
       //
-      // This is a permanent guard, not a pending feature gap. ArcID is
+      // This is a permanent guard, not a pending feature gap. SovGrant is
       // expressly non-custodial for individual DIDs: ArcWallet generates
-      // and holds the private key on-device. ArcID only ever receives the
+      // and holds the private key on-device. SovGrant only ever receives the
       // public key and verifies signatures — it must never hold a private
       // key capable of signing on behalf of an individual identity.
       //
@@ -118,7 +118,7 @@ export class SigningService {
       // wallet-originated presentation proofs verified by
       // verifyCredentialFlow, never for server-side signing.
       throw ApiError.badRequest(
-        `DID ${issuerDid} is identity-owned, not tenant-owned. ArcID never signs on behalf of an individual DID — credential issuance requires a tenant-issued DID.`,
+        `DID ${issuerDid} is identity-owned, not tenant-owned. SovGrant never signs on behalf of an individual DID — credential issuance requires a tenant-issued DID.`,
       );
     }
 

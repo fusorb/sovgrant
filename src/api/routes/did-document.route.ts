@@ -1,5 +1,5 @@
 // src/api/routes/did-document.route.ts
-// Serves the global /.well-known/did.json for the ArcID deployment domain.
+// Serves the global /.well-known/did.json for the SovGrant deployment domain.
 // Resolves the SYSTEM tenant's DID document.
 //
 // FIX: z.record(z.any()) is Zod v3 API. Zod v4 requires both key and value
@@ -23,7 +23,7 @@ export async function didDocumentRoute(fastify: FastifyInstance) {
     {
       schema: {
         tags: ["Discovery"],
-        summary: "Global did:web document for the ArcID deployment domain",
+        summary: "Global did:web document for the SovGrant deployment domain",
         response: {
           200: DidDocumentSchema,
           404: ErrorResponseSchema,

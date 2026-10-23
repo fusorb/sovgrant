@@ -7,7 +7,7 @@ import {
   EmailSection,
   EmailList,
   EmailLink,
-} from "@arcevo/facet-emails";
+} from "@fusorb/facet-emails";
 import { MAIL_COLOR, MAIL_SPACE, MAIL_RADIUS, MAIL_FONT } from "../brand";
 
 export interface VerifyEmailMailProps {
@@ -17,11 +17,11 @@ export interface VerifyEmailMailProps {
 
 export const VerifyEmailMail = ({ verifyUrl, name }: VerifyEmailMailProps) => (
   <EmailLayout
-    previewText="One last step: verify your email and step into your ArcID identity"
+    previewText="One last step: verify your email and step into your SovGrant identity"
     heading="Verify Your Email Address"
-    brandName="ArcID"
-    footerNote="This message was sent by ArcID, the sovereign identity engine. You are receiving it because this address is connected to an ArcID account."
-    footerMeta={`© ${new Date().getFullYear()} ArcID. All rights reserved.`}
+    brandName="SovGrant"
+    footerNote="This message was sent by SovGrant, the sovereign identity engine. You are receiving it because this address is connected to an SovGrant account."
+    footerMeta={`© ${new Date().getFullYear()} SovGrant. All rights reserved.`}
   >
     <EmailText
       style={{
@@ -33,11 +33,11 @@ export const VerifyEmailMail = ({ verifyUrl, name }: VerifyEmailMailProps) => (
         marginBottom: MAIL_SPACE.sm,
       }}
     >
-      Welcome to ArcID
+      Welcome to SovGrant
     </EmailText>
 
     <EmailText style={{ marginBottom: MAIL_SPACE.md }}>
-      {name ? `Hello ${name},` : "Hello,"} your ArcID profile is nearly ready.
+      {name ? `Hello ${name},` : "Hello,"} your SovGrant profile is nearly ready.
       One small step remains: confirming that this inbox is truly yours.
     </EmailText>
 
@@ -68,7 +68,7 @@ export const VerifyEmailMail = ({ verifyUrl, name }: VerifyEmailMailProps) => (
           marginBottom: MAIL_SPACE.sm,
         }}
       >
-        Once verified, your ArcID account gives you:
+        Once verified, your SovGrant account gives you:
       </EmailText>
       <EmailList
         items={[
@@ -82,7 +82,7 @@ export const VerifyEmailMail = ({ verifyUrl, name }: VerifyEmailMailProps) => (
 
     <EmailText variant="small" style={{ marginBottom: MAIL_SPACE.md }}>
       This link expires in <strong>1 hour</strong>. If you didn't create an
-      ArcID account, you can safely ignore this email - no action will be
+      SovGrant account, you can safely ignore this email - no action will be
       taken, and nothing will be activated.
     </EmailText>
 

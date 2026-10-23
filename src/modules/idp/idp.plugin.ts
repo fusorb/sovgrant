@@ -15,7 +15,7 @@ export const idpPlugin = fp(
     );
   },
   {
-    name: "arc-id:idp",
-    dependencies: ["arc-id:db", "arc-id:auth-guard"],
+    name: "sg:idp",
+    dependencies: ["sg:db", "sg:auth-guard"],
   },
 );

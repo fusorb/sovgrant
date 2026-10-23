@@ -9,7 +9,7 @@ const WebhookIncomingSchema = z.object({
 
 export async function webhookRoutes(fastify: FastifyInstance) {
   fastify.post(
-    "/arcid", // Placed under a /webhooks prefix inside server registration
+    "/sg", // Placed under a /webhooks prefix inside server registration
     {
       schema: {
         tags: ["System Webhooks Engine"],

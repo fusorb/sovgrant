@@ -9,7 +9,7 @@ import {
   EmailColumn,
   EmailList,
   EmailLink,
-} from "@arcevo/facet-emails";
+} from "@fusorb/facet-emails";
 import {
   MAIL_COLOR,
   MAIL_SPACE,
@@ -37,9 +37,9 @@ export const TenantInviteMail = ({
   expiresAt,
 }: TenantInviteMailProps) => (
   <EmailLayout
-    previewText={`${inviterName} invited you to join ${tenantName} on ArcID`}
+    previewText={`${inviterName} invited you to join ${tenantName} on SovGrant`}
     heading={`Join ${tenantName}`}
-    brandName="ArcID"
+    brandName="SovGrant"
     footerNote={DEFAULT_MAIL_FOOTER_NOTE}
     footerMeta={DEFAULT_MAIL_FOOTER_META}
   >
@@ -58,7 +58,7 @@ export const TenantInviteMail = ({
 
     <EmailText style={{ marginBottom: MAIL_SPACE.md }}>
       <strong>{inviterName}</strong> has invited you to join{" "}
-      <strong>{tenantName}</strong> on ArcID. Accepting gives you a place at
+      <strong>{tenantName}</strong> on SovGrant. Accepting gives you a place at
       that organisation's table - with the access and protections of the{" "}
       <strong>{role}</strong> role.
     </EmailText>

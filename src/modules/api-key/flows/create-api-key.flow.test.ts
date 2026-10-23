@@ -10,7 +10,7 @@ describe("createApiKeyFlow", () => {
       create: vi.fn().mockResolvedValue({
         id: "ak_123",
         name: "CI-CD Key",
-        keyPrefix: "arc_sk_a",
+        keyPrefix: "sg_sk_a",
         scopes: ["read:tenants"],
         createdAt: new Date(),
       }),
@@ -24,7 +24,7 @@ describe("createApiKeyFlow", () => {
     ).resolves.toMatchObject({
       id: "ak_123",
       name: "CI-CD Key",
-      keyPrefix: "arc_sk_a",
+      keyPrefix: "sg_sk_a",
       scopes: ["read:tenants"],
     });
 
@@ -33,13 +33,13 @@ describe("createApiKeyFlow", () => {
       { name: "CI-CD Key", scopes: ["read:tenants"] },
       createMockFlowCtx({ identityId: "id_1", tenantId: "tnt_1", db }),
     );
-    expect(result.key).toMatch(/^arc_sk_/);
+    expect(result.key).toMatch(/^sg_sk_/);
 
     // The stored hash must NOT be the plaintext
     expect(db.apiKey.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          keyHash: expect.not.stringContaining("arc_sk_"),
+          keyHash: expect.not.stringContaining("sg_sk_"),
         }),
       }),
     );

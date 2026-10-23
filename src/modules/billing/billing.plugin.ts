@@ -19,7 +19,7 @@ export const billingPlugin = fp(
   },
 
   {
-    name: "arc-id:billing",
-    dependencies: ["arc-id:db", "arc-id:auth-guard"],
+    name: "sg:billing",
+    dependencies: ["sg:db", "sg:auth-guard"],
   },
 );

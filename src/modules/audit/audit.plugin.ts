@@ -28,7 +28,7 @@ export const auditPlugin = fp(
   },
 
   {
-    name: "arc-id:audit",
-    dependencies: ["arc-id:db", "arc-id:auth-guard"],
+    name: "sg:audit",
+    dependencies: ["sg:db", "sg:auth-guard"],
   },
 );

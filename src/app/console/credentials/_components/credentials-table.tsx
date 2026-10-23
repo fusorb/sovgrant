@@ -1,6 +1,6 @@
 "use client";
 
-import type { DataTableColumn } from "@arcevo/facet-components";
+import type { DataTableColumn } from "@fusorb/facet-components";
 
 export interface VC {
   id: string;

@@ -9,9 +9,9 @@ import {
   Label,
   PasswordStrengthMeter,
   SecuritySectionCard,
-} from "@arcevo/facet-components";
-import { useAuthStore } from "@arcevo/facet-store";
-import { useAuth } from "@arcevo/facet-auth";
+} from "@fusorb/facet-components";
+import { useAuthStore } from "@fusorb/facet-store";
+import { useAuth } from "@fusorb/facet-auth";
 import { PageShell } from "@/components/page-shell";
 import { useProfile } from "@/hooks/use-profile";
 

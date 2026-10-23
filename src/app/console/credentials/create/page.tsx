@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { PageHeader } from "@arcevo/facet-layout";
+import { PageHeader } from "@fusorb/facet-layout";
 import {
   AnimatedButton,
   Button,
@@ -19,8 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
   Textarea,
-} from "@arcevo/facet-components";
-import type { JsonObject } from "@arcevo/facet-sdk";
+} from "@fusorb/facet-components";
+import type { JsonObject } from "@fusorb/facet-sdk";
 import { useCredentials } from "@/hooks/use-credentials";
 
 const VC_FORMATS = ["JWT", "LDP", "SD_JWT"] as const;

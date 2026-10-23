@@ -42,7 +42,7 @@ export async function tokensRoute(fastify: FastifyInstance) {
         // refresh token from the httpOnly cookie instead — this keeps the
         // token out of localStorage and unreachable by JS.
         const refreshToken =
-          body?.refresh_token || (req.cookies as any)?.arcid_refresh_token;
+          body?.refresh_token || (req.cookies as any)?.sg_refresh_token;
         if (!refreshToken) {
           return reply.code(400).send({
             success: false,

@@ -30,9 +30,9 @@ export async function walletDidRoute(fastify: FastifyInstance) {
           "Register an identity-owned did:key from a wallet-supplied JWK",
         description:
           "ArcWallet generates a keypair on-device and submits the public key as a JWK. " +
-          "ArcID encodes it as a spec-correct did:key (multicodec + multibase), builds the " +
+          "SovGrant encodes it as a spec-correct did:key (multicodec + multibase), builds the " +
           "DID document, and creates the DecentralizedIdentifier + Wallet rows. " +
-          "ArcID never touches the private key.",
+          "SovGrant never touches the private key.",
         security: [{ bearerAuth: [] }],
         body: z.object({
           publicKeyJwk: JwkSchema,

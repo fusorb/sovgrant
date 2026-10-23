@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { PageHeader } from "@arcevo/facet-layout";
-import { AnimatedButton, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, HoverScaleCard } from "@arcevo/facet-components";
-import { useTenantStore } from "@arcevo/facet-store";
+import { PageHeader } from "@fusorb/facet-layout";
+import { AnimatedButton, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, HoverScaleCard } from "@fusorb/facet-components";
+import { useTenantStore } from "@fusorb/facet-store";
 import { useTenant } from "@/hooks/use-tenant";
 import Link from "next/link";
 

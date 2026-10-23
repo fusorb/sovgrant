@@ -24,7 +24,7 @@ const RefreshSchema = z.object({
   // First-party session refresh (facet-sdk's AuthSdk.refresh) omits
   // client_id; default to the direct client. The real client binding comes
   // from the token record (existing.clientId), so this is safe.
-  client_id: z.string().default("arcid-direct"),
+  client_id: z.string().default("sg-direct"),
   client_secret: z.string().optional(),
 });
 

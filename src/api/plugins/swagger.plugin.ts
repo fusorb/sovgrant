@@ -7,8 +7,8 @@ import swaggerUi from "@fastify/swagger-ui";
 import { jsonSchemaTransform } from "fastify-type-provider-zod";
 
 const SWAGGER_DESCRIPTION = `
-## ArcID - Sovereign Identity Engine
-ArcID is a high-performance, multi-tenant identity platform integrating traditional OAuth2/OIDC flows with W3C Decentralized Identity (DID) and Verifiable Credential (VC) standards.
+## SovGrant - Sovereign Identity Engine
+SovGrant is a high-performance, multi-tenant identity platform integrating traditional OAuth2/OIDC flows with W3C Decentralized Identity (DID) and Verifiable Credential (VC) standards.
 `;
 
 export const swaggerGeneratorPlugin = fp(
@@ -18,7 +18,7 @@ export const swaggerGeneratorPlugin = fp(
       openapi: {
         openapi: "3.1.0",
         info: {
-          title: "ArcID - Sovereign Identity Engine",
+          title: "SovGrant - Sovereign Identity Engine",
           description: SWAGGER_DESCRIPTION,
           version: "1.0.0-alpha",
         },
@@ -45,7 +45,7 @@ export const swaggerGeneratorPlugin = fp(
       transform: jsonSchemaTransform,
     });
   },
-  { name: "arc-id:swagger-gen" },
+  { name: "sg:swagger-gen" },
 );
 
 export const swaggerUiPlugin = fp(
@@ -60,5 +60,5 @@ export const swaggerUiPlugin = fp(
       },
     });
   },
-  { name: "arc-id:swagger-ui" },
+  { name: "sg:swagger-ui" },
 );

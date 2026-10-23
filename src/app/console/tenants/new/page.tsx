@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { PageHeader } from "@arcevo/facet-layout";
+import { PageHeader } from "@fusorb/facet-layout";
 import {
   AnimatedButton,
   Button,
@@ -13,7 +13,7 @@ import {
   CardTitle,
   Input,
   Label,
-} from "@arcevo/facet-components";
+} from "@fusorb/facet-components";
 import { useTenant } from "@/hooks/use-tenant";
 
 export default function CreateTenantPage() {

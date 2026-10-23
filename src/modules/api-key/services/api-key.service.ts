@@ -1,6 +1,6 @@
 import { randomBytes, createHash } from "node:crypto";
 
-const KEY_PREFIX = "arc_sk_";
+const KEY_PREFIX = "sg_sk_";
 const KEY_RANDOM_BYTES = 32; // 256-bit entropy
 const DISPLAY_PREFIX_LENGTH = 12;
 

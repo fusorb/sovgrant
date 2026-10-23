@@ -1,7 +1,7 @@
 "use client";
 
-import { useAuthStore } from "@arcevo/facet-store";
-import { NotFound } from "@arcevo/facet-components";
+import { useAuthStore } from "@fusorb/facet-store";
+import { NotFound } from "@fusorb/facet-components";
 import { PublicNavbar } from "@/components/public-navbar";
 
 export default function GlobalNotFound() {

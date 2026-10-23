@@ -20,14 +20,14 @@ export async function healthRoute(fastify: FastifyInstance) {
   fastify.get("/health/live", async () => ({
     status: "ok",
     probe: "liveness",
-    system: "ArcID Core Engine",
+    system: "SovGrant Core Engine",
     ts: new Date().toISOString(),
   }));
 
   // ── Legacy alias ───────────────────────────────────────────────────────────
   fastify.get("/health", async () => ({
     status: "healthy",
-    system: "ArcID Core Engine",
+    system: "SovGrant Core Engine",
     ts: new Date().toISOString(),
   }));
 

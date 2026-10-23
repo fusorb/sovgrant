@@ -7,7 +7,7 @@ import {
   EmailSection,
   EmailRow,
   EmailColumn,
-} from "@arcevo/facet-emails";
+} from "@fusorb/facet-emails";
 import {
   MAIL_COLOR,
   MAIL_SPACE,
@@ -39,7 +39,7 @@ export const CredentialIssuedMail = ({
   <EmailLayout
     previewText={`A new credential was issued to you by ${issuerName} - it's now in your wallet`}
     heading="A Credential, Yours"
-    brandName="ArcID"
+    brandName="SovGrant"
     footerNote={DEFAULT_MAIL_FOOTER_NOTE}
     footerMeta={DEFAULT_MAIL_FOOTER_META}
   >
@@ -58,7 +58,7 @@ export const CredentialIssuedMail = ({
 
     <EmailText style={{ marginBottom: MAIL_SPACE.md }}>
       {holderName ? `Hello ${holderName},` : "Hello,"} a new Verifiable
-      Credential has been issued to your ArcID identity by{" "}
+      Credential has been issued to your SovGrant identity by{" "}
       <strong>{issuerName}</strong>. It now lives in your wallet - portable,
       tamper-evident, and ready to present whenever you choose.
     </EmailText>

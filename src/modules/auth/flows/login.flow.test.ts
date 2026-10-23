@@ -255,7 +255,7 @@ describe("loginFlow", () => {
       // TokenService.issue() lookups (uses mockDb as ctx.db)
       mockDb.client.findUnique.mockResolvedValue({
         id: 1,
-        clientId: "arcid-direct",
+        clientId: "sg-direct",
         public: false,
         clientSecret: null,
       });
@@ -506,7 +506,7 @@ describe("loginFlow", () => {
       mockDb.session.create.mockResolvedValue(session);
       mockDb.client.findUnique.mockResolvedValue({
         id: 1,
-        clientId: "arcid-direct",
+        clientId: "sg-direct",
         public: false,
         clientSecret: null,
       });

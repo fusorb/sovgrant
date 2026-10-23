@@ -38,7 +38,7 @@ export async function signJwt(
   const jwt = new SignJWT(payload)
     .setProtectedHeader({ alg })
     .setIssuedAt()
-    .setIssuer(options.issuer ?? "arcid")
+    .setIssuer(options.issuer ?? "sovgrant")
     .setExpirationTime(options.expiresIn);
 
   if (alg === "HS256") {
@@ -70,7 +70,7 @@ export async function verifyJwt<T extends JWTPayload>(
   if (alg === "HS256") {
     const secret = new TextEncoder().encode(keyOrSecret);
     const { payload } = await jwtVerify(token, secret, {
-      issuer: options?.issuer ?? "arcid",
+      issuer: options?.issuer ?? "sovgrant",
       audience: options?.audience,
     });
     return payload as T;
@@ -78,7 +78,7 @@ export async function verifyJwt<T extends JWTPayload>(
     // RS256: Load PEM string
     const publicKey = await importSPKI(keyOrSecret, "RS256");
     const { payload } = await jwtVerify(token, publicKey, {
-      issuer: options?.issuer ?? "arcid",
+      issuer: options?.issuer ?? "sovgrant",
       audience: options?.audience,
     });
     return payload as T;

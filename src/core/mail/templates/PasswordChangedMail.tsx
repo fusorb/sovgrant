@@ -4,7 +4,7 @@ import {
   EmailText,
   EmailSecurityNotice,
   EmailDivider,
-} from "@arcevo/facet-emails";
+} from "@fusorb/facet-emails";
 import { MAIL_COLOR, MAIL_SPACE } from "../brand";
 
 export interface PasswordChangedMailProps {
@@ -19,11 +19,11 @@ export const PasswordChangedMail = ({
   changedAt,
 }: PasswordChangedMailProps) => (
   <EmailLayout
-    previewText="Your ArcID password was changed - review the details"
+    previewText="Your SovGrant password was changed - review the details"
     heading="Password Changed"
-    brandName="ArcID"
-    footerNote="This message was sent by ArcID, the sovereign identity engine. You are receiving it because this address is connected to an ArcID account."
-    footerMeta={`© ${new Date().getFullYear()} ArcID. All rights reserved.`}
+    brandName="SovGrant"
+    footerNote="This message was sent by SovGrant, the sovereign identity engine. You are receiving it because this address is connected to an SovGrant account."
+    footerMeta={`© ${new Date().getFullYear()} SovGrant. All rights reserved.`}
   >
     <EmailText
       style={{
@@ -39,7 +39,7 @@ export const PasswordChangedMail = ({
     </EmailText>
 
     <EmailText style={{ marginBottom: MAIL_SPACE.md }}>
-      {name ? `Hello ${name},` : "Hello,"} the password for your ArcID account
+      {name ? `Hello ${name},` : "Hello,"} the password for your SovGrant account
       was successfully changed on{" "}
       {new Date(changedAt).toLocaleString("en-US", {
         dateStyle: "long",

@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback } from "react";
-import { useAuthStore, useTenantStore } from "@arcevo/facet-store";
-import { tenants, arcIdClient, persistSession } from "@/sdk";
+import { useAuthStore, useTenantStore } from "@fusorb/facet-store";
+import { tenants, sgClient, persistSession } from "@/sdk";
 
 export function useTenant() {
   const { activeTenant, tenants: tenantList, isLoading, setActiveTenant, setTenants, setLoading } =
@@ -13,7 +13,7 @@ export function useTenant() {
     const result = await tenants.list();
     if (result.data && result.data.length > 0) {
       setTenants(result.data);
-      const stored = localStorage.getItem("arcid-active-tenant");
+      const stored = localStorage.getItem("sg-active-tenant");
       const saved = stored ? JSON.parse(stored) : null;
       const target = saved ? result.data.find((t) => t.id === saved.id) : result.data[0];
       if (target) setActiveTenant(target);
@@ -40,7 +40,7 @@ export function useTenant() {
       if (result.data) {
         const target = tenantList.find((t) => t.id === tenantId) ?? null;
         setActiveTenant(target);
-        if (target) localStorage.setItem("arcid-active-tenant", JSON.stringify(target));
+        if (target) localStorage.setItem("sg-active-tenant", JSON.stringify(target));
 
         // switch-context returns a fresh token bundle scoped to the new
         // tenant - push it into the auth store + client or every subsequent
@@ -52,7 +52,7 @@ export function useTenant() {
         } else {
           useAuthStore.getState().setTokens(accessToken, refreshToken ?? "");
         }
-        arcIdClient.setAccessToken(accessToken);
+        sgClient.setAccessToken(accessToken);
         if (user) persistSession(user);
       }
       return result;
@@ -69,7 +69,7 @@ export function useTenant() {
       if (result.data) {
         setTenants([result.data, ...tenantList]);
         setActiveTenant(result.data);
-        localStorage.setItem("arcid-active-tenant", JSON.stringify(result.data));
+        localStorage.setItem("sg-active-tenant", JSON.stringify(result.data));
       }
       return result;
     },

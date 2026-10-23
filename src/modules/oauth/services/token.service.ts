@@ -122,7 +122,7 @@ export class TokenService {
     }
 
     const now = new Date();
-    const issuer = "arcid";
+    const issuer = "sovgrant";
 
     const privateKeyPem = resolvePemContent(config.security.jwt.privateKey);
     const publicKeyPem = resolvePemContent(config.security.jwt.publicKey);

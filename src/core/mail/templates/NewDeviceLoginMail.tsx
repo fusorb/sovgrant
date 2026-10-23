@@ -5,7 +5,7 @@ import {
   EmailSecurityNotice,
   EmailButton,
   EmailDivider,
-} from "@arcevo/facet-emails";
+} from "@fusorb/facet-emails";
 import { MAIL_COLOR, MAIL_SPACE } from "../brand";
 
 export interface NewDeviceLoginMailProps {
@@ -24,11 +24,11 @@ export const NewDeviceLoginMail = ({
   revokeUrl,
 }: NewDeviceLoginMailProps) => (
   <EmailLayout
-    previewText="New sign-in to your ArcID account - was this you?"
+    previewText="New sign-in to your SovGrant account - was this you?"
     heading="New Sign-In Detected"
-    brandName="ArcID"
-    footerNote="This message was sent by ArcID, the sovereign identity engine. You are receiving it because this address is connected to an ArcID account."
-    footerMeta={`© ${new Date().getFullYear()} ArcID. All rights reserved.`}
+    brandName="SovGrant"
+    footerNote="This message was sent by SovGrant, the sovereign identity engine. You are receiving it because this address is connected to an SovGrant account."
+    footerMeta={`© ${new Date().getFullYear()} SovGrant. All rights reserved.`}
   >
     <EmailText
       style={{
@@ -45,7 +45,7 @@ export const NewDeviceLoginMail = ({
 
     <EmailText style={{ marginBottom: MAIL_SPACE.md }}>
       {name ? `Hello ${name},` : "Hello,"} a new device just signed in to your
-      ArcID account. If it was you, welcome back - nothing else to do. If it
+      SovGrant account. If it was you, welcome back - nothing else to do. If it
       wasn't, the details below will help you act fast.
     </EmailText>
 

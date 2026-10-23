@@ -11,7 +11,7 @@ export const webhooksPlugin = fp(
       async (scope) => {
         const withZod = scope.withTypeProvider<ZodTypeProvider>();
 
-        // Inbound: POST /webhooks/arcid — internal system signal receiver
+        // Inbound: POST /webhooks/sovgrant — internal system signal receiver
         await withZod.register(webhookRoutes);
 
         // Outbound management: POST/GET/PATCH/DELETE /webhooks/endpoints
@@ -23,7 +23,7 @@ export const webhooksPlugin = fp(
     );
   },
   {
-    name: "arc-id:webhooks",
-    dependencies: ["arc-id:db", "arc-id:auth-guard"],
+    name: "sg:webhooks",
+    dependencies: ["sg:db", "sg:auth-guard"],
   },
 );

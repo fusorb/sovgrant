@@ -41,7 +41,7 @@ export const authPlugin = fp(
     );
   },
   {
-    name: "arc-id:auth",
-    dependencies: ["arc-id:db", "arc-id:jwt", "arc-id:auth-guard"],
+    name: "sg:auth",
+    dependencies: ["sg:db", "sg:jwt", "sg:auth-guard"],
   },
 );

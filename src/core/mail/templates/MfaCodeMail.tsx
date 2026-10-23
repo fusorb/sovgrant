@@ -4,7 +4,7 @@ import {
   EmailText,
   EmailSection,
   EmailDivider,
-} from "@arcevo/facet-emails";
+} from "@fusorb/facet-emails";
 import { MAIL_COLOR, MAIL_SPACE, MAIL_FONT, MAIL_RADIUS } from "../brand";
 
 export interface MfaCodeMailProps {
@@ -22,11 +22,11 @@ export const MfaCodeMail = ({
   const minutes = Math.round(ttlSec / 60);
   return (
     <EmailLayout
-      previewText={`Your ArcID verification code is ${code} - valid for ${minutes} minutes`}
+      previewText={`Your SovGrant verification code is ${code} - valid for ${minutes} minutes`}
       heading="Verification Code"
-      brandName="ArcID"
-      footerNote="This message was sent by ArcID, the sovereign identity engine. You are receiving it because this address is connected to an ArcID account."
-      footerMeta={`© ${new Date().getFullYear()} ArcID. All rights reserved.`}
+      brandName="SovGrant"
+      footerNote="This message was sent by SovGrant, the sovereign identity engine. You are receiving it because this address is connected to an SovGrant account."
+      footerMeta={`© ${new Date().getFullYear()} SovGrant. All rights reserved.`}
     >
       <EmailText
         style={{
@@ -42,7 +42,7 @@ export const MfaCodeMail = ({
       </EmailText>
 
       <EmailText style={{ marginBottom: MAIL_SPACE.md }}>
-        {name ? `Hello ${name},` : "Hello,"} a sign-in to your ArcID account is
+        {name ? `Hello ${name},` : "Hello,"} a sign-in to your SovGrant account is
         waiting on one last proof: the code below. It's the second lock on your
         door - the one only you hold.
       </EmailText>
@@ -81,7 +81,7 @@ export const MfaCodeMail = ({
       <EmailDivider />
 
       <EmailText variant="muted" style={{ marginBottom: MAIL_SPACE.md }}>
-        ArcID will never ask you for this code by phone, chat, or email. If
+        SovGrant will never ask you for this code by phone, chat, or email. If
         someone does, they are not us - end the conversation.
       </EmailText>
     </EmailLayout>

@@ -6,7 +6,7 @@ import {
   type BillingInterval,
   type BillingPageConfig,
   type BillingPlan,
-} from "@arcevo/facet-components";
+} from "@fusorb/facet-components";
 import { PLAN_CAPS } from "@/config/plan-caps";
 
 const formatCap = (n: number) => (n === Infinity ? "Unlimited" : String(n));
@@ -66,7 +66,7 @@ export const pricingPlans: BillingPlan[] = [
     customPriceLabel: "Contact",
     cta: {
       label: "Contact Sales",
-      href: "mailto:sales@arcevo.com.ng",
+      href: "mailto:sales@fusorb.com.ng",
       variant: "outline",
     },
   },
@@ -89,10 +89,10 @@ export function PricingContent() {
       <p className="text-center text-sm text-muted-foreground">
         Questions? Contact{" "}
         <a
-          href="mailto:hello@arcevo.com"
+          href="mailto:hello@fusorb.com"
           className="underline"
         >
-          hello@arcevo.com
+          hello@fusorb.com
         </a>
       </p>
     ),

@@ -4,7 +4,7 @@ import {
   EmailText,
   EmailSecurityNotice,
   EmailDivider,
-} from "@arcevo/facet-emails";
+} from "@fusorb/facet-emails";
 import {
   MAIL_COLOR,
   MAIL_SPACE,
@@ -23,11 +23,11 @@ export const AccountDeletionMail = ({
   graceDays,
 }: AccountDeletionMailProps) => (
   <EmailLayout
-    previewText="Your ArcID account deletion has been scheduled"
+    previewText="Your SovGrant account deletion has been scheduled"
     heading="Account Deletion Scheduled"
-    brandName="ArcID"
-    footerNote="This is an automated notice from ArcID."
-    footerMeta={`© ${new Date().getFullYear()} ArcID. All rights reserved.`}
+    brandName="SovGrant"
+    footerNote="This is an automated notice from SovGrant."
+    footerMeta={`© ${new Date().getFullYear()} SovGrant. All rights reserved.`}
   >
     <EmailText
       style={{
@@ -43,7 +43,7 @@ export const AccountDeletionMail = ({
     </EmailText>
 
     <EmailText style={{ marginBottom: MAIL_SPACE.md }}>
-      {name ? `Hello ${name},` : "Hello,"} this email confirms that your ArcID
+      {name ? `Hello ${name},` : "Hello,"} this email confirms that your SovGrant
       account was scheduled for deletion on{" "}
       {new Date(deletedAt).toLocaleDateString("en-US", {
         dateStyle: "long",

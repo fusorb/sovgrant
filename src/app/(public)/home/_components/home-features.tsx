@@ -1,6 +1,6 @@
 "use client";
 
-import { CardContent, CardDescription, CardHeader, CardTitle, GlowCard, Icon, type IconProps } from "@arcevo/facet-components";
+import { CardContent, CardDescription, CardHeader, CardTitle, GlowCard, Icon, type IconProps } from "@fusorb/facet-components";
 
 const features = [
   {

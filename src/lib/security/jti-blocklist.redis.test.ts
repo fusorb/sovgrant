@@ -81,7 +81,7 @@ describe("jti-blocklist (Redis enabled)", () => {
   it("blockJti writes to Redis with the correct key prefix", async () => {
     await blockJti("uuid-abc-123", 900);
     expect(mockRedis.set).toHaveBeenCalledWith(
-      "arcid:revoked_jti:uuid-abc-123",
+      "sg:revoked_jti:uuid-abc-123",
       "1",
       { ex: 900 },
     );

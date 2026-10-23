@@ -1,5 +1,5 @@
-import { LandingLayout } from "@arcevo/facet-layout";
-import { Footer, CookieConsent } from "@arcevo/facet-components";
+import { LandingLayout } from "@fusorb/facet-layout";
+import { Footer, CookieConsent } from "@fusorb/facet-components";
 import { ConditionalHero } from "./_components/conditional-hero";
 import { PublicNavbar } from "@/components/public-navbar";
 

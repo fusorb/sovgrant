@@ -68,5 +68,5 @@ export const tenantPlugin = fp(
       { prefix: "/tenants" },
     );
   },
-  { name: "arc-id:tenant", dependencies: ["arc-id:db", "arc-id:auth-guard"] },
+  { name: "sg:tenant", dependencies: ["sg:db", "sg:auth-guard"] },
 );

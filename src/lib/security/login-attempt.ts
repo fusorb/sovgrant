@@ -13,8 +13,8 @@
 //   - Email is hashed (SHA-256) before use as a Redis key — we never store
 //     plaintext emails in Redis.
 //   - Two keys per email:
-//       arcid:login_fail:{emailHash}    — attempt counter, TTL resets on each failure
-//       arcid:login_lock:{emailHash}    — lockout sentinel, TTL is the lockout duration
+//       sg:login_fail:{emailHash}    — attempt counter, TTL resets on each failure
+//       sg:login_lock:{emailHash}    — lockout sentinel, TTL is the lockout duration
 //   - On failure:  increment counter → set lockout key if threshold crossed
 //   - On success:  clear both keys
 //   - On check:    if lockout key exists → blocked
@@ -60,8 +60,8 @@ function emailHash(email: string): string {
   return createHash("sha256").update(email.toLowerCase().trim()).digest("hex");
 }
 
-const failKey = (h: string) => `arcid:login_fail:${h}`;
-const lockKey = (h: string) => `arcid:login_lock:${h}`;
+const failKey = (h: string) => `sg:login_fail:${h}`;
+const lockKey = (h: string) => `sg:login_lock:${h}`;
 
 // ── Lockout thresholds ─────────────────────────────────────────────────────────
 

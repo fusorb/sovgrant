@@ -4,7 +4,7 @@
 // client-supplied public key (JWK). Never generates keys server-side.
 //
 // ArcWallet generates the keypair on-device, sends only the public key.
-// ArcID encodes it as a spec-correct did:key (multicodec + multibase),
+// SovGrant encodes it as a spec-correct did:key (multicodec + multibase),
 // builds the DID document, and creates the DecentralizedIdentifier +
 // Wallet rows in a single transaction.
 

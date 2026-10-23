@@ -20,7 +20,7 @@ export class MfaService {
     return authenticator.generateSecret();
   }
 
-  totpUri(secret: string, email: string, issuer = "ArcID"): string {
+  totpUri(secret: string, email: string, issuer = "SovGrant"): string {
     return authenticator.keyuri(email, issuer, secret);
   }
 

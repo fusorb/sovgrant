@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ActivityFeed, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, GlowCard, HoverScaleCard, ShimmerText, StatCard } from "@arcevo/facet-components";
-import { useAuthStore, useTenantStore } from "@arcevo/facet-store";
+import { ActivityFeed, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, GlowCard, HoverScaleCard, ShimmerText, StatCard } from "@fusorb/facet-components";
+import { useAuthStore, useTenantStore } from "@fusorb/facet-store";
 import { useRouter } from "next/navigation";
 import { useCredentials } from "@/hooks/use-credentials";
 import { useSessions } from "@/hooks/use-sessions";

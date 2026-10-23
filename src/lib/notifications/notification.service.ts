@@ -81,7 +81,7 @@ export const notificationService = {
     const url = `${config.base.apiUrl}/auth/email/verify?token=${token}`;
     await sendEmail(
       to,
-      "Verify your email — ArcID",
+      "Verify your email — SovGrant",
       React.createElement(VerifyEmailMail, { verifyUrl: url, name }),
     );
   },
@@ -94,7 +94,7 @@ export const notificationService = {
     const url = `${config.base.apiUrl}/auth/magic-link?token=${token}`;
     await sendEmail(
       to,
-      "Your sign-in link — ArcID",
+      "Your sign-in link — SovGrant",
       React.createElement(MagicLinkMail, {
         loginUrl: url,
         name: opts?.name,
@@ -111,7 +111,7 @@ export const notificationService = {
     const url = `${config.base.apiUrl}/auth/password/reset/confirm?token=${token}`;
     await sendEmail(
       to,
-      "Reset your password — ArcID",
+      "Reset your password — SovGrant",
       React.createElement(PasswordResetMail, {
         resetUrl: url,
         name: opts?.name,
@@ -123,7 +123,7 @@ export const notificationService = {
   async sendPasswordChanged(to: string, opts?: { name?: string; ip?: string }) {
     await sendEmail(
       to,
-      "Your password was changed — ArcID",
+      "Your password was changed — SovGrant",
       React.createElement(PasswordChangedMail, {
         name: opts?.name,
         ip: opts?.ip,
@@ -136,7 +136,7 @@ export const notificationService = {
     const dashboardUrl = `${config.base.apiUrl.replace(":4000", ":3000")}/dashboard`;
     await sendEmail(
       to,
-      "Welcome to ArcID",
+      "Welcome to SovGrant",
       React.createElement(WelcomeMail, { name: opts?.name, dashboardUrl }),
     );
   },
@@ -150,7 +150,7 @@ export const notificationService = {
   ) {
     await sendEmail(
       to,
-      `${code} — Your ArcID verification code`,
+      `${code} — Your SovGrant verification code`,
       React.createElement(MfaCodeMail, {
         code,
         name: opts?.name,
@@ -162,7 +162,7 @@ export const notificationService = {
   async sendRecoveryCodes(to: string, codes: string[], name?: string) {
     await sendEmail(
       to,
-      "Your ArcID recovery codes — save these now",
+      "Your SovGrant recovery codes — save these now",
       React.createElement(RecoveryCodesIssuedMail, { codes, name }),
     );
   },
@@ -171,7 +171,7 @@ export const notificationService = {
     const resetUrl = `${config.base.apiUrl}/auth/password/reset`;
     await sendEmail(
       to,
-      "⚠️ MFA was disabled on your ArcID account",
+      "⚠️ MFA was disabled on your SovGrant account",
       React.createElement(MfaDisabledAlertMail, {
         name: opts.name,
         ip: opts.ip,
@@ -188,7 +188,7 @@ export const notificationService = {
     const revokeUrl = `${config.base.apiUrl.replace(":4000", ":3000")}/settings/sessions`;
     await sendEmail(
       to,
-      "New sign-in detected on your ArcID account",
+      "New sign-in detected on your SovGrant account",
       React.createElement(NewDeviceLoginMail, {
         name: opts.name,
         ip: opts.ip,
@@ -207,7 +207,7 @@ export const notificationService = {
   ) {
     await sendEmail(
       to,
-      "Your ArcID account has been suspended",
+      "Your SovGrant account has been suspended",
       React.createElement(AccountSuspendedMail, {
         name: opts?.name,
         reason: opts?.reason,
@@ -221,7 +221,7 @@ export const notificationService = {
   ) {
     await sendEmail(
       to,
-      "Your ArcID account deletion has been processed",
+      "Your SovGrant account deletion has been processed",
       React.createElement(AccountDeletionMail, {
         name: opts?.name,
         deletedAt: new Date().toISOString(),
@@ -290,11 +290,11 @@ export const notificationService = {
   sendMfaCodeSms(phone: string, code: string) {
     void sendSms(
       phone,
-      `Your ArcID verification code is: ${code}. Valid for 10 minutes. Do not share.`,
+      `Your SovGrant verification code is: ${code}. Valid for 10 minutes. Do not share.`,
     );
   },
 
   sendSecurityAlertSms(phone: string, message: string) {
-    void sendSms(phone, `ArcID Security Alert: ${message}`);
+    void sendSms(phone, `SovGrant Security Alert: ${message}`);
   },
 };

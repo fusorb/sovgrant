@@ -29,5 +29,5 @@ export const oauthPlugin = fp(
       { prefix: "/oauth" },
     );
   },
-  { name: "arc-id:oauth", dependencies: ["arc-id:db", "arc-id:jwt"] },
+  { name: "sg:oauth", dependencies: ["sg:db", "sg:jwt"] },
 );

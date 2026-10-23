@@ -15,7 +15,7 @@
 // tenant's TenantPolicy. Per-tenant password rules for tenant-invite-based
 // registration (a specific non-SYSTEM tenant's rules applying to a new
 // member) is a real but separate feature — not built here; tracked in
-// arcid-v2-roadmap.md as future work if a tenant-invite registration path
+// sovgrant-v2-roadmap.md as future work if a tenant-invite registration path
 // is added.
 
 import { z } from "zod";

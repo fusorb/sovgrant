@@ -1,6 +1,6 @@
 import type { FastifyReply } from "fastify";
 
-export const REFRESH_COOKIE_NAME = "arcid_refresh_token";
+export const REFRESH_COOKIE_NAME = "sg_refresh_token";
 
 // Keep this module free of any `@/core/config` import so it can be bundled
 // into the client (it's re-exported via the SDK). `@/core/config` eagerly

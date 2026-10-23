@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PageHeader } from "@arcevo/facet-layout";
+import { PageHeader } from "@fusorb/facet-layout";
 import {
   Button,
   Card,
@@ -9,8 +9,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@arcevo/facet-components";
-import { MfaSetupForm } from "@arcevo/facet-auth";
+} from "@fusorb/facet-components";
+import { MfaSetupForm } from "@fusorb/facet-auth";
 import { useMfa } from "@/hooks/use-mfa";
 
 interface MfaSetupResult {

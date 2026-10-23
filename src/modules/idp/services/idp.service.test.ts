@@ -58,7 +58,7 @@ describe("federatedLogin — Phase 0: email-verification gate", () => {
     // TokenService.issue() lookups
     db.client.findUnique.mockResolvedValue({
       id: 1,
-      clientId: "arcid-direct",
+      clientId: "sg-direct",
       public: false,
       clientSecret: null,
     });
@@ -148,7 +148,7 @@ describe("federatedLogin — Phase 0: email-verification gate", () => {
     // TokenService.issue() lookups
     db.client.findUnique.mockResolvedValue({
       id: 1,
-      clientId: "arcid-direct",
+      clientId: "sg-direct",
       public: false,
       clientSecret: null,
     });

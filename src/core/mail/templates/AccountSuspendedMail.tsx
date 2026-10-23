@@ -4,7 +4,7 @@ import {
   EmailText,
   EmailSecurityNotice,
   EmailDivider,
-} from "@arcevo/facet-emails";
+} from "@fusorb/facet-emails";
 import {
   MAIL_COLOR,
   MAIL_SPACE,
@@ -22,10 +22,10 @@ export const AccountSuspendedMail = ({
   reason,
 }: AccountSuspendedMailProps) => (
   <EmailLayout
-    previewText="Your ArcID account has been suspended"
+    previewText="Your SovGrant account has been suspended"
     heading="Account Suspended"
-    brandName="ArcID"
-    footerNote="This is an automated notice from ArcID."
+    brandName="SovGrant"
+    footerNote="This is an automated notice from SovGrant."
     footerMeta={DEFAULT_MAIL_FOOTER_META}
   >
     <EmailText
@@ -42,9 +42,9 @@ export const AccountSuspendedMail = ({
     </EmailText>
 
     <EmailText style={{ marginBottom: MAIL_SPACE.md }}>
-      {name ? `Hello ${name},` : "Hello,"} your ArcID account has been
+      {name ? `Hello ${name},` : "Hello,"} your SovGrant account has been
       suspended. While it is suspended, you won't be able to sign in or use
-      ArcID-integrated services.
+      SovGrant-integrated services.
     </EmailText>
 
     {reason && (

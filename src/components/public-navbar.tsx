@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Navbar, Button, UserAvatar } from "@arcevo/facet-components";
-import { useAuthStore } from "@arcevo/facet-store";
-import type { RouterAdapter, RouterLinkProps } from "@arcevo/facet-layout";
+import { Navbar, Button, UserAvatar } from "@fusorb/facet-components";
+import { useAuthStore } from "@fusorb/facet-store";
+import type { RouterAdapter, RouterLinkProps } from "@fusorb/facet-layout";
 import { useAuth } from "@/hooks/use-auth";
 
 export const navLinks = [
@@ -54,8 +54,8 @@ export function PublicNavbar() {
       variant="pill"
       brand={
         <Link href="/" className="flex items-center gap-2 font-display text-xl font-semibold">
-          <img src="/arcid-bw.png" alt="ArcID" className="h-7 w-auto dark:invert" />
-          <span>ArcID</span>
+          <img src="/sg-bw.png" alt="SovGrant" className="h-7 w-auto dark:invert" />
+          <span>SovGrant</span>
         </Link>
       }
       showThemeToggle

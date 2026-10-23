@@ -217,7 +217,7 @@ export const loginFlow: Flow<Input, Output> = {
       .catch(() => {});
 
     void notificationService
-      .sendNewDeviceLogin(identity.primaryEmail ?? "unknown@arcid.local", {
+      .sendNewDeviceLogin(identity.primaryEmail ?? "unknown@sg.local", {
         ip: ctx.ip ?? "0.0.0.0",
         userAgent: ctx.userAgent ?? "Unknown User Agent",
       })

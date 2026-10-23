@@ -6,7 +6,7 @@ import {
   EmailSecurityNotice,
   EmailDivider,
   EmailLink,
-} from "@arcevo/facet-emails";
+} from "@fusorb/facet-emails";
 import { MAIL_COLOR, MAIL_SPACE } from "../brand";
 
 export interface PasswordResetMailProps {
@@ -21,11 +21,11 @@ export const PasswordResetMail = ({
   ip,
 }: PasswordResetMailProps) => (
   <EmailLayout
-    previewText="Reset your ArcID password - link valid for 1 hour"
+    previewText="Reset your SovGrant password - link valid for 1 hour"
     heading="Password Reset Request"
-    brandName="ArcID"
-    footerNote="This message was sent by ArcID, the sovereign identity engine. You are receiving it because this address is connected to an ArcID account."
-    footerMeta={`© ${new Date().getFullYear()} ArcID. All rights reserved.`}
+    brandName="SovGrant"
+    footerNote="This message was sent by SovGrant, the sovereign identity engine. You are receiving it because this address is connected to an SovGrant account."
+    footerMeta={`© ${new Date().getFullYear()} SovGrant. All rights reserved.`}
   >
     <EmailText
       style={{
@@ -42,7 +42,7 @@ export const PasswordResetMail = ({
 
     <EmailText style={{ marginBottom: MAIL_SPACE.md }}>
       {name ? `Hello ${name},` : "Hello,"} we received a request to reset the
-      password for your ArcID account. If that was you, the button below will
+      password for your SovGrant account. If that was you, the button below will
       take you to a secure page where you can choose a new one.
     </EmailText>
 
@@ -58,7 +58,7 @@ export const PasswordResetMail = ({
 
     <EmailText variant="small" style={{ marginBottom: MAIL_SPACE.md }}>
       A few quiet notes while you're here: never reuse this password anywhere
-      else, and consider a passkey - ArcID supports passwordless sign-in, so
+      else, and consider a passkey - SovGrant supports passwordless sign-in, so
       one day you may not need a password at all.
     </EmailText>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatedButton, Button } from "@arcevo/facet-components";
+import { AnimatedButton, Button } from "@fusorb/facet-components";
 import { PageShell } from "@/components/page-shell";
 import { ConsoleDataTable } from "@/components/console-data-table";
 import { useSessions } from "@/hooks/use-sessions";

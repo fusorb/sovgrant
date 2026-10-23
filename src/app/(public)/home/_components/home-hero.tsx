@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AnimatedButton, Badge, Button, GradientText } from "@arcevo/facet-components";
+import { AnimatedButton, Badge, Button, GradientText } from "@fusorb/facet-components";
 
 export function HomeHero() {
   return (
@@ -15,7 +15,7 @@ export function HomeHero() {
       </h1>
 
       <p className="text-muted-foreground mx-auto mt-8 max-w-2xl text-lg">
-        ArcID is a sovereign multi-tenant IAM backend providing OIDC,
+        SovGrant is a sovereign multi-tenant IAM backend providing OIDC,
         WebAuthn passkeys, TOTP MFA, SD-JWT verifiable credentials, and
         did:web - for developers who build the identity layer.
       </p>

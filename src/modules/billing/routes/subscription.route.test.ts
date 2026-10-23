@@ -284,7 +284,7 @@ describe("Phase 1a: Free-upgrade bypass fix", () => {
       const payload = JSON.stringify({
         event: "subscription.create",
         data: {
-          plan: { plan_code: "PLN_arcid_pro" },
+          plan: { plan_code: "PLN_sg_pro" },
           customer: {
             customer_code: "CUS_xxx",
             metadata: { tenantId: "tenant-1" },
@@ -369,7 +369,7 @@ describe("Phase 1a: Free-upgrade bypass fix", () => {
             id: "sub_stripe_xxx",
             customer: "cus_xxx",
             metadata: { tenantId: "tenant-1" },
-            items: { data: [{ price: { id: "price_arcid_pro" } }] },
+            items: { data: [{ price: { id: "price_sg_pro" } }] },
           },
         },
       });

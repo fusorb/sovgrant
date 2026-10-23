@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@arcevo/facet-store";
-import { AuthLayout } from "@arcevo/facet-layout";
+import { useAuthStore } from "@fusorb/facet-store";
+import { AuthLayout } from "@fusorb/facet-layout";
 import { buildLayoutConfig } from "@/config/layout";
 
 export default function AuthRootLayout({

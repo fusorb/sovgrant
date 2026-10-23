@@ -33,5 +33,5 @@ export const credentialsPlugin = fp(
       },
     );
   },
-  { name: "arc-id:credentials", dependencies: ["arc-id:db", "arc-id:jwt"] },
+  { name: "sg:credentials", dependencies: ["sg:db", "sg:jwt"] },
 );

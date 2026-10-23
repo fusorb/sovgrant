@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { useAuthStore } from "@arcevo/facet-store";
+import { useAuthStore } from "@fusorb/facet-store";
 import { auth } from "@/sdk";
 
 export function useSessions() {

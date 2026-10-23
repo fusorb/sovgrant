@@ -4,7 +4,7 @@
 // flows anywhere in the codebase prior to this. The Prisma model existed
 // schema-only.
 //
-// Project = a product/section inside a Tenant (e.g. ArcID, ArcWallet,
+// Project = a product/section inside a Tenant (e.g. SovGrant, ArcWallet,
 // ArcVerify, Arcademy, ArcBase, the Cirqle landing page all live as Projects
 // under the ArcevoCirqle tenant). `category` is an optional grouping label
 // ("identity", "knowledge", etc) for organizing the console UI — it carries

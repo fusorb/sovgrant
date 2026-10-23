@@ -58,5 +58,5 @@ export const identityPlugin = fp(
       },
     );
   },
-  { name: "arc-id:identity", dependencies: ["arc-id:db", "arc-id:auth-guard"] },
+  { name: "sg:identity", dependencies: ["sg:db", "sg:auth-guard"] },
 );

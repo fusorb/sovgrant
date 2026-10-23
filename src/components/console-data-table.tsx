@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { DataTable, type DataTableColumn, EmptyState, Skeleton } from "@arcevo/facet-components";
+import { DataTable, type DataTableColumn, EmptyState, Skeleton } from "@fusorb/facet-components";
 
 interface ConsoleDataTableProps<T extends object> {
   data: T[] | null;

@@ -12,7 +12,7 @@ import {
   Input,
   Label,
   Textarea,
-} from "@arcevo/facet-components";
+} from "@fusorb/facet-components";
 
 export function FeedbackContent() {
   const [submitted, setSubmitted] = useState(false);

@@ -1,5 +1,5 @@
 /**
- * ArcID Navigation Configuration
+ * SovGrant Navigation Configuration
  *
  * Single source of truth for the sidebar nav tree.
  * The facet-ConsoleLayout's Sidebar reads this - not hardcoded JSX.
@@ -9,7 +9,7 @@
  * users. The backend is the real enforcement boundary.
  */
 
-import type { IconName } from "@arcevo/facet-components";
+import type { IconName } from "@fusorb/facet-components";
 
 export interface NavItem {
   /** Full route path e.g. "/console/security/sessions" */

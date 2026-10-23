@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useAuthStore } from "@arcevo/facet-store";
+import { useAuthStore } from "@fusorb/facet-store";
 import { billing } from "@/sdk";
-import type { Subscription } from "@arcevo/facet-sdk";
+import type { Subscription } from "@fusorb/facet-sdk";
 
 export const PLAN_STATUS_VARIANT: Record<string, "default" | "success" | "warning" | "destructive"> = {
   ACTIVE: "success",

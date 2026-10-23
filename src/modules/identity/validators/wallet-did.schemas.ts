@@ -19,7 +19,7 @@ export const RegisterWalletDidInputSchema = z.object({
   publicKeyJwk: JwkSchema,
   /** Provider name, e.g. "arcwallet" */
   provider: z.string().min(1).max(64).default("arcwallet"),
-  /** Provider's wallet identifier for this user — opaque to ArcID */
+  /** Provider's wallet identifier for this user — opaque to SovGrant */
   providerWalletId: z.string().min(1).max(256),
 });
 

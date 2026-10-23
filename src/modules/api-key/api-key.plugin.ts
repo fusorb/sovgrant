@@ -15,5 +15,5 @@ export const apiKeyPlugin = fp(
       { prefix: "/api-keys" },
     );
   },
-  { name: "arc-id:api-key", dependencies: ["arc-id:db", "arc-id:auth-guard"] },
+  { name: "sg:api-key", dependencies: ["sg:db", "sg:auth-guard"] },
 );

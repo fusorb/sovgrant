@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuthStore } from "@arcevo/facet-store";
+import { useAuthStore } from "@fusorb/facet-store";
 import { useTenant } from "@/hooks/use-tenant";
 import {
   Button,
@@ -11,8 +11,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@arcevo/facet-components";
-import { PageHeader } from "@arcevo/facet-layout";
+} from "@fusorb/facet-components";
+import { PageHeader } from "@fusorb/facet-layout";
 
 export default function InviteAcceptPage() {
   const router = useRouter();

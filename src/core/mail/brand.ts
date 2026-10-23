@@ -1,6 +1,6 @@
-import type { EmailBrand } from "@arcevo/facet-emails";
+import type { EmailBrand } from "@fusorb/facet-emails";
 
-/** ArcID mail color palette — used for inline styles on custom sections. */
+/** SovGrant mail color palette — used for inline styles on custom sections. */
 export const MAIL_COLOR = {
   bg: "#ffffff",
   bgMuted: "#f9fafb",
@@ -19,7 +19,7 @@ export const MAIL_COLOR = {
   link: "#2563eb",
 } as const;
 
-/** ArcID mail typography tokens. */
+/** SovGrant mail typography tokens. */
 export const MAIL_FONT = {
   family:
     "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
@@ -32,7 +32,7 @@ export const MAIL_FONT = {
   sizeXl: "24px",
 } as const;
 
-/** ArcID mail spacing tokens. */
+/** SovGrant mail spacing tokens. */
 export const MAIL_SPACE = {
   xs: "4px",
   sm: "8px",
@@ -42,7 +42,7 @@ export const MAIL_SPACE = {
   xxl: "48px",
 } as const;
 
-/** ArcID mail radius tokens. */
+/** SovGrant mail radius tokens. */
 export const MAIL_RADIUS = {
   sm: "4px",
   md: "6px",
@@ -52,27 +52,27 @@ export const MAIL_RADIUS = {
 /** Maximum email body width. */
 export const MAIL_MAX_WIDTH = "600px";
 
-/** Default footer note for ArcID emails. */
+/** Default footer note for SovGrant emails. */
 export const DEFAULT_MAIL_FOOTER_NOTE =
-  "This message was sent by ArcID, the sovereign identity engine. " +
-  "You are receiving it because this address is connected to an ArcID account.";
+  "This message was sent by SovGrant, the sovereign identity engine. " +
+  "You are receiving it because this address is connected to an SovGrant account.";
 
-/** Default footer meta (copyright) for ArcID emails. */
-export const DEFAULT_MAIL_FOOTER_META = `© ${new Date().getFullYear()} ArcID. All rights reserved.`;
+/** Default footer meta (copyright) for SovGrant emails. */
+export const DEFAULT_MAIL_FOOTER_META = `© ${new Date().getFullYear()} SovGrant. All rights reserved.`;
 
 /**
- * ArcID email brand configuration.
+ * SovGrant email brand configuration.
  *
  * facet-emails components reference colors via CSS variables
  * (`var(--primary, …)`, `var(--surface, …)` etc.).  Those variables are
  * **never** set by `renderEmail` itself — only a few brand options leak
  * into the `<style>` block (link colors, heading colors, hr borders).
- * `ARCID_EMAIL_CSS_VARS` below is injected into every rendered document so
+ * `SG_EMAIL_CSS_VARS` below is injected into every rendered document so
  * that the component-level `var(--…)` references resolve to the correct
- * ArcID palette.  Without it buttons render in facet's default purple
- * instead of ArcID black.
+ * SovGrant palette.  Without it buttons render in facet's default purple
+ * instead of SovGrant black.
  */
-export const ARCID_EMAIL_BRAND: EmailBrand = {
+export const SG_EMAIL_BRAND: EmailBrand = {
   primary: MAIL_COLOR.primary,
   background: MAIL_COLOR.bgMuted,
   surface: MAIL_COLOR.bg,
@@ -80,11 +80,11 @@ export const ARCID_EMAIL_BRAND: EmailBrand = {
   muted: MAIL_COLOR.textMuted,
   fontFamily: MAIL_FONT.family,
   radius: 8,
-  brandName: "ArcID",
+  brandName: "SovGrant",
 };
 
 /** CSS-injected `:root` block that powers the facet-emails CSS variables. */
-export const ARCID_EMAIL_CSS_VARS = `:root {
+export const SG_EMAIL_CSS_VARS = `:root {
   --primary: ${MAIL_COLOR.primary};
   --surface: ${MAIL_COLOR.bg};
   --text: ${MAIL_COLOR.text};
@@ -94,10 +94,10 @@ export const ARCID_EMAIL_CSS_VARS = `:root {
 }`;
 
 /**
- * Inject ArcID CSS variables into a rendered email's `<style>` block.
+ * Inject SovGrant CSS variables into a rendered email's `<style>` block.
  * Safe to call multiple times — only injects once.
  */
 export function injectEmailCssVars(html: string): string {
   if (html.includes("--primary")) return html;
-  return html.replace("</style>", `${ARCID_EMAIL_CSS_VARS}</style>`);
+  return html.replace("</style>", `${SG_EMAIL_CSS_VARS}</style>`);
 }

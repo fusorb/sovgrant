@@ -1,34 +1,34 @@
 import type { Metadata, Viewport } from "next";
-import "@arcevo/facet-tokens/tokens.css";
+import "@fusorb/facet-tokens/tokens.css";
 import "@/styles/globals.css";
 import { Providers } from "@/providers";
-import { ArcMetadata } from "@/components/metadata";
+import { SgMetadata } from "@/components/metadata";
 
 export const metadata: Metadata = {
   title: {
-    default: `${ArcMetadata.name} · ${ArcMetadata.tagline}`,
-    template: `%s · ${ArcMetadata.name}`,
+    default: `${SgMetadata.name} · ${SgMetadata.tagline}`,
+    template: `%s · ${SgMetadata.name}`,
   },
-  description: ArcMetadata.description,
-  keywords: [...ArcMetadata.keywords],
-  authors: [{ name: ArcMetadata.org.name, url: ArcMetadata.org.url }],
-  creator: ArcMetadata.org.name,
-  publisher: ArcMetadata.org.name,
-  icons: [{ rel: "icon", url: "/arcid-bw.png" }],
+  description: SgMetadata.description,
+  keywords: [...SgMetadata.keywords],
+  authors: [{ name: SgMetadata.org.name, url: SgMetadata.org.url }],
+  creator: SgMetadata.org.name,
+  publisher: SgMetadata.org.name,
+  icons: [{ rel: "icon", url: "/sg-bw.png" }],
   openGraph: {
     type: "website",
-    locale: ArcMetadata.locale,
-    siteName: ArcMetadata.name,
-    title: `${ArcMetadata.name} · ${ArcMetadata.tagline}`,
-    description: ArcMetadata.longDescription,
-    url: ArcMetadata.url,
-    images: [{ url: ArcMetadata.ogImage }],
+    locale: SgMetadata.locale,
+    siteName: SgMetadata.name,
+    title: `${SgMetadata.name} · ${SgMetadata.tagline}`,
+    description: SgMetadata.longDescription,
+    url: SgMetadata.url,
+    images: [{ url: SgMetadata.ogImage }],
   },
   robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {
-  themeColor: ArcMetadata.themeColor,
+  themeColor: SgMetadata.themeColor,
   width: "device-width",
   initialScale: 1,
   colorScheme: "dark",

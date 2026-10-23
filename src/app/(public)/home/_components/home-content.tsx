@@ -12,7 +12,7 @@ import {
   GlowCard,
   Icon,
   type IconProps,
-} from "@arcevo/facet-components";
+} from "@fusorb/facet-components";
 import { HomeFeatures } from "./home-features";
 import { HomeDevelop } from "./home-develop";
 import { HomeStats } from "./home-stats";
@@ -21,7 +21,7 @@ const steps = [
   {
     title: "Deploy",
     description:
-      "Run ArcID in 30 seconds with Docker Compose. Postgres 17 + Redis 7 + API + workers — ready for production with auto-migration and health checks.",
+      "Run SovGrant in 30 seconds with Docker Compose. Postgres 17 + Redis 7 + API + workers — ready for production with auto-migration and health checks.",
     icon: "package",
   },
   {
@@ -33,7 +33,7 @@ const steps = [
   {
     title: "Integrate",
     description:
-      "Drop in the ArcID SDK, add passkey login, and start issuing verifiable credentials — all with standards you control.",
+      "Drop in the SovGrant SDK, add passkey login, and start issuing verifiable credentials — all with standards you control.",
     icon: "code",
   },
 ];
@@ -67,24 +67,24 @@ const securityFeatures = [
 
 const faqs = [
   {
-    question: "Is ArcID open source?",
+    question: "Is SovGrant open source?",
     answer:
-      "ArcID is self-hostable and built from open standards. The backend is written in TypeScript (Fastify + Prisma) and the frontend uses Next.js 16.",
+      "SovGrant is self-hostable and built from open standards. The backend is written in TypeScript (Fastify + Prisma) and the frontend uses Next.js 16.",
   },
   {
-    question: "What standards does ArcID support?",
+    question: "What standards does SovGrant support?",
     answer:
       "OAuth 2.0, OpenID Connect, WebAuthn/FIDO2, TOTP/HOTP, W3C Verifiable Credentials with SD-JWT, did:web, and SAML 2.0 federation.",
   },
   {
-    question: "Can I run ArcID on-prem?",
+    question: "Can I run SovGrant on-prem?",
     answer:
       "Yes. A multi-stage Dockerfile and docker-compose.yml (Postgres 17 + Redis 7) are included. Run `docker compose up -d` and you're live.",
   },
   {
     question: "How do I migrate from my current IdP?",
     answer:
-      "ArcID supports OIDC and SAML federation, so you can connect your existing IdP and migrate users gradually. Contact us for migration assistance.",
+      "SovGrant supports OIDC and SAML federation, so you can connect your existing IdP and migrate users gradually. Contact us for migration assistance.",
   },
 ];
 
@@ -101,7 +101,7 @@ export function HomeContent() {
             Get started in three steps
           </h2>
           <p className="text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
-            Deploy, configure, and integrate — ArcID handles the identity
+            Deploy, configure, and integrate — SovGrant handles the identity
             infrastructure so you don't have to.
           </p>
 
@@ -145,7 +145,7 @@ export function HomeContent() {
               Defence in depth, from the network up
             </h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              ArcID is built with security as the default. Every outbound
+              SovGrant is built with security as the default. Every outbound
               request is validated, every token revocation is durable, and
               every query is tenant-scoped at the database layer.
             </p>
@@ -186,7 +186,7 @@ export function HomeContent() {
             Frequently asked questions
           </h2>
           <p className="text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
-            Everything you need to know about getting started with ArcID.
+            Everything you need to know about getting started with SovGrant.
           </p>
 
           <div className="space-y-4">

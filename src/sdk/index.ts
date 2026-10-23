@@ -1,15 +1,15 @@
 /**
- * ArcID SDK - singleton wiring for @arcevo/facet-sdk.
+ * SovGrant SDK - singleton wiring for @fusorb/facet-sdk.
  *
- * The domain SDKs live in the published `@arcevo/facet-sdk` package
+ * The domain SDKs live in the published `@fusorb/facet-sdk` package
  * (class-based: `new AuthSdk(client)`). This module owns the single
- * `ArcIdClient` instance, wired to the Zustand auth store for token
+ * `SgClient` instance, wired to the Zustand auth store for token
  * refresh + auth-cleared handling, and re-exports the domain SDKs as
  * singletons so consumers keep the same `import { auth } from "@/sdk"` API.
  */
 
 import {
-  ArcIdClient,
+  ArcIdClient as SgClient,
   AuthSdk,
   BillingSdk,
   AuditSdk,
@@ -24,8 +24,8 @@ import {
   type ApiError,
   type ApiResponse,
   type User,
-} from "@arcevo/facet-sdk";
-import { useAuthStore, useTenantStore } from "@arcevo/facet-store";
+} from "@fusorb/facet-sdk";
+import { useAuthStore, useTenantStore } from "@fusorb/facet-store";
 import {
   REFRESH_COOKIE_NAME,
   REFRESH_COOKIE_OPTIONS,
@@ -35,7 +35,7 @@ import {
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
-const AUTH_STORAGE_KEY = "arcid-session";
+const AUTH_STORAGE_KEY = "sg-session";
 
 /** Persist the current user so AuthProvider can restore identity on page load. */
 export function persistSession(user: User) {
@@ -68,7 +68,7 @@ let refreshInFlight = false;
 // at call-time, well after both are initialised.
 let authSdk: AuthSdk;
 
-const client: ArcIdClient = new ArcIdClient({
+const client: SgClient = new SgClient({
   baseUrl: BASE_URL,
   onTokenRefresh: async (): Promise<string | null> => {
     if (refreshInFlight) return null;
@@ -109,7 +109,7 @@ export const passkeys = new PasskeySdk(client);
 export const idp = new IdpSdk(client);
 
 // Re-export the client so providers can push token updates.
-export const arcIdClient = client;
+export const sgClient = client;
 
 // Re-export cookie constants (single source of truth: src/lib/refresh-cookies.ts).
 export { REFRESH_COOKIE_NAME, REFRESH_COOKIE_OPTIONS };

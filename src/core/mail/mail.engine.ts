@@ -5,15 +5,15 @@ import {
   toTemplateTree,
   renderEmail,
   type TemplateNode,
-} from "@arcevo/facet-emails";
-import { ARCID_EMAIL_BRAND, injectEmailCssVars } from "./brand";
+} from "@fusorb/facet-emails";
+import { SG_EMAIL_BRAND, injectEmailCssVars } from "./brand";
 
 /**
  * Compiles a React email element to a complete HTML document string.
  *
- * This wraps facet-emails' `renderEmailFromReact` and injects the ArcID
+ * This wraps facet-emails' `renderEmailFromReact` and injects the SovGrant
  * CSS variables into the `<style>` block so that component-level
- * `var(--primary)` / `var(--surface)` references resolve to ArcID colors
+ * `var(--primary)` / `var(--surface)` references resolve to SovGrant colors
  * instead of facet's defaults.
  *
  * Always await before passing html to Resend.
@@ -22,7 +22,7 @@ export async function compileMailTemplate(
   element: React.ReactElement,
 ): Promise<string> {
   const html = await renderEmailFromReact(element, {
-    brand: ARCID_EMAIL_BRAND,
+    brand: SG_EMAIL_BRAND,
   });
   return injectEmailCssVars(html);
 }
@@ -42,6 +42,6 @@ export async function compileMailText(
  * Used by the facet-emails preview server.
  */
 export function compileMailTree(tree: TemplateNode): string {
-  const html = renderEmail(tree, { brand: ARCID_EMAIL_BRAND });
+  const html = renderEmail(tree, { brand: SG_EMAIL_BRAND });
   return injectEmailCssVars(html);
 }

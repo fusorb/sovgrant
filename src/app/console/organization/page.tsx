@@ -1,14 +1,14 @@
 "use client";
 
-import { PageHeader } from "@arcevo/facet-layout";
+import { PageHeader } from "@fusorb/facet-layout";
 import {
   GlowCard,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@arcevo/facet-components";
-import { useTenantStore } from "@arcevo/facet-store";
+} from "@fusorb/facet-components";
+import { useTenantStore } from "@fusorb/facet-store";
 import Link from "next/link";
 
 export default function OrganizationPage() {

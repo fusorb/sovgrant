@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { SignUp, enterprisePreset } from "@arcevo/facet-auth";
+import { SignUp, enterprisePreset } from "@fusorb/facet-auth";
 
 export default function RegisterPage() {
   const router = useRouter();

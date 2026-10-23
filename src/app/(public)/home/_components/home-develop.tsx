@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, CardContent, CardDescription, CardHeader, CardTitle, GlowCard, Icon } from "@arcevo/facet-components";
+import { Badge, CardContent, CardDescription, CardHeader, CardTitle, GlowCard, Icon } from "@fusorb/facet-components";
 
 const benefits = [
   {
@@ -49,7 +49,7 @@ export function HomeDevelop() {
             Built for developers who ship real products
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            ArcID handles the identity complexity so your team can focus on
+            SovGrant handles the identity complexity so your team can focus on
             building. No vendor lock-in, no black-box SDKs - just standards you
             can read and trust.
           </p>

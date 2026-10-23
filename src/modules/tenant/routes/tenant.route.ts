@@ -77,7 +77,7 @@ export async function tenantRoute(fastify: FastifyInstance) {
 
   // ── GET /:slug/jwks — public JWKS endpoint ────────────────────────────────
   // Intentionally has NO auth — JWKS is always public so relying parties
-  // can verify credentials without an ArcID account.
+  // can verify credentials without an SovGrant account.
   fastify.get(
     "/:slug/jwks",
     {

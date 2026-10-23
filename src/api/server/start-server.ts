@@ -62,7 +62,7 @@ async function start() {
     // Mark server as successfully live
     isFullyBooted = true;
 
-    server.log.info(`ArcID Engine ready on port ${config.base.port}`);
+    server.log.info(`SovGrant Engine ready on port ${config.base.port}`);
     server.log.info(`Swagger UI  → http://localhost:${config.base.port}/docs`);
 
   } catch (err) {

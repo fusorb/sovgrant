@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useAuthStore, useTenantStore } from "@arcevo/facet-store";
-import { tenants, arcIdClient } from "@/sdk";
+import { useAuthStore, useTenantStore } from "@fusorb/facet-store";
+import { tenants, sgClient } from "@/sdk";
 
 /**
  * AuthProvider - reads stored tokens on mount and restores session.
@@ -23,7 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // tokens; the SDK's onTokenRefresh will fire on the first 401 and
       // use the cookie to obtain a fresh access token.
       try {
-        const stored = localStorage.getItem("arcid-session");
+        const stored = localStorage.getItem("sg-session");
         if (stored) {
           const parsed = JSON.parse(stored);
           if (parsed.user) {
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!cancelled) {
           if (result.data && result.data.length > 0) {
             useTenantStore.getState().setTenants(result.data);
-            const stored = localStorage.getItem("arcid-active-tenant");
+            const stored = localStorage.getItem("sg-active-tenant");
             const saved = stored ? JSON.parse(stored) : null;
             const target = saved
               ? result.data.find((t: any) => t.id === saved.id)

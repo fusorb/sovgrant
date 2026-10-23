@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { ResetPasswordForm } from "@arcevo/facet-auth";
+import { ResetPasswordForm } from "@fusorb/facet-auth";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function ResetPasswordPage() {

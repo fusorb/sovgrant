@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback } from "react";
-import { useAuthStore } from "@arcevo/facet-store";
+import { useAuthStore } from "@fusorb/facet-store";
 import { identity } from "@/sdk";
-import type { JsonObject } from "@arcevo/facet-sdk";
+import type { JsonObject } from "@fusorb/facet-sdk";
 
 export function useProfile() {
   const accessToken = useAuthStore((s) => s.accessToken);

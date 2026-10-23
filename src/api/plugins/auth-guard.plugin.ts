@@ -68,7 +68,7 @@ export const authGuardPlugin = fp(
         const authHeader = req.headers.authorization;
         if (authHeader?.startsWith("Bearer ")) {
           const token = authHeader.slice(7);
-          if (token.startsWith("arc_sk_")) {
+          if (token.startsWith("sg_sk_")) {
             const service = new ApiKeyService();
             const repo = new ApiKeyRepository(fastify.db);
             const record = await repo.findApiKey(service.hash(token));
@@ -306,5 +306,5 @@ export const authGuardPlugin = fp(
       requirePermission,
     });
   },
-  { name: "arc-id:auth-guard", dependencies: ["arc-id:jwt", "arc-id:db"] },
+  { name: "sg:auth-guard", dependencies: ["sg:jwt", "sg:db"] },
 );

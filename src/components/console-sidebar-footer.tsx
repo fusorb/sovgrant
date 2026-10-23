@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Popover, PopoverTrigger, PopoverContent, Button, Icon } from "@arcevo/facet-components";
-import { useLayout } from "@arcevo/facet-layout";
-import { useAuthStore } from "@arcevo/facet-store";
+import { Popover, PopoverTrigger, PopoverContent, Button, Icon } from "@fusorb/facet-components";
+import { useLayout } from "@fusorb/facet-layout";
+import { useAuthStore } from "@fusorb/facet-store";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/providers/theme-provider";
 

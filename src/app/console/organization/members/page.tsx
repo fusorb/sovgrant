@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Badge } from "@arcevo/facet-components";
+import { Badge } from "@fusorb/facet-components";
 import { PageShell } from "@/components/page-shell";
 import { ConsoleDataTable } from "@/components/console-data-table";
-import { useTenantStore } from "@arcevo/facet-store";
+import { useTenantStore } from "@fusorb/facet-store";
 import { useTenant } from "@/hooks/use-tenant";
 
 interface Member {

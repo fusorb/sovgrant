@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback } from "react";
-import { useAuthStore } from "@arcevo/facet-store";
+import { useAuthStore } from "@fusorb/facet-store";
 import { credentials } from "@/sdk";
-import type { IssueCredentialParams } from "@arcevo/facet-sdk";
+import type { IssueCredentialParams } from "@fusorb/facet-sdk";
 
 export function useCredentials() {
   const accessToken = useAuthStore((s) => s.accessToken);

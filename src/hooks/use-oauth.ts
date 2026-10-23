@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback } from "react";
-import { useAuthStore } from "@arcevo/facet-store";
+import { useAuthStore } from "@fusorb/facet-store";
 import { oauth } from "@/sdk";
-import type { CreateClientParams } from "@arcevo/facet-sdk";
+import type { CreateClientParams } from "@fusorb/facet-sdk";
 
 export function useOAuth() {
   const accessToken = useAuthStore((s) => s.accessToken);

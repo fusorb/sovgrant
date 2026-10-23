@@ -1,12 +1,12 @@
-import { Icon } from "@arcevo/facet-components";
-import { enterpriseLayoutPreset, type LayoutConfig, type NavSection } from "@arcevo/facet-layout";
+import { Icon } from "@fusorb/facet-components";
+import { enterpriseLayoutPreset, type LayoutConfig, type NavSection } from "@fusorb/facet-layout";
 import { navConfig } from "@/config/nav";
 
 /**
- * ArcID layout config - drives @arcevo/facet-layout's AuthLayout + ConsoleLayout.
+ * SovGrant layout config - drives @fusorb/facet-layout's AuthLayout + ConsoleLayout.
  *
  * Merges the facet-layout `enterpriseLayoutPreset` (B2B IAM features) with
- * ArcID's own brand identity + nav tree from @/config/nav.
+ * SovGrant's own brand identity + nav tree from @/config/nav.
  *
  * The sidebar nav tree is defined once in @/config/nav (string icon names).
  * facet-layout's NavSection expects icon ReactNodes, so we map the icon
@@ -31,10 +31,10 @@ export function buildLayoutConfig(): LayoutConfig {
 
   return {
     // Layer the enterprise preset (tenant switcher, theme toggle, etc.)
-    // underneath ArcID's brand + nav overrides.
+    // underneath SovGrant's brand + nav overrides.
     ...enterpriseLayoutPreset,
     brand: {
-      name: "ArcID",
+      name: "SovGrant",
       tagline: "Sovereign Identity Engine",
       benefits: [
         "Passkey-native authentication",

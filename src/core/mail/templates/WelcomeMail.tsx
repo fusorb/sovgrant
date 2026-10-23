@@ -6,7 +6,7 @@ import {
   EmailDivider,
   EmailSection,
   EmailList,
-} from "@arcevo/facet-emails";
+} from "@fusorb/facet-emails";
 import { MAIL_COLOR, MAIL_SPACE, MAIL_RADIUS, MAIL_FONT } from "../brand";
 
 export interface WelcomeMailProps {
@@ -16,11 +16,11 @@ export interface WelcomeMailProps {
 
 export const WelcomeMail = ({ name, dashboardUrl }: WelcomeMailProps) => (
   <EmailLayout
-    previewText="Welcome to ArcID - your sovereign identity is now active"
+    previewText="Welcome to SovGrant - your sovereign identity is now active"
     heading={`Welcome${name ? `, ${name}` : ""}`}
-    brandName="ArcID"
-    footerNote="This message was sent by ArcID, the sovereign identity engine. You are receiving it because this address is connected to an ArcID account."
-    footerMeta={`© ${new Date().getFullYear()} ArcID. All rights reserved.`}
+    brandName="SovGrant"
+    footerNote="This message was sent by SovGrant, the sovereign identity engine. You are receiving it because this address is connected to an SovGrant account."
+    footerMeta={`© ${new Date().getFullYear()} SovGrant. All rights reserved.`}
   >
     <EmailText
       style={{
@@ -42,7 +42,7 @@ export const WelcomeMail = ({ name, dashboardUrl }: WelcomeMailProps) => (
     </EmailText>
 
     <EmailText style={{ marginBottom: MAIL_SPACE.md }}>
-      ArcID is your sovereign identity layer - passkey-native sign-in,
+      SovGrant is your sovereign identity layer - passkey-native sign-in,
       multi-tenant access control, and verifiable credentials you can take
       anywhere it's trusted.
     </EmailText>

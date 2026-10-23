@@ -6,7 +6,7 @@ import {
   EmailSecurityNotice,
   EmailDivider,
   EmailList,
-} from "@arcevo/facet-emails";
+} from "@fusorb/facet-emails";
 import { MAIL_COLOR, MAIL_SPACE } from "../brand";
 
 export interface RecoveryCodesIssuedMailProps {
@@ -19,11 +19,11 @@ export const RecoveryCodesIssuedMail = ({
   name,
 }: RecoveryCodesIssuedMailProps) => (
   <EmailLayout
-    previewText="Your ArcID recovery codes - save them now, they won't appear again"
+    previewText="Your SovGrant recovery codes - save them now, they won't appear again"
     heading="Your Recovery Codes"
-    brandName="ArcID"
-    footerNote="This message was sent by ArcID, the sovereign identity engine. You are receiving it because this address is connected to an ArcID account."
-    footerMeta={`© ${new Date().getFullYear()} ArcID. All rights reserved.`}
+    brandName="SovGrant"
+    footerNote="This message was sent by SovGrant, the sovereign identity engine. You are receiving it because this address is connected to an SovGrant account."
+    footerMeta={`© ${new Date().getFullYear()} SovGrant. All rights reserved.`}
   >
     <EmailText
       style={{
@@ -40,7 +40,7 @@ export const RecoveryCodesIssuedMail = ({
 
     <EmailText style={{ marginBottom: MAIL_SPACE.md }}>
       {name ? `Hello ${name},` : "Hello,"} two-factor authentication is now
-      active on your ArcID account. Below are your one-time recovery codes -
+      active on your SovGrant account. Below are your one-time recovery codes -
       the spare keys that let you back in if you ever lose access to your
       authenticator.
     </EmailText>

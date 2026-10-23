@@ -6,9 +6,9 @@
 //   Each provider follows the same three-phase pattern:
 //     1. GET /:provider          → redirect to provider with state + CSRF cookie
 //     2. GET /:provider/callback → exchange code, upsert OAuthAccount+Identity,
-//                                  issue ArcID session + JWT pair
+//                                  issue SovGrant session + JWT pair
 //
-// The user always ends up with an ArcID token — provider tokens are never
+// The user always ends up with an SovGrant token — provider tokens are never
 // exposed or stored long-term. Provider access tokens are kept only in
 // OAuthAccount for potential future use (e.g. avatar refresh).
 //
@@ -23,7 +23,7 @@
 //   GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
 //   APPLE_CLIENT_ID, APPLE_TEAM_ID, APPLE_KEY_ID, APPLE_PRIVATE_KEY
 //   MICROSOFT_CLIENT_ID, MICROSOFT_CLIENT_SECRET
-//   SOCIAL_REDIRECT_URI (e.g. https://api.arcid.dev/auth/social/:provider/callback)
+//   SOCIAL_REDIRECT_URI (e.g. https://api.sg.dev/auth/social/:provider/callback)
 //
 // Install deps: pnpm add arctic
 // arctic provides lightweight, spec-correct OAuth2 clients for all four providers.
@@ -176,7 +176,7 @@ async function handleCallback(
         // Existing users can log in via OAuth; brand-new users must register
         // first (email+password), then link the provider from their account.
         throw new ApiError(
-          "No ArcID account found for this social login. Please register first, then sign in with GitHub/Google.",
+          "No SovGrant account found for this social login. Please register first, then sign in with GitHub/Google.",
           404,
           "SOCIAL_ACCOUNT_NOT_FOUND",
         );
@@ -217,7 +217,7 @@ async function handleCallback(
     return { identity: resolvedIdentity, session: newSession };
   });
 
-  // Issue ArcID tokens outside the transaction (pure signing, no writes)
+  // Issue SovGrant tokens outside the transaction (pure signing, no writes)
   const tokenService = new TokenService();
   const directClientId = config.oauth.directClientId;
 
@@ -416,13 +416,13 @@ export async function socialRoute(instance: FastifyInstance) {
         fetch("https://api.github.com/user", {
           headers: {
             Authorization: `Bearer ${accessToken}`,
-            "User-Agent": "ArcID",
+            "User-Agent": "SovGrant",
           },
         }),
         fetch("https://api.github.com/user/emails", {
           headers: {
             Authorization: `Bearer ${accessToken}`,
-            "User-Agent": "ArcID",
+            "User-Agent": "SovGrant",
           },
         }),
       ]);

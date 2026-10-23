@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ConsoleLayout } from "@arcevo/facet-layout";
-import type { RouterAdapter, RouterLinkProps } from "@arcevo/facet-layout";
+import { ConsoleLayout } from "@fusorb/facet-layout";
+import type { RouterAdapter, RouterLinkProps } from "@fusorb/facet-layout";
 import { buildLayoutConfig } from "@/config/layout";
-import { useAuthStore, useTenantStore } from "@arcevo/facet-store";
+import { useAuthStore, useTenantStore } from "@fusorb/facet-store";
 import { ConsoleSidebarFooter } from "@/components/console-sidebar-footer";
 
 export default function ConsoleRootLayout({

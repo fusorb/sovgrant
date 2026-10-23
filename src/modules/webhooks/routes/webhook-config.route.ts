@@ -31,7 +31,7 @@ export async function webhookConfigRoute(fastify: FastifyInstance) {
         summary:
           "Register a new outbound webhook endpoint for your tenant (PRO)",
         description:
-          "Registers a URL to receive webhook events. A signing secret is returned, store it securely and use it to verify the X-ArcID-Signature header on incoming requests.",
+          "Registers a URL to receive webhook events. A signing secret is returned, store it securely and use it to verify the X-SovGrant-Signature header on incoming requests.",
         security: [{ bearerAuth: [] }],
         body: EndpointBodySchema,
         response: {
@@ -282,7 +282,7 @@ export async function webhookConfigRoute(fastify: FastifyInstance) {
       const body = JSON.stringify({
         eventType: "WEBHOOK_TEST",
         tenantId,
-        payload: { message: "ArcID webhook test ping", timestamp },
+        payload: { message: "SovGrant webhook test ping", timestamp },
         createdAt: new Date().toISOString(),
       });
 
@@ -296,9 +296,9 @@ export async function webhookConfigRoute(fastify: FastifyInstance) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-ArcID-Signature": `sha256=${signature}`,
-            "X-ArcID-Timestamp": String(timestamp),
-            "X-ArcID-Event-Type": "WEBHOOK_TEST",
+            "X-SovGrant-Signature": `sha256=${signature}`,
+            "X-SovGrant-Timestamp": String(timestamp),
+            "X-SovGrant-Event-Type": "WEBHOOK_TEST",
           },
           body,
           signal: AbortSignal.timeout(10_000),

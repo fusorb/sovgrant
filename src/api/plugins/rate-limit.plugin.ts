@@ -73,5 +73,5 @@ export const rateLimitPlugin = fp(
       }),
     });
   },
-  { name: "arc-id:rate-limit" },
+  { name: "sg:rate-limit" },
 );

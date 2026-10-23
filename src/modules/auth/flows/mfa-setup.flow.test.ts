@@ -44,7 +44,7 @@ import { ApiError } from "@/core/errors";
 describe("mfaSetupFlow", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSetupTotp.mockReset().mockResolvedValue({ secret: "JBSWY3DPEHPK3PXP", uri: "otpauth://totp/ArcID:test?secret=JBSWY", qrCode: "data:image/png;base64,iVBOR" });
+    mockSetupTotp.mockReset().mockResolvedValue({ secret: "JBSWY3DPEHPK3PXP", uri: "otpauth://totp/SovGrant:test?secret=JBSWY", qrCode: "data:image/png;base64,iVBOR" });
   });
 
   it("returns TOTP setup data", async () => {

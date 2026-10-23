@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ForgotPasswordForm } from "@arcevo/facet-auth";
+import { ForgotPasswordForm } from "@fusorb/facet-auth";
 import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
 

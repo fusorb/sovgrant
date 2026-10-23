@@ -64,7 +64,7 @@ export const jwtPlugin = fp(
       });
     }
   },
-  { name: "arc-id:jwt", dependencies: ["arc-id:db"] },
+  { name: "sg:jwt", dependencies: ["sg:db"] },
 );
 
 // Export the resolver so token.service.ts can use the SAME logic

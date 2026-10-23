@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { User } from "@arcevo/facet-sdk";
+import type { User } from "@fusorb/facet-sdk";
 
 /**
  * Decide where an authenticated user should land after login/register.

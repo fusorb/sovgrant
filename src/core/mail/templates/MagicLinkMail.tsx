@@ -5,7 +5,7 @@ import {
   EmailText,
   EmailSecurityNotice,
   EmailLink,
-} from "@arcevo/facet-emails";
+} from "@fusorb/facet-emails";
 import { MAIL_COLOR, MAIL_SPACE } from "../brand";
 
 export interface MagicLinkMailProps {
@@ -16,11 +16,11 @@ export interface MagicLinkMailProps {
 
 export const MagicLinkMail = ({ loginUrl, name, ip }: MagicLinkMailProps) => (
   <EmailLayout
-    previewText="Your one-tap sign-in link for ArcID - valid for 15 minutes"
+    previewText="Your one-tap sign-in link for SovGrant - valid for 15 minutes"
     heading="Secure Sign-In Link"
-    brandName="ArcID"
-    footerNote="This message was sent by ArcID, the sovereign identity engine. You are receiving it because this address is connected to an ArcID account."
-    footerMeta={`© ${new Date().getFullYear()} ArcID. All rights reserved.`}
+    brandName="SovGrant"
+    footerNote="This message was sent by SovGrant, the sovereign identity engine. You are receiving it because this address is connected to an SovGrant account."
+    footerMeta={`© ${new Date().getFullYear()} SovGrant. All rights reserved.`}
   >
     <EmailText
       style={{
@@ -37,11 +37,11 @@ export const MagicLinkMail = ({ loginUrl, name, ip }: MagicLinkMailProps) => (
 
     <EmailText style={{ marginBottom: MAIL_SPACE.md }}>
       {name ? `Hello ${name},` : "Hello,"} a passwordless sign-in was just
-      requested for your ArcID account. No passwords, no friction - just a
+      requested for your SovGrant account. No passwords, no friction - just a
       single, secure link that knows it's you.
     </EmailText>
 
-    <EmailButton href={loginUrl}>Sign In to ArcID</EmailButton>
+    <EmailButton href={loginUrl}>Sign In to SovGrant</EmailButton>
 
     <EmailSecurityNotice variant="warning" ip={ip}>
       🔒 This link expires in <strong>15 minutes</strong> and can only be used

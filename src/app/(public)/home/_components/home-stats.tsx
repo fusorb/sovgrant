@@ -1,6 +1,6 @@
 "use client";
 
-import { StatCard } from "@arcevo/facet-components";
+import { StatCard } from "@fusorb/facet-components";
 
 const stats = [
   { value: "OIDC", label: "Full OAuth2 provider" },

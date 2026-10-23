@@ -54,7 +54,7 @@ describe("tokenRefreshFlow", () => {
 
   const clientRecord = {
     id: 42,
-    clientId: "arcid-direct",
+    clientId: "sg-direct",
     scopes: ["openid", "profile", "email", "offline_access"],
   };
 
@@ -74,7 +74,7 @@ describe("tokenRefreshFlow", () => {
     // TokenService.issue() lookups
     ctx.db.client.findUnique.mockResolvedValue({
       id: 1,
-      clientId: "arcid-direct",
+      clientId: "sg-direct",
       public: false,
       clientSecret: null,
     });
@@ -104,7 +104,7 @@ describe("tokenRefreshFlow", () => {
       const rawResult = await tokenRefreshFlow.execute(
         {
           refresh_token: "valid-refresh-token-value",
-          client_id: "arcid-direct",
+          client_id: "sg-direct",
         },
         ctx,
       );
@@ -134,7 +134,7 @@ describe("tokenRefreshFlow", () => {
       const result = await tokenRefreshFlow.execute(
         {
           refresh_token: "valid-refresh-token-value",
-          client_id: "arcid-direct",
+          client_id: "sg-direct",
         },
         ctx,
       );
@@ -162,7 +162,7 @@ describe("tokenRefreshFlow", () => {
         tokenRefreshFlow.execute(
           {
             refresh_token: "expired-token",
-            client_id: "arcid-direct",
+            client_id: "sg-direct",
           },
           ctx,
         ),
@@ -174,7 +174,7 @@ describe("tokenRefreshFlow", () => {
         await tokenRefreshFlow.execute(
           {
             refresh_token: "expired-token",
-            client_id: "arcid-direct",
+            client_id: "sg-direct",
           },
           ctx,
         );
@@ -204,7 +204,7 @@ describe("tokenRefreshFlow", () => {
         tokenRefreshFlow.execute(
           {
             refresh_token: "replayed-token",
-            client_id: "arcid-direct",
+            client_id: "sg-direct",
           },
           ctx,
         ),
@@ -247,7 +247,7 @@ describe("tokenRefreshFlow", () => {
         tokenRefreshFlow.execute(
           {
             refresh_token: "race-condition-token",
-            client_id: "arcid-direct",
+            client_id: "sg-direct",
           },
           ctx,
         ),
@@ -268,7 +268,7 @@ describe("tokenRefreshFlow", () => {
         tokenRefreshFlow.execute(
           {
             refresh_token: "valid-token",
-            client_id: "arcid-direct",
+            client_id: "sg-direct",
           },
           ctx,
         ),
@@ -285,7 +285,7 @@ describe("tokenRefreshFlow", () => {
 
       try {
         await tokenRefreshFlow.execute(
-          { refresh_token: "valid-token", client_id: "arcid-direct" },
+          { refresh_token: "valid-token", client_id: "sg-direct" },
           ctx,
         );
       } catch (e: any) {
@@ -303,7 +303,7 @@ describe("tokenRefreshFlow", () => {
 
       try {
         await tokenRefreshFlow.execute(
-          { refresh_token: "valid-token", client_id: "arcid-direct" },
+          { refresh_token: "valid-token", client_id: "sg-direct" },
           ctx,
         );
       } catch (e: any) {
@@ -319,7 +319,7 @@ describe("tokenRefreshFlow", () => {
 
       await expect(
         tokenRefreshFlow.execute(
-          { refresh_token: "nonexistent", client_id: "arcid-direct" },
+          { refresh_token: "nonexistent", client_id: "sg-direct" },
           ctx,
         ),
       ).rejects.toThrow(ApiError);

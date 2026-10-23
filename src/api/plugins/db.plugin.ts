@@ -19,5 +19,5 @@ export const dbPlugin = fp(
       await prisma.$disconnect();
     });
   },
-  { name: "arc-id:db" },
+  { name: "sg:db" },
 );

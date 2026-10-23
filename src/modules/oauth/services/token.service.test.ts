@@ -17,7 +17,7 @@ describe("TokenService", () => {
 
   const baseClient = {
     id: 1,
-    clientId: "arcid-direct",
+    clientId: "sg-direct",
     public: false,
     clientSecret: null,
   };
@@ -33,10 +33,10 @@ describe("TokenService", () => {
 
   const baseParams = {
     identityId: "identity-1",
-    clientId: "arcid-direct",
+    clientId: "sg-direct",
     sessionId: "session-1",
     scopes: ["openid", "profile", "email", "offline_access"],
-    audience: ["arcid-direct"],
+    audience: ["sg-direct"],
     tenantId: "SYSTEM",
   };
 

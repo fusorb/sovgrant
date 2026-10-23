@@ -1,1 +1,1 @@
-export { cn } from "@arcevo/facet-components";
+export { cn } from "@fusorb/facet-components";

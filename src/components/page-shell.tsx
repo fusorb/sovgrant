@@ -1,8 +1,8 @@
 "use client";
 
 import { ReactNode } from "react";
-import { PageHeader } from "@arcevo/facet-layout";
-import { Card, CardContent } from "@arcevo/facet-components";
+import { PageHeader } from "@fusorb/facet-layout";
+import { Card, CardContent } from "@fusorb/facet-components";
 
 export interface PageShellProps {
   title: string;

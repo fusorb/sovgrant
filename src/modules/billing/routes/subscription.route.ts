@@ -11,13 +11,13 @@ import { z } from "zod";
 
 // ── Plan code mappings per provider ──────────────────────────────────────────
 const PAYSTACK_PLAN_MAP: Record<string, "FREE" | "PRO" | "ENTERPRISE"> = {
-  PLN_arcid_pro: "PRO",
-  PLN_arcid_enterprise: "ENTERPRISE",
+  PLN_sg_pro: "PRO",
+  PLN_sg_enterprise: "ENTERPRISE",
 };
 
 const STRIPE_PLAN_MAP: Record<string, "FREE" | "PRO" | "ENTERPRISE"> = {
-  price_arcid_pro: "PRO",
-  price_arcid_enterprise: "ENTERPRISE",
+  price_sg_pro: "PRO",
+  price_sg_enterprise: "ENTERPRISE",
 };
 
 // ── Webhook signature verification ───────────────────────────────────────────

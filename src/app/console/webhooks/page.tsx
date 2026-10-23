@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { DataTableColumn } from "@arcevo/facet-components";
-import { AnimatedButton, Badge, Button } from "@arcevo/facet-components";
+import type { DataTableColumn } from "@fusorb/facet-components";
+import { AnimatedButton, Badge, Button } from "@fusorb/facet-components";
 import { PageShell } from "@/components/page-shell";
 import { ConsoleDataTable } from "@/components/console-data-table";
 import { useWebhooks } from "@/hooks/use-webhooks";

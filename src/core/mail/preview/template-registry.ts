@@ -1,9 +1,9 @@
 import * as React from "react";
-import { toTemplateTree } from "@arcevo/facet-emails";
-import type { EmailPreviewTemplate } from "@arcevo/facet-emails/server";
+import { toTemplateTree } from "@fusorb/facet-emails";
+import type { EmailPreviewTemplate } from "@fusorb/facet-emails/server";
 import { Server } from "node:http";
-import { startEmailPreviewServer, stopEmailPreviewServer } from "@arcevo/facet-emails/server";
-import { ARCID_EMAIL_BRAND } from "../brand";
+import { startEmailPreviewServer, stopEmailPreviewServer } from "@fusorb/facet-emails/server";
+import { SG_EMAIL_BRAND } from "../brand";
 
 // ── Import every template
 import { VerifyEmailMail, MagicLinkMail, PasswordResetMail, PasswordChangedMail, CredentialIssuedMail, AccountSuspendedMail, AccountDeletionMail, MfaCodeMail, MfaDisabledAlertMail, TenantInviteMail, WelcomeMail, RecoveryCodesIssuedMail, NewDeviceLoginMail  } from "../templates";
@@ -68,7 +68,7 @@ export const TEMPLATE_REGISTRY: Record<string, EmailPreviewTemplate> = {
   },
 
   welcome: {
-    title: "Welcome to ArcID",
+    title: "Welcome to SovGrant",
     tree: () =>
       toTemplateTree(
         React.createElement(WelcomeMail, {
@@ -211,7 +211,7 @@ export async function startMailPreviewServer(): Promise<Server | null> {
 
   previewServer = startEmailPreviewServer({
     templates: TEMPLATE_REGISTRY,
-    brand: ARCID_EMAIL_BRAND,
+    brand: SG_EMAIL_BRAND,
     port: 3888,
     host: "127.0.0.1",
     onReady: (port: number) => {

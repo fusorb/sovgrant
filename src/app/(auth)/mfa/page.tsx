@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { MfaDialog } from "@arcevo/facet-auth";
+import { MfaDialog } from "@fusorb/facet-auth";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function MfaPage() {

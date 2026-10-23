@@ -5,14 +5,14 @@ describe("ApiKeyService", () => {
   const service = new ApiKeyService();
 
   describe("generate", () => {
-    it("produces a key with the arc_sk_ prefix", () => {
+    it("produces a key with the sg_sk_ prefix", () => {
       const { key } = service.generate();
-      expect(key.startsWith("arc_sk_")).toBe(true);
+      expect(key.startsWith("sg_sk_")).toBe(true);
     });
 
     it("generates a key of at least 32 bytes of entropy", () => {
       const { key } = service.generate();
-      const raw = key.slice("arc_sk_".length);
+      const raw = key.slice("sg_sk_".length);
       const bytes = Buffer.from(raw, "base64url");
       expect(bytes.length).toBeGreaterThanOrEqual(32);
     });

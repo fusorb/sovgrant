@@ -62,7 +62,7 @@ async function getRedis(): Promise<import("@upstash/redis").Redis | null> {
 
 // ── Key scheme ────────────────────────────────────────────────────────────────
 
-const jtiKey = (jti: string): string => `arcid:revoked_jti:${jti}`;
+const jtiKey = (jti: string): string => `sg:revoked_jti:${jti}`;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
