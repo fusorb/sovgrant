@@ -4,8 +4,8 @@ import { createRequire } from "node:module";
 import fs from "node:fs";
 
 // Canonicalize the project root to its real on-disk casing. On Windows the
-// shell can report a lowercase path (C:\Users\HP\desktop\arcevodev\arc-id)
-// while the real path is proper-case (C:\Users\HP\Desktop\ArcevoDev\arc-id).
+// shell can report a lowercase path (C:\Users\HP\desktop\arcevodev\sovgrant)
+// while the real path is proper-case (C:\Users\HP\Desktop\ArcevoDev\sovgrant).
 // Webpack treats the two spellings as different module ids, which doubles
 // Next/React/facet modules and causes "invariant expected layout router to be
 // mounted" on hydration. Using the real-case root everywhere keeps module
@@ -34,7 +34,7 @@ const r = createRequire(import.meta.url);
  */
 function resolveRhfImportEntry(): string {
   try {
-    const facetPkgPath = r.resolve("@arcevo/facet-auth/package.json", {
+    const facetPkgPath = r.resolve("@fusorb/facet-auth/package.json", {
       paths: [PROJECT_ROOT],
     });
     const rhfPkgPath = r.resolve("react-hook-form/package.json", {
@@ -146,13 +146,13 @@ const nextConfig: NextConfig = {
       ...config.resolve.alias,
       "@": path.join(PROJECT_ROOT, "src"),
       "@/": path.join(PROJECT_ROOT, "src") + "/",
-      "@arcevo/facet-tokens/tailwind.css": path.join(
+      "@fusorb/facet-tokens/tailwind.css": path.join(
         PROJECT_ROOT,
-        "node_modules/@arcevo/facet-tokens/dist/tailwind.css",
+        "node_modules/@fusorb/facet-tokens/dist/tailwind.css",
       ),
-      "@arcevo/facet-tokens/tokens.css": path.join(
+      "@fusorb/facet-tokens/tokens.css": path.join(
         PROJECT_ROOT,
-        "node_modules/@arcevo/facet-tokens/dist/tokens.css",
+        "node_modules/@fusorb/facet-tokens/dist/tokens.css",
       ),
       // Force react-hook-form's full ESM entry (useForm, Controller, etc.)
       // instead of its `react-server` stub, resolved to an absolute path so
