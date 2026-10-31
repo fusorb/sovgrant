@@ -103,7 +103,10 @@ All nine facet packages pinned: sdk 1.1.0, auth 1.2.2, components 1.10.0,
    installed as the basis for `packages/cli` work, now scaffolded).
 - **Phase 3 - Security hardening** - ✅ **Closed (2026-07-28).** Cross-tenant HTTP integration test added (3 tests, fastify.inject, passes). SSRF call-site gaps (4/4 closed: idp.route OIDC discovery + token endpoint, webhook test-ping, SAML entryPoint). CSRF review complete - only OAuth state cookies in social.route.ts, all `sameSite: "lax"` + `httpOnly` + `secure`. Redis-backed distributed revocation done - `AccessToken.sessionId` column + migration + `DELETE /sessions/:id` revokes bound access tokens + blocks JTIs in Redis (full kill chain).
 - **Phase 4 - Observability** - ✅ **Shipped (2026-07-28).** Correlation IDs through `FlowContext.requestId` → audit log metadata. `@fastify-metrics` at `GET /metrics`. Pino structured logs carry traceId on every flow init/ok/fail.
-- **CLI + SDK packages** - deferred until frontend rebuild stabilises the
-  API contract.
+- **CLI package** - Phase 1 implemented in `packages/cli` (`@fusorb/sg-cli`,
+  bin `sg`): init/doctor/migrate/setup/revert, Postgres + Cockroach adapters,
+  safe overwrite/revert, secret generation, --dry-run/--force/--yes. 10 tests
+  passing. Phase 2 (Mongo/Mongoose/Dynamo + auth-UI scaffolding) pending.
+  SDK packages published as `@fusorb/facet-sdk@2.0.0`.
 - **LegalConsent** - ✅ Done (2026-08-19): gate wired into `issue-credential.flow.ts` (E2) — VC issuance blocked when the tenant policy requires consent and none is recorded.
 - **ExternalIdentifier.verified → VC issuance** - ✅ Done (2026-08-19): gate wired into `issue-credential.flow.ts` (E1) — subject DID must resolve to an Identity with ≥1 verified external identifier before issuance.

@@ -1,4 +1,9 @@
-# SovGrant CLI - Design & Onboarding Basis
+# SovGrant CLI - Design & Onboarding Basis (SUPERSEDED)
+
+> **Status: Superseded (2026-10-31).** This design basis has been replaced by
+> the executable phased plan at `~/.commandcode/plans/sovgrant-cli-replan.md`
+> and the implementation in `packages/cli` (Phase 1). Retained as historical
+> basis only.
 
 > Status: **Planned** (per `sovgrant-v2-roadmap.md`: "CLI package extraction"
 > rebuild stabilises API contract"). This doc is the initiated basis: the command

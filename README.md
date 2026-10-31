@@ -1,8 +1,8 @@
 # SovGrant
 
-> Sovereign, multi-tenant identity and access management engine for the ArcevoCirqle ecosystem.
+> Sovereign, multi-tenant identity and access management engine for the Fusorb ecosystem.
 
-SovGrant is the identity backbone... one person's verified attributes (a national ID, a professional license, an academic transcript) can be issued once, held by them, and reused across sectors, instead of every institution re-verifying the same facts from scratch. It's the foundation layer that ArcevoCirqle's per-sector products (starting with the academic space) build on.
+SovGrant is the identity backbone... one person's verified attributes (a national ID, a professional license, an academic transcript) can be issued once, held by them, and reused across sectors, instead of every institution re-verifying the same facts from scratch. It's the foundation layer that Fusorb's per-sector products (starting with the academic space) build on.
 
 ## The problem this solves
 
@@ -38,7 +38,7 @@ SovGrant is a **Fastify + PostgreSQL (Prisma)** backend with a **Next.js 16** ad
 
 ### Verification
 
-- **61 test files / 342 tests / 0 failures** (`pnpm test`)
+- **71 test files / 387 tests / 0 failures** (`pnpm test`)
 - **Typecheck clean** (`tsc --noEmit`)
 - **Migration chain integrity** verified (no-drift rollback tests)
 - CI pipeline: install → prisma generate → schema validate → typecheck → lint → secret scan → trivy → test → rollback guard → build
@@ -48,8 +48,8 @@ SovGrant is a **Fastify + PostgreSQL (Prisma)** backend with a **Next.js 16** ad
 See `docs/planning/sovgrant-v2-roadmap.md` for the current planning document. In short:
 
 - **API keys** — backend CRUD routes + Prisma model (frontend UI stub removed; tracked for v2).
-- **CLI & SDK packages** — standalone `packages/cli` for external integrators.
-- **ArcWallet integration** — end-to-end wallet connection for credential possession.
+- **CLI & SDK packages** — Phase 1 implemented in `packages/cli` (`@fusorb/sg-cli`, bin `sg`): init/doctor/migrate/setup/revert with Postgres + Cockroach adapters.
+- **SovPort integration** — end-to-end wallet connection for credential possession.
 - **Production hardening** — full integration test suite against live Postgres, open-source release.
 
 ## Architecture, briefly

@@ -111,8 +111,10 @@ contract stabilized for the CLI package.
   `TenantSdk`, `OAuthSdk`, `CredentialSdk`, `WebhookSdk`). `src/sdk/index.ts`
   is a thin singleton that owns the `SgClient` + 401 auto-refresh (wired to
   the Zustand auth store) and re-exports the facet domain SDKs.
-- **CLI** — `packages/cli` scaffolded on `@fusorb/facet-cli@0.8.0`. Pending API
-  contract stability before extracting to its own npm package.
+- **CLI** — Phase 1 implemented in `packages/cli` (`@fusorb/sg-cli`, bin `sg`):
+  init/doctor/migrate/setup/revert, Postgres + Cockroach adapters, safe
+  overwrite/revert, secret generation, --dry-run/--force/--yes. Tests: 10
+  passing. Phase 2 (Mongo/Mongoose/Dynamo + auth-UI scaffolding) pending.
 
 ---
 
