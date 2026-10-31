@@ -128,7 +128,7 @@ export const registerFlow: Flow<Input, Output> = {
           eventType: "IDENTITY_CREATED",
           identityId: identity.id,
           payload: { email: input.email, name: input.name ?? null },
-          targetUrl: config.integration.arcbaseWebhookUrl,
+          targetUrl: config.integration.relnexWebhookUrl,
         },
       });
     } catch (error) {

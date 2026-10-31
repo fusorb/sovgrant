@@ -261,7 +261,7 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 
 - BBS+/selective disclosure beyond SD-JWT - SD-JWT VC is correctly implemented now
 - `did:jwk` - `did:key` is sufficient for wallet-originated DIDs
-- Full OIDC4VCI/OIDC4VP - revisit when ArcWallet is live and external consumers exist
+- Full OIDC4VCI/OIDC4VP - revisit when SovPort is live and external consumers exist
 - OPA/Cedar policy engine, SCIM, Terraform provider - all v2+
 - Identity-scoped signing key (non-custodial by design - abandoned per architecture decision)
 
@@ -335,7 +335,7 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 Current: `0.1.0` (package.json). Pre-release - no stability promises.
 
 - `0.1.0` ✅ **COMPLETE** (v1) - Backend complete: all Phase 0–8 + Phase E shipped; 62 test files / 358 tests, 0 code failures. Docker, security hardening, observability, LegalConsent + ExternalIdentifier gates all shipped.
-- `0.2.0` 🔄 **ACTIVE (v2)** - ArcWallet companion app integration (end-to-end), CLI package extraction, integration tests against real Postgres. **API key management backend ✅ Done** (CRUD flows + routes, SHA-256 hashed bearer tokens, auth guard extension, migration + Tier 1 rollback tests).
+- `0.2.0` 🔄 **ACTIVE (v2)** - SovPort companion app integration (end-to-end), CLI package extraction, integration tests against real Postgres. **API key management backend ✅ Done** (CRUD flows + routes, SHA-256 hashed bearer tokens, auth guard extension, migration + Tier 1 rollback tests).
 - `1.0.0` — Stable production milestone: full integration test suite, open-source release
 
 _The v1 roadmap was closed (2026-08-22). Active track: `docs/planning/sovgrant-v2-roadmap.md`._

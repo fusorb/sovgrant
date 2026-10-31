@@ -45,14 +45,14 @@ has been removed; this document supersedes it.
 
 ## 🔄 v2 — ACTIVE (0.2.0)
 
-Frontend consumed from facet packages + ArcWallet integration. Backend API
+Frontend consumed from facet packages + SovPort integration. Backend API
 contract stabilized for the CLI package.
 
-### 0.2.0 — "ArcWallet integration + backend polish"
+### 0.2.0 — "SovPort integration + backend polish"
 
 | # | Item | Priority | Status |
 |---|------|----------|--------|
-| 1 | ArcWallet companion app — end-to-end wallet issuance/verify/presentation flow (separate package) | P0 | ⏳ Not started |
+| 1 | SovPort companion app — end-to-end wallet issuance/verify/presentation flow (separate package) | P0 | ⏳ Not started |
 | 2 | API key management backend — CRUD flows + routes (OAuth2 bearer-token style keys) | P1 | ✅ Done — `ApiKey` model + migration, CRUD flows/routes, SHA-256 hashed tokens, auth guard bearer detection + `requirePermission` scope fallback, 16 unit tests + Tier 1 migration check |
 | 3 | CLI package extraction — move `packages/cli` to published `@fusorb/sg-cli` npm package | P1 | ⏸️ Scaffolded; pending API contract stability |
 | 4 | Integration tests against real Postgres (`pnpm test:rollback`) | P2 | ✅ Unblocked (facet shipped 2026-08-19); needs Postgres 17 service |

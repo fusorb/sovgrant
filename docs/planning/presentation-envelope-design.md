@@ -7,7 +7,7 @@
 
 ## Problem
 
-ArcVerify (or any relying party) needs to ask ArcWallet "prove you hold
+ArcVerify (or any relying party) needs to ask SovPort "prove you hold
 credential X." The current stack can verify a VC in isolation
 (`verifyCredentialFlow`), but there's no way for a third party to bind
 that verification to a real-time challenge - without which any
@@ -15,12 +15,12 @@ credential presentation is subject to replay.
 
 A full OIDC4VP / Presentation Exchange implementation is deferred to v2.
 This design covers a lightweight, expressive enough container that SovGrant
-can host for ArcWallet via a simple two-step protocol.
+can host for SovPort via a simple two-step protocol.
 
 ## Flow (conceptual)
 
 ```
-ArcVerify                   SovGrant                          ArcWallet
+ArcVerify                   SovGrant                          SovPort
    |                          |                               |
    |  1. POST /verify/session |                               |
    |     { credentialRef }    |                               |
@@ -30,7 +30,7 @@ ArcVerify                   SovGrant                          ArcWallet
    |                          |                               |
    |  3. ArcVerify passes      |                               |
    |     sessionId + challenge |                               |
-   |     to ArcWallet (deep    |                               |
+   |     to SovPort (deep    |                               |
    |     link / QR code)       |                               |
    |                          |                               |
    |                          |  4. POST /verify/present       |
@@ -57,7 +57,7 @@ Response: {
   challenge: string; // random nonce (base64url, 32 bytes)
 }
 
-// 2. ArcWallet presents
+// 2. SovPort presents
 POST /verify/present
 Body: {
   sessionId: string;
@@ -94,7 +94,7 @@ Response: {
 
 OIDC4VP / W3C Vp requires `@context`, `type`, potentially `presentationSubmission`
 matching a `PresentationDefinition`. None of ArcVerify needs that complexity
-- ArcVerify and ArcWallet are both first-party apps you control. The hash +
+- ArcVerify and SovPort are both first-party apps you control. The hash +
 nonce envelope is sufficient for v1 and can be embedded inside a real
 `VerifiablePresentation` later without changing the verification path.
 

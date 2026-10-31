@@ -6,25 +6,24 @@ Source of truth for the ecosystem: the Fusorb architecture repo
 - Naming: `ecosystem/naming-ledger.json`
 - Standards: `content/standards/`
 
-Last checked: 2026-10-31, against fusorb `424e31c`.
+Last synced: 2026-10-31, against fusorb `424e31c`.
 
-## Outstanding: apply the ledger's renamed entries
+## Status: in sync
 
-1. **`ArcWallet` -> `SovPort`**
-   - `CLAUDE.md`
-   - `docs/planning/sovgrant-v2-roadmap.md`
-   - `docs/planning/presentation-envelope-design.md`
-2. **`ArcBase` / `arcbase` -> `Relnex`**
-   - the `arcbaseWebhookUrl` config key in `src/core/config/config.ts` and
-     `src/modules/auth/flows/register.flow.ts`
-   - the comment in `src/modules/tenant/validators/project.schemas.ts`
-3. **`@arcevo/` -> `@fusorb/`**
-   - the comment in `pnpm-workspace.yaml`
+Applied the ledger's renamed entries:
 
-Leave as `legacy-ok`: the local DB credential `arcevodev` (`.env.example`,
-`docker-compose.yml`) and the Windows path-casing comments in `next.config.ts`.
+- `ArcWallet` -> `SovPort` in `CLAUDE.md`, `docs/planning/sovgrant-v2-roadmap.md`,
+  and `docs/planning/presentation-envelope-design.md`.
+- `ArcBase` -> `Relnex`: the `arcbaseWebhookUrl` config key renamed to
+  `relnexWebhookUrl` (`src/core/config/config.ts`,
+  `src/modules/auth/flows/register.flow.ts`), plus the comment in
+  `src/modules/tenant/validators/project.schemas.ts` and the `.env.example` note.
+- `@arcevo/` -> `@fusorb/` in the `pnpm-workspace.yaml` comment.
 
-## Next step
+Left as `legacy-ok`: the local DB credential `arcevodev` (`.env.example`,
+`docker-compose.yml`) and the historical path-casing comments in `next.config.ts`.
 
-Apply items 1-3 in one change, then run this repo's typecheck and tests. Do not
-rename the live `arcevocirqle` brand, domain, or email addresses.
+## Staying in sync
+
+Re-read the naming ledger before any rename. Never rename the live
+`arcevocirqle` brand, domain, or email addresses.

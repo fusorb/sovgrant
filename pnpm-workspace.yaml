@@ -9,7 +9,7 @@ allowBuilds:
   unrs-resolver: true
 
 # react-hook-form@7.84+ added a `react-server` export condition that omits
-# Controller/FormProvider/useFormContext/useForm. @arcevo/facet-components
+# Controller/FormProvider/useFormContext/useForm. @fusorb/facet-components
 # imports these from react-hook-form, and when used in the Next.js Server
 # Component graph the build resolves via `react-server` and fails.
 # Pin below 7.84 so the main ESM entry (which has the full export surface)

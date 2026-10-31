@@ -39,7 +39,7 @@ export const config = {
     },
   },
   integration: {
-    arcbaseWebhookUrl: rawEnv.SOVGRANT_WEBHOOK_URL,
+    relnexWebhookUrl: rawEnv.SOVGRANT_WEBHOOK_URL,
   },
   security: {
     cookieSecret: rawEnv.COOKIE_SECRET,
