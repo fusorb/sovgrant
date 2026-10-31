@@ -108,7 +108,7 @@ export class SigningService {
       // registered via the wallet-did flow in identity/modules.
       //
       // This is a permanent guard, not a pending feature gap. SovGrant is
-      // expressly non-custodial for individual DIDs: ArcWallet generates
+      // expressly non-custodial for individual DIDs: SovPort generates
       // and holds the private key on-device. SovGrant only ever receives the
       // public key and verifies signatures — it must never hold a private
       // key capable of signing on behalf of an individual identity.

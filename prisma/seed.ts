@@ -40,7 +40,7 @@ const SYSTEM_TENANT_ID = "SYSTEM";
 const DIRECT_CLIENT_ID = process.env.SG_DIRECT_CLIENT_ID ?? "sg-direct";
 const API_BASE = process.env.API_BASE_URL ?? "http://localhost:4000";
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "admin@arcevocirqle.com.ng";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "admin@sg.fusorb.com";
 
 if (process.env.NODE_ENV === "production" && !process.env.ADMIN_PASSWORD) {
   console.error(
@@ -65,7 +65,7 @@ if (process.env.NODE_ENV === "production") {
 }
 
 // Derive the did:web identifier from API_BASE.
-// Production: API_BASE = https://api.arcevocirqle.com.ng → did:web:api.arcevocirqle.com.ng
+// Production: API_BASE = https://api.sg.fusorb.com → did:web:api.sg.fusorb.com
 // Development: http://localhost:4000 → did:web:localhost
 function deriveDidWeb(base: string): string {
   try {
@@ -86,7 +86,7 @@ async function main() {
     update: {},
     create: {
       id: SYSTEM_TENANT_ID,
-      name: "ArcevoCirqle System",
+      name: "SovGrant System",
       slug: "system-global",
       sector: "Technology",
     },
@@ -195,6 +195,9 @@ async function main() {
       action: "credential:offer",
       description: "Create credential offers for holders to accept",
     },
+    { action: "api-key:create", description: "Create API keys for machine/tokens auth" },
+    { action: "api-key:read", description: "List and view API keys" },
+    { action: "api-key:revoke", description: "Revoke API keys" },
   ] as const;
 
   const permissionRecords: { id: string; action: string }[] = [];
@@ -269,7 +272,7 @@ async function main() {
   console.log("✅ SYSTEM tenant policy");
 
   // ── 5. Wallet Project ─────────────────────────────────────────────────────
-  const walletProjectSlug = "arcwallet";
+  const walletProjectSlug = "sovport";
   const existingWalletProject = await prisma.project.findUnique({
     where: { slug: walletProjectSlug },
   });
@@ -277,12 +280,12 @@ async function main() {
     await prisma.project.create({
       data: {
         tenantId: SYSTEM_TENANT_ID,
-        name: "ArcWallet",
+        name: "SovPort",
         slug: walletProjectSlug,
         category: "wallet",
       },
     });
-    console.log("✅ Wallet project (arcwallet, category: wallet)");
+    console.log("✅ Wallet project (sovport, category: wallet)");
   } else {
     console.log("ℹ️  Wallet project already exists");
   }
@@ -430,14 +433,14 @@ async function main() {
     console.log(`ℹ️  Direct client '${DIRECT_CLIENT_ID}' already exists`);
   }
 
-  // ── 9. ArcWallet OAuth Client ─────────────────────────────────────────────
-  const WALLET_CLIENT_ID = "arcwallet-app";
+  // ── 9. SovPort OAuth Client ─────────────────────────────────────────────
+  const WALLET_CLIENT_ID = "sovport-app";
   const existingWalletClient = await prisma.client.findUnique({
     where: { clientId: WALLET_CLIENT_ID },
   });
   if (!existingWalletClient) {
     const walletProject = await prisma.project.findUniqueOrThrow({
-      where: { slug: "arcwallet" },
+      where: { slug: "sovport" },
       select: { id: true },
     });
 
@@ -446,22 +449,22 @@ async function main() {
         clientId: WALLET_CLIENT_ID,
         tenantId: SYSTEM_TENANT_ID,
         projectId: walletProject.id,
-        name: "ArcWallet Mobile Application",
+        name: "SovPort Mobile Application",
         public: true,
         requirePkce: true,
         grantTypes: ["authorization_code", "refresh_token"],
         scopes: ["openid", "profile", "email", "offline_access"],
         redirectUris: {
           create: [
-            { uri: "https://wallet.arcevocirqle.com.ng/oauth/callback" },
-            { uri: "ng.arcevocirqle.arcwallet://oauth/callback" },
+            { uri: "https://wallet.sg.fusorb.com/oauth/callback" },
+            { uri: "com.fusorb.sg.sovport://oauth/callback" },
           ],
         },
       },
     });
-    console.log(`✅ ArcWallet client '${WALLET_CLIENT_ID}'`);
+    console.log(`✅ SovPort client '${WALLET_CLIENT_ID}'`);
   } else {
-    console.log(`ℹ️  ArcWallet client '${WALLET_CLIENT_ID}' already exists`);
+    console.log(`ℹ️  SovPort client '${WALLET_CLIENT_ID}' already exists`);
   }
 
   // ── 10. System Administrator ──────────────────────────────────────────────
@@ -561,13 +564,13 @@ async function main() {
     where: {
       identityId_documentId: {
         identityId: adminIdentity.id,
-        documentId: "arcevocirqle-terms-of-service",
+        documentId: "sovgrant-terms-of-service",
       },
     },
     update: {},
     create: {
       identityId: adminIdentity.id,
-      documentId: "arcevocirqle-terms-of-service",
+      documentId: "sovgrant-terms-of-service",
       version: "1.0",
     },
   });

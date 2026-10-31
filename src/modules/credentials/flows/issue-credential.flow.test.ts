@@ -42,7 +42,7 @@ vi.mock("@prisma-client", () => ({
 
 vi.mock("@/core/config", () => ({
   config: {
-    base: { apiUrl: "https://api.test.arcevocirqle.com.ng" },
+    base: { apiUrl: "https://api.test.sg.fusorb.com" },
   },
 }));
 
@@ -99,7 +99,7 @@ const validInput = {
   schemaId: "degree-schema-v1",
 };
 
-const mockTenantDid = { id: "did:web:test.arcevocirqle.com.ng", tenantId: "SYSTEM" };
+const mockTenantDid = { id: "did:web:test.sg.fusorb.com", tenantId: "SYSTEM" };
 const mockStatusListResult = { listId: "urn:uuid:list-001", index: 0 };
 const mockSignedResult = {
   proof: "eyJhbGciOiJFUzI1NiJ9.mock-proof",

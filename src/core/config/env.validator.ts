@@ -49,7 +49,7 @@ export const envSchema = z
 
     // Mail Delivery Communication Vector
     RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),
-    EMAIL_FROM: z.string().default("SovGrant <noreply@arcevocirqle.com.ng>"),
+    EMAIL_FROM: z.string().default("SovGrant <noreply@sg.fusorb.com>"),
 
     // SMS Gateway - SKIPPED for now (Brevo costs too much at MVP stage)
     BREVO_API_KEY: z.string().optional(),

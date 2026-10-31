@@ -34,19 +34,19 @@ export const SgMetadata = {
     "enterprise SSO",
     "Africa identity",
     "SovGrant",
-    "ArcevoCirqle",
+    "Fusorb",
   ],
 
   version: "1.0.0-alpha",
 
   org: {
-    name: "ArcevoCirqle",
-    url: "https://arcevocirqle.com.ng",
+    name: "Fusorb",
+    url: "https://fusorb.com",
   },
 
-  url: process.env.NEXT_PUBLIC_APP_URL ?? "https://sovgrant.arcevocirqle.com.ng",
+  url: process.env.NEXT_PUBLIC_APP_URL ?? "https://sg.fusorb.com",
   ogImage: "/sg-full.png",
-  twitterHandle: "@arcevocirqle",
+  twitterHandle: "@fusorb",
   locale: "en_NG",
 
   themeColor: "#0f1117",

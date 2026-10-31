@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ArcIdClient as SgClient, AuthSdk, TenantSdk, BillingSdk, AuditSdk, VcSdk, IdentitySdk, OAuthSdk, WebhooksSdk, PasskeySdk, IdpSdk } from "@fusorb/facet-sdk";
+import { SgClient, AuthSdk, TenantSdk, BillingSdk, AuditSdk, VcSdk, IdentitySdk, OAuthSdk, WebhooksSdk, PasskeySdk, IdpSdk } from "@fusorb/facet-sdk";
 import { auth, tenants, billing, credentials, audit, identity, oauth, webhooks, passkeys, idp, sgClient } from "./index";
 
 // The migrated SDK layer is a thin singleton wiring over @fusorb/facet-sdk.

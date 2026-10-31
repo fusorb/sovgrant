@@ -4,7 +4,7 @@ import type { KeyType } from "@prisma-client";
 
 /**
  * A JWK as produced by Web Crypto API (OKP Ed25519, EC P-256, etc.).
- * ArcWallet generates the key on-device and submits the public key only.
+ * SovPort generates the key on-device and submits the public key only.
  */
 export const JwkSchema = z.object({
   kty: z.enum(["OKP", "EC", "RSA"]),
@@ -15,10 +15,10 @@ export const JwkSchema = z.object({
 });
 
 export const RegisterWalletDidInputSchema = z.object({
-  /** JWK representing the public key — generated on-device by ArcWallet */
+  /** JWK representing the public key — generated on-device by SovPort */
   publicKeyJwk: JwkSchema,
-  /** Provider name, e.g. "arcwallet" */
-  provider: z.string().min(1).max(64).default("arcwallet"),
+  /** Provider name, e.g. "sovport" */
+  provider: z.string().min(1).max(64).default("sovport"),
   /** Provider's wallet identifier for this user — opaque to SovGrant */
   providerWalletId: z.string().min(1).max(256),
 });

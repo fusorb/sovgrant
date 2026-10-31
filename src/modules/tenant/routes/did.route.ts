@@ -31,7 +31,7 @@ export async function tenantDidRoute(fastify: FastifyInstance) {
         security: [{ bearerAuth: [] }],
         params: z.object({ tenantId: z.string().cuid() }),
         body: z.object({
-          domain: z.string().min(1).describe("e.g. health.arcevocirqle.com.ng"),
+          domain: z.string().min(1).describe("e.g. health.sg.fusorb.com"),
         }),
         response: {
           201: z.object({

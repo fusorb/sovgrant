@@ -34,7 +34,7 @@ vi.mock("@/core/flows", () => ({
       {
         id: "vc-001",
         format: "JWT",
-        issuerDid: "did:web:test.arcevocirqle.com.ng",
+        issuerDid: "did:web:test.sg.fusorb.com",
         subjectDid: "did:key:z6MktafZ",
         issuedAt: new Date("2026-07-22T12:00:00Z"),
         expiresAt: new Date("2027-07-22T12:00:00Z"),
@@ -139,7 +139,7 @@ describe("GET /credentials — authenticated", () => {
     expect(body.data[0]).toMatchObject({
       id: "vc-001",
       format: "JWT",
-      issuerDid: "did:web:test.arcevocirqle.com.ng",
+      issuerDid: "did:web:test.sg.fusorb.com",
     });
   });
 

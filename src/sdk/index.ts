@@ -9,7 +9,7 @@
  */
 
 import {
-  ArcIdClient as SgClient,
+  SgClient,
   AuthSdk,
   BillingSdk,
   AuditSdk,

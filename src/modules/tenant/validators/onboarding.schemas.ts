@@ -3,7 +3,7 @@
 // NEW MODULE. OnboardingFlow and OnboardingProgress existed in the Prisma
 // schema with zero routes/services/flows anywhere in the codebase.
 //
-// An OnboardingFlow belongs to a Project (e.g. "ArcWallet new-user setup").
+// An OnboardingFlow belongs to a Project (e.g. "SovPort new-user setup").
 // `steps` is an ordered JSON array — each step is a free-form descriptor the
 // consuming frontend renders (the backend doesn't interpret step content,
 // only tracks position). OnboardingProgress tracks one Identity's position

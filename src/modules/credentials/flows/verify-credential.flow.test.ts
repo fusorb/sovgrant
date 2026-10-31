@@ -91,7 +91,7 @@ describe("verifyCredentialFlow — Phase 0: algorithm read from header", () => {
       "base64",
     );
 
-    const issuerDid = "did:web:test.arcevocirqle.com.ng";
+    const issuerDid = "did:web:test.sg.fusorb.com";
     const jwt = await new SignJWT({
       vc: {
         "@context": ["https://www.w3.org/2018/credentials/v1"],
@@ -136,7 +136,7 @@ describe("verifyCredentialFlow — Phase 0: algorithm read from header", () => {
       "base64",
     );
 
-    const issuerDid = "did:web:test.arcevocirqle.com.ng";
+    const issuerDid = "did:web:test.sg.fusorb.com";
     const jwt = await new SignJWT({
       vc: {
         "@context": ["https://www.w3.org/2018/credentials/v1"],
@@ -176,7 +176,7 @@ describe("verifyCredentialFlow — Phase 0: algorithm read from header", () => {
     );
     const payload = Buffer.from(
       JSON.stringify({
-        iss: "did:web:test.arcevocirqle.com.ng",
+        iss: "did:web:test.sg.fusorb.com",
         vc: { credentialSubject: {} },
       }),
     ).toString("base64url");
@@ -184,7 +184,7 @@ describe("verifyCredentialFlow — Phase 0: algorithm read from header", () => {
 
     const ctx = createMockFlowCtx({ tenantId: "SYSTEM" });
     mockDidServiceResolve.mockResolvedValue({
-      id: "did:web:test.arcevocirqle.com.ng",
+      id: "did:web:test.sg.fusorb.com",
       tenantId: "SYSTEM",
       publicKeyBytes: Buffer.from("fake"),
       keyType: "JsonWebKey2020",

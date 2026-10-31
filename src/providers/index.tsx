@@ -1,6 +1,6 @@
 "use client";
 
-import { ArcProvider as SgProvider } from "@fusorb/facet-auth";
+import { SgProvider } from "@fusorb/facet-auth";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { AuthProvider } from "@/providers/auth-provider";
 import { zustandTokenStorage } from "@/providers/facet-auth-bridge";

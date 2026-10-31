@@ -1,9 +1,9 @@
 // src/modules/identity/flows/register-wallet-did.flow.ts
 //
-// ArcWallet-facing flow: register an identity-owned did:key from a
+// SovPort-facing flow: register an identity-owned did:key from a
 // client-supplied public key (JWK). Never generates keys server-side.
 //
-// ArcWallet generates the keypair on-device, sends only the public key.
+// SovPort generates the keypair on-device, sends only the public key.
 // SovGrant encodes it as a spec-correct did:key (multicodec + multibase),
 // builds the DID document, and creates the DecentralizedIdentifier +
 // Wallet rows in a single transaction.

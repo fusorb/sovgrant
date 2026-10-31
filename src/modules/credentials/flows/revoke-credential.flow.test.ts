@@ -51,7 +51,7 @@ import { createMockFlowCtx } from "@/test-utils/mock-db";
 const validInput = { credentialId: "urn:uuid:vc-001" };
 const mockCredential = {
   id: "urn:uuid:vc-001",
-  issuer: { tenantId: "SYSTEM", id: "did:web:test.arcevocirqle.com.ng" },
+  issuer: { tenantId: "SYSTEM", id: "did:web:test.sg.fusorb.com" },
   statusListId: "urn:uuid:list-001",
   statusListIndex: 0,
 };

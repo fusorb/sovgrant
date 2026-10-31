@@ -25,13 +25,13 @@ import { createMockFlowCtx } from "@/test-utils/mock-db";
 const mockCredential = (id: string, overrides: Record<string, unknown> = {}) => ({
   id,
   format: "JWT",
-  issuerDid: "did:web:test.arcevocirqle.com.ng",
+  issuerDid: "did:web:test.sg.fusorb.com",
   subjectDid: "did:key:z6MktafZ",
   issuedAt: new Date("2026-07-22T12:00:00Z"),
   expiresAt: new Date("2027-07-22T12:00:00Z"),
   createdAt: new Date("2026-07-22T12:00:00Z"),
   credentialSubject: { name: "Alice" },
-  issuer: { id: "did:web:test.arcevocirqle.com.ng", tenantId: "SYSTEM" },
+  issuer: { id: "did:web:test.sg.fusorb.com", tenantId: "SYSTEM" },
   ...overrides,
 });
 
@@ -59,7 +59,7 @@ describe("listCredentialsFlow", () => {
     expect(result[0]).toMatchObject({
       id: "vc-001",
       format: "JWT",
-      issuerDid: "did:web:test.arcevocirqle.com.ng",
+      issuerDid: "did:web:test.sg.fusorb.com",
     });
     expect(result[1].id).toBe("vc-002");
   });
@@ -86,7 +86,7 @@ describe("listCredentialsFlow", () => {
     expect(result[0]).toEqual({
       id: "vc-003",
       format: "LDP",
-      issuerDid: "did:web:test.arcevocirqle.com.ng",
+      issuerDid: "did:web:test.sg.fusorb.com",
       subjectDid: "did:key:z6MktafZ",
       issuedAt: raw.issuedAt,
       expiresAt: raw.expiresAt,

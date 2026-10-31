@@ -3,7 +3,7 @@
 // Mounted under /identity/wallet — full path:
 //   POST /identity/wallet/did
 //
-// Registers a user-owned did:key from an ArcWallet-supplied public key JWK.
+// Registers a user-owned did:key from an SovPort-supplied public key JWK.
 // Creates the DecentralizedIdentifier + Wallet rows in a single flow.
 
 import type { FastifyInstance } from "fastify";
@@ -25,18 +25,18 @@ export async function walletDidRoute(fastify: FastifyInstance) {
     {
       preHandler: fastify.auth.requireUser,
       schema: {
-        tags: ["ArcWallet Integration"],
+        tags: ["SovPort Integration"],
         summary:
           "Register an identity-owned did:key from a wallet-supplied JWK",
         description:
-          "ArcWallet generates a keypair on-device and submits the public key as a JWK. " +
+          "SovPort generates a keypair on-device and submits the public key as a JWK. " +
           "SovGrant encodes it as a spec-correct did:key (multicodec + multibase), builds the " +
           "DID document, and creates the DecentralizedIdentifier + Wallet rows. " +
           "SovGrant never touches the private key.",
         security: [{ bearerAuth: [] }],
         body: z.object({
           publicKeyJwk: JwkSchema,
-          provider: z.string().min(1).max(64).default("arcwallet"),
+          provider: z.string().min(1).max(64).default("sovport"),
           providerWalletId: z.string().min(1).max(256),
         }),
         response: {

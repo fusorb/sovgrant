@@ -1,7 +1,7 @@
 // src/modules/oauth/routes/clients.route.ts
 //
 // UPDATED: OAuth clients can now optionally be scoped to a Project
-// (SovGrant, ArcWallet, ArcVerify, etc) via projectId, in addition to the
+// (SovGrant, SovPort, ArcVerify, etc) via projectId, in addition to the
 // existing tenantId scoping. projectId is OPTIONAL — existing clients with
 // no project (e.g. the SYSTEM tenant's direct-login client) are unaffected.
 //

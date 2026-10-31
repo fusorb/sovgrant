@@ -48,7 +48,7 @@ describe("registerWalletDidFlow", () => {
     ctx.db.wallet.create.mockResolvedValue({
       id: "wallet-1",
       identityId: IDENTITY_ID,
-      provider: "arcwallet",
+      provider: "sovport",
       providerWalletId: "wallet-abc",
     });
 
@@ -59,7 +59,7 @@ describe("registerWalletDidFlow", () => {
           crv: "Ed25519",
           x: ED25519_X,
         },
-        provider: "arcwallet",
+        provider: "sovport",
         providerWalletId: "wallet-abc",
       },
       ctx,
@@ -78,7 +78,7 @@ describe("registerWalletDidFlow", () => {
     );
     expect(ctx.db.wallet.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: { identityId: IDENTITY_ID, provider: "arcwallet", providerWalletId: "wallet-abc" },
+        data: { identityId: IDENTITY_ID, provider: "sovport", providerWalletId: "wallet-abc" },
       }),
     );
   });
@@ -96,14 +96,14 @@ describe("registerWalletDidFlow", () => {
     ctx.db.wallet.create.mockResolvedValue({
       id: "wallet-1",
       identityId: IDENTITY_ID,
-      provider: "arcwallet",
+      provider: "sovport",
       providerWalletId: "wallet-456",
     });
 
     const result = await registerWalletDidFlow.execute(
       {
         publicKeyJwk: { kty: "EC", crv: "P-256", x: P256_X, y: P256_Y },
-        provider: "arcwallet",
+        provider: "sovport",
         providerWalletId: "wallet-456",
       },
       ctx,
@@ -120,7 +120,7 @@ describe("registerWalletDidFlow", () => {
       registerWalletDidFlow.execute(
         {
           publicKeyJwk: { kty: "OKP", crv: "Ed25519", x: ED25519_X },
-          provider: "arcwallet",
+          provider: "sovport",
           providerWalletId: "wallet-1",
         },
         ctx,
@@ -141,7 +141,7 @@ describe("registerWalletDidFlow", () => {
       registerWalletDidFlow.execute(
         {
           publicKeyJwk: { kty: "OKP", crv: "Ed25519", x: ED25519_X },
-          provider: "arcwallet",
+          provider: "sovport",
           providerWalletId: "wallet-abc",
         },
         ctx,
@@ -161,7 +161,7 @@ describe("registerWalletDidFlow", () => {
       registerWalletDidFlow.execute(
         {
           publicKeyJwk: { kty: "RSA", crv: "RS256", x: "AAAA" },
-          provider: "arcwallet",
+          provider: "sovport",
           providerWalletId: "wallet-rsa",
         },
         ctx,
@@ -179,7 +179,7 @@ describe("registerWalletDidFlow", () => {
       registerWalletDidFlow.execute(
         {
           publicKeyJwk: { kty: "EC", crv: "P-256", x: P256_X },
-          provider: "arcwallet",
+          provider: "sovport",
           providerWalletId: "wallet-ec-no-y",
         },
         ctx,
@@ -190,7 +190,7 @@ describe("registerWalletDidFlow", () => {
     });
   });
 
-  it("uses default provider 'arcwallet' when not specified", async () => {
+  it("uses default provider 'sovport' when not specified", async () => {
     const ctx = createMockFlowCtx({ identityId: IDENTITY_ID });
     ctx.db.wallet.findUnique.mockResolvedValue(null);
     ctx.db.decentralizedIdentifier.create.mockResolvedValue({
@@ -203,14 +203,14 @@ describe("registerWalletDidFlow", () => {
     ctx.db.wallet.create.mockResolvedValue({
       id: "wallet-1",
       identityId: IDENTITY_ID,
-      provider: "arcwallet",
+      provider: "sovport",
       providerWalletId: "wallet-default",
     });
 
     const result = await registerWalletDidFlow.execute(
       {
         publicKeyJwk: { kty: "OKP", crv: "Ed25519", x: ED25519_X },
-        provider: "arcwallet",
+        provider: "sovport",
         providerWalletId: "wallet-default",
       },
       ctx,
@@ -219,7 +219,7 @@ describe("registerWalletDidFlow", () => {
     expect(result.did).toMatch(/^did:key:/);
     expect(ctx.db.wallet.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ provider: "arcwallet" }),
+        data: expect.objectContaining({ provider: "sovport" }),
       }),
     );
   });

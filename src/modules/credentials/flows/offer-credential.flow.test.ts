@@ -63,7 +63,7 @@ const validInput = {
 const validOfferRecord = {
   id: "cloffer000001testoffer1",
   token: "550e8400-e29b-41d4-a716-446655440000",
-  issuerDid: "did:web:test.arcevocirqle.com.ng",
+  issuerDid: "did:web:test.sg.fusorb.com",
   subjectDid: validInput.subjectDid,
   holderId: validInput.holderId,
   format: "JWT",
@@ -87,7 +87,7 @@ describe("createOfferFlow", () => {
   it("creates an offer with valid input", async () => {
     const ctx = createMockFlowCtx({ tenantId: "SYSTEM" });
     ctx.db.decentralizedIdentifier.findUnique.mockResolvedValue({
-      id: "did:web:test.arcevocirqle.com.ng",
+      id: "did:web:test.sg.fusorb.com",
     });
 
     const result = await createOfferFlow.execute(validInput, ctx);
@@ -96,7 +96,7 @@ describe("createOfferFlow", () => {
     expect(ctx.db.credentialOffer.create).toHaveBeenCalledOnce();
     const createCall = ctx.db.credentialOffer.create.mock.calls[0][0];
     expect(createCall.data.token).toBeDefined();
-    expect(createCall.data.issuerDid).toBe("did:web:test.arcevocirqle.com.ng");
+    expect(createCall.data.issuerDid).toBe("did:web:test.sg.fusorb.com");
     expect(createCall.data.subjectDid).toBe(validInput.subjectDid);
     expect(createCall.data.format).toBe("JWT");
     expect(createCall.data.credentialSubject).toEqual(
