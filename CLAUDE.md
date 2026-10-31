@@ -96,11 +96,21 @@ pnpm dev:workers         # Background workers only
 pnpm typecheck
 pnpm lint
 pnpm format
-pnpm test                # 358 tests, 62 files, all passing
+pnpm test                # 387 tests, 71 files, all passing
 pnpm test:watch
 pnpm test:coverage
 pnpm build:api
 pnpm build:web
+
+### Dev servers on Windows
+- `pnpm dev:all` runs web (3000) + api (4000) + workers via concurrently; ensure
+  ports are free. Memory: `NODE_OPTIONS='--max-old-space-size=4096'` for web.
+- `pnpm build:api` (tsup) uses Unix `rm -rf dist`; on Windows cmd use Git Bash/WSL
+  or add `rimraf`. Prefer `pnpm cli:build` (same caveat applies to packages/cli).
+- Vitest runs fine on Windows for sovgrant (71 files / 387 tests). The facet repo's
+  vitest workspace has Windows glob issues — run facet tests via WSL/Git Bash.
+- CORS: `ALLOWED_ORIGINS` must include the frontend origin; sovport dev origin
+  (`http://localhost:8081` for Expo) should be added when wiring the wallet.
 
 ### Docker deployment
 
