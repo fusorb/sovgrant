@@ -5,6 +5,10 @@
 
 # dependencies
 /node_modules
+packages/*/node_modules
+# build output
+/dist
+packages/*/dist
 /.pnp
 .pnp.*
 .yarn/*
@@ -57,6 +61,9 @@ ArcevoCirqle_Design_Standards_Manual_v1.0..txt
 
 # local e2e harness
 /scratch-e2e/
+
+# SovGrant CLI generated state
+.sg/
 
 # sovgrant generated codebase snapshot (tooling output - regenerate via gen-snapshot.js)
 sovgrant_codebase_snapshot.txt
