@@ -56,6 +56,12 @@ const securityFeatures: SecurityFeature[] = [
     icon: "monitor",
   },
   {
+    id: "paired-devices",
+    title: "Paired SovPort Devices",
+    description: "Manage devices paired for biometric authentication and approvals.",
+    icon: "smartphone",
+  },
+  {
     id: "audit",
     title: "Audit Log",
     description: "Track security and access events.",
@@ -67,6 +73,7 @@ const securityRoutes: Record<string, string> = {
   mfa: "/console/security/mfa",
   passkeys: "/console/security/passkeys",
   sessions: "/console/security/sessions",
+  "paired-devices": "/console/security/paired-devices",
   audit: "/console/security/audit",
 };
 
