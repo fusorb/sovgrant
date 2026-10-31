@@ -1,4 +1,6 @@
-# Documentation
+- When verifying generated/render output (emails, HTML, snapshots), assert on the presence of the actual expected content, not just non-empty length or a passing exit code — a check that only verifies output length can falsely pass while body content is silently dropped (the mail-render check passed at >200 chars even though the email body never rendered). Confidence: 0.70
+- Tests cover failure/edge paths with typed `ApiError` — assert the specific HTTP status classification (401 unauthorized, 400 bad request, 404 not found) is thrown, not just that an error is thrown. Trigger auth/guard error paths by passing `undefined` for `identityId` or `tenantId` in the mock flow context. Confidence: 0.70
+- When asserting on Prisma `create` mock calls in tests, expect the input nested under a `data` key (e.g., `expect.objectContaining({ data: expect.objectContaining({ keyHash: ... }) })`), since Prisma's `create` wraps records in `{ data: { ... } }`. Confidence: 0.60# Documentation
 See [documentation/taste.md](documentation/taste.md)
 # Testing
 - When fixing mock-db.ts for a flow test: check the actual flow file for ALL models/entities it reads, not just the one that surfaced in the first error. Confidence: 0.70
