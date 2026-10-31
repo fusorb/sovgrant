@@ -16,6 +16,7 @@ import { adminRoute } from "./routes/admin.route";
 import { onboardingProgressRoute } from "@/modules/tenant/routes/onboarding.route";
 import { walletDidRoute } from "./routes/wallet-did.route";
 import { pairedDeviceRoute } from "./routes/paired-device.route";
+import { deviceApprovalRoute } from "./routes/device-approval.route";
 import { externalIdRoute } from "./routes/external-id.route";
 
 export const identityPlugin = fp(
@@ -53,6 +54,7 @@ export const identityPlugin = fp(
         await withZod.register(onboardingProgressRoute);
         await withZod.register(walletDidRoute);
         await withZod.register(pairedDeviceRoute);
+        await withZod.register(deviceApprovalRoute);
       },
 
       {

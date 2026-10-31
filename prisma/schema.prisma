@@ -170,6 +170,7 @@ model Identity {
   sessions         Session[]
   devices          Device[]
   pairedDevices    PairedDevice[]
+  deviceApprovals  DeviceApproval[]
   emailTokens      EmailToken[]
 
   memberships TenantMembership[]
@@ -784,10 +785,35 @@ model PairedDevice {
   createdAt  DateTime @default(now())
   revokedAt  DateTime?
 
-  identity Identity @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  identity         Identity          @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  deviceApprovals  DeviceApproval[]
 
   @@index([identityId])
   @@index([deviceId])
+}
+
+model DeviceApproval {
+  id          String    @id @default(cuid())
+  identityId  String
+  pairedDeviceId String?
+  challenge   String    @unique
+  type        String    @default("login") // login | mfa | step-up
+  context     Json?
+  status      String    @default("pending") // pending | approved | rejected | expired
+  approvedAt  DateTime?
+  rejectedAt  DateTime?
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  ip          String?
+  userAgent   String?
+
+  pairedDevice PairedDevice? @relation(fields: [pairedDeviceId], references: [id])
+  identity     Identity      @relation(fields: [identityId], references: [id], onDelete: Cascade)
+
+  @@index([identityId])
+  @@index([challenge])
+  @@index([status])
+  @@index([expiresAt])
 }
 
 model Session {
