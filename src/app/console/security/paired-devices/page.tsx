@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@fusorb/facet-components";
-import { apiFetch } from "@/lib/api-fetch";
+import { sgClient } from "@/sdk";
 
 interface PairedDevice {
   id: string;
@@ -31,7 +31,7 @@ export default function PairedDevicesPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await apiFetch("/identity/paired-devices");
+      const res = await (sgClient as any).get?.("/identity/paired-devices") ?? await fetch("/api/v1/identity/paired-devices");
       if (res.ok) {
         const json = await res.json();
         setDevices(json.data ?? []);
@@ -48,7 +48,11 @@ export default function PairedDevicesPage() {
   const revoke = async (deviceId: string) => {
     setRevoking(deviceId);
     try {
-      await apiFetch(`/identity/paired-devices/${deviceId}`, { method: "DELETE" });
+      if ((sgClient as any).del) {
+        await (sgClient as any).del(`/identity/paired-devices/${deviceId}`);
+      } else {
+        await fetch(`/api/v1/identity/paired-devices/${deviceId}`, { method: "DELETE" });
+      }
       await load();
     } finally {
       setRevoking(null);
