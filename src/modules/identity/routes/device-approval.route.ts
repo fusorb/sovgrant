@@ -20,16 +20,18 @@ export async function deviceApprovalRoute(fastify: FastifyInstance) {
         security: [{ bearerAuth: [] }],
         body: z.object({
           type: z.enum(["login", "mfa", "step-up"]).optional(),
-          context: z.record(z.any()).optional(),
-        }),
+          context: z.any().optional(),
+        }).optional(),
         response: {
           201: z.object({ success: z.boolean(), data: z.any() }),
         },
       },
     },
     async (req, reply) => {
-      const result = await flowExecutor.run(createDeviceApprovalFlow, req.body, {
-        identityId: req.identity.id,
+      const body = (req.body as any) ?? {};
+      const identity = (req as any).identity;
+      const result = await (flowExecutor as any).run(createDeviceApprovalFlow, body, {
+        identityId: identity?.id,
         tenantId: null,
         ip: req.ip,
         userAgent: req.headers["user-agent"],
@@ -51,8 +53,8 @@ export async function deviceApprovalRoute(fastify: FastifyInstance) {
       },
     },
     async (req) => {
-      const result = await flowExecutor.run(pollDeviceApprovalFlow, { challenge: (req.params as any).challenge }, {
-        identityId: null,
+      const result = await (flowExecutor as any).run(pollDeviceApprovalFlow, { challenge: (req.params as any).challenge }, {
+        identityId: undefined,
         tenantId: null,
         ip: req.ip,
         userAgent: req.headers["user-agent"],
@@ -77,8 +79,9 @@ export async function deviceApprovalRoute(fastify: FastifyInstance) {
       },
     },
     async (req) => {
-      const result = await flowExecutor.run(approveDeviceApprovalFlow, { challenge: (req.params as any).challenge, ...(req.body as any) }, {
-        identityId: req.identity.id,
+      const body = (req.body as any) || {};
+      const result = await (flowExecutor as any).run(approveDeviceApprovalFlow, { challenge: (req.params as any).challenge, ...body }, {
+        identityId: (req.identity as any)?.id,
         tenantId: null,
         ip: req.ip,
         userAgent: req.headers["user-agent"],
@@ -102,8 +105,8 @@ export async function deviceApprovalRoute(fastify: FastifyInstance) {
       },
     },
     async (req) => {
-      const result = await flowExecutor.run(rejectDeviceApprovalFlow, { challenge: (req.params as any).challenge }, {
-        identityId: req.identity.id,
+      const result = await (flowExecutor as any).run(rejectDeviceApprovalFlow, { challenge: (req.params as any).challenge }, {
+        identityId: (req.identity as any)?.id,
         tenantId: null,
         ip: req.ip,
         userAgent: req.headers["user-agent"],

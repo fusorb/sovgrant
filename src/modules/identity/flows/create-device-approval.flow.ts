@@ -6,7 +6,7 @@ import { randomBytes } from "crypto";
 
 const CreateDeviceApprovalInputSchema = z.object({
   type: z.enum(["login", "mfa", "step-up"]).default("login"),
-  context: z.record(z.any()).optional(),
+  context: z.any().optional(),
 });
 
 const CreateDeviceApprovalOutputSchema = z.object({
@@ -40,7 +40,7 @@ export const createDeviceApprovalFlow: Flow<
         identityId,
         challenge,
         type: input.type,
-        context: input.context ?? {},
+        context: (input.context ?? {}) as any,
         expiresAt,
         ip: ctx.ip,
         userAgent: ctx.userAgent,
