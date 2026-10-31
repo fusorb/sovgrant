@@ -169,6 +169,7 @@ model Identity {
   mfaRecoveryCodes MfaRecoveryCode[]
   sessions         Session[]
   devices          Device[]
+  pairedDevices    PairedDevice[]
   emailTokens      EmailToken[]
 
   memberships TenantMembership[]
@@ -769,6 +770,24 @@ model Device {
   sessions     Session[]
 
   @@index([identityId])
+}
+
+model PairedDevice {
+  id         String   @id @default(cuid())
+  identityId String
+  deviceId   String   @unique
+  publicKey  String
+  name       String?
+  platform   String?
+  lastSeenAt DateTime @default(now())
+  trusted    Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  revokedAt  DateTime?
+
+  identity Identity @relation(fields: [identityId], references: [id], onDelete: Cascade)
+
+  @@index([identityId])
+  @@index([deviceId])
 }
 
 model Session {
