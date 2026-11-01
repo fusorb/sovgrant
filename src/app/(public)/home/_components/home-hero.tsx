@@ -22,7 +22,7 @@ export function HomeHero() {
 
       <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
         <AnimatedButton
-          animation="sparkle"
+          animation="shine"
           renderButton={(props) => (
             <Button {...props} size="lg" asChild>
               <Link href="/login">Get Started</Link>

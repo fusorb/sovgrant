@@ -9,8 +9,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  EmptyState,
 } from "@fusorb/facet-components";
-import { sgClient } from "@/sdk";
+import { usePairedDevices } from "@/hooks/use-paired-devices";
 
 interface PairedDevice {
   id: string;
@@ -24,6 +25,7 @@ interface PairedDevice {
 }
 
 export default function PairedDevicesPage() {
+  const { list, revoke } = usePairedDevices();
   const [devices, setDevices] = useState<PairedDevice[]>([]);
   const [loading, setLoading] = useState(true);
   const [revoking, setRevoking] = useState<string | null>(null);
@@ -31,11 +33,8 @@ export default function PairedDevicesPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await (sgClient as any).get?.("/identity/paired-devices") ?? await fetch("/api/v1/identity/paired-devices");
-      if (res.ok) {
-        const json = await res.json();
-        setDevices(json.data ?? []);
-      }
+      const res: any = await list();
+      setDevices(res?.data ?? []);
     } finally {
       setLoading(false);
     }
@@ -45,14 +44,10 @@ export default function PairedDevicesPage() {
     load();
   }, []);
 
-  const revoke = async (deviceId: string) => {
+  const onRevoke = async (deviceId: string) => {
     setRevoking(deviceId);
     try {
-      if ((sgClient as any).del) {
-        await (sgClient as any).del(`/identity/paired-devices/${deviceId}`);
-      } else {
-        await fetch(`/api/v1/identity/paired-devices/${deviceId}`, { method: "DELETE" });
-      }
+      await revoke(deviceId);
       await load();
     } finally {
       setRevoking(null);
@@ -63,7 +58,7 @@ export default function PairedDevicesPage() {
     <>
       <PageHeader
         title="Paired SovPort Devices"
-        description="Manage devices paired for biometric authentication and approvals."
+        description="Paired SovPort devices trusted to approve a sign-in with biometrics."
       />
       <main className="p-6 space-y-4">
         <Card className="max-w-3xl">
@@ -77,9 +72,10 @@ export default function PairedDevicesPage() {
             {loading ? (
               <p className="text-sm text-muted-foreground">Loading...</p>
             ) : devices.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No paired devices yet. Pair SovPort from your device to see it here.
-              </p>
+              <EmptyState
+                title="No paired devices"
+                description="Pair a SovPort app to use it for biometric approvals."
+              />
             ) : (
               devices.map((d) => (
                 <div
@@ -102,7 +98,7 @@ export default function PairedDevicesPage() {
                     <Button
                       size="sm"
                       variant="destructive"
-                      onClick={() => revoke(d.deviceId)}
+                      onClick={() => onRevoke(d.deviceId)}
                       disabled={revoking === d.deviceId}
                     >
                       {revoking === d.deviceId ? "Revoking..." : "Revoke"}

@@ -1,6 +1,6 @@
 "use client";
 
-import { CardContent, CardDescription, CardHeader, CardTitle, GlowCard, Icon, type IconProps } from "@fusorb/facet-components";
+import { CardContent, CardDescription, CardHeader, CardTitle, Icon, ShineBorderCard, type IconProps } from "@fusorb/facet-components";
 
 const features = [
   {
@@ -55,7 +55,7 @@ export function HomeFeatures() {
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
-            <GlowCard key={feature.title} className="flex flex-col overflow-hidden">
+            <ShineBorderCard key={feature.title} className="flex flex-col overflow-hidden">
               <CardHeader>
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
@@ -72,7 +72,7 @@ export function HomeFeatures() {
                   {feature.description}
                 </CardDescription>
               </CardContent>
-            </GlowCard>
+            </ShineBorderCard>
           ))}
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ActivityFeed, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, GlowCard, HoverScaleCard, ShimmerText, StatCard } from "@fusorb/facet-components";
+import { ActivityFeed, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, HoverScaleCard, ShineBorderCard, ShimmerText, StatCard } from "@fusorb/facet-components";
 import { useAuthStore, useTenantStore } from "@fusorb/facet-store";
 import { useRouter } from "next/navigation";
 import { useCredentials } from "@/hooks/use-credentials";
@@ -90,15 +90,15 @@ export default function ConsoleDashboardPage() {
       </header>
       <main className="p-6">
         {!activeTenant && (
-          <Card className="mb-6">
+          <ShineBorderCard className="mb-6">
             <CardHeader>
               <CardTitle>No workspace selected</CardTitle>
-              <CardDescription>Select or create a tenant to begin.</CardDescription>
+              <CardDescription>Create a workspace to issue credentials and manage identities.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button asChild><Link href="/console/tenants">Manage Tenants</Link></Button>
+              <Button asChild><Link href="/console/tenants/new">Create a workspace</Link></Button>
             </CardContent>
-          </Card>
+          </ShineBorderCard>
         )}
 
         {activeTenant && (
@@ -124,7 +124,7 @@ export default function ConsoleDashboardPage() {
               ))}
             </div>
 
-            <GlowCard>
+            <ShineBorderCard>
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
                 <CardDescription>Latest audit events for this tenant.</CardDescription>
@@ -145,7 +145,7 @@ export default function ConsoleDashboardPage() {
                   />
                 )}
               </CardContent>
-            </GlowCard>
+            </ShineBorderCard>
           </>
         )}
       </main>

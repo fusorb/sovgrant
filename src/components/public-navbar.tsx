@@ -51,7 +51,7 @@ export function PublicNavbar() {
 
   return (
     <Navbar
-      variant="pill"
+        variant="glass"
       brand={
         <Link href="/" className="flex items-center gap-2 font-display text-xl font-semibold">
           <img src="/sg-bw.png" alt="SovGrant" className="h-7 w-auto dark:invert" />

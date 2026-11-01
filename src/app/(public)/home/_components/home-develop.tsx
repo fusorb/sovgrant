@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, CardContent, CardDescription, CardHeader, CardTitle, GlowCard, Icon } from "@fusorb/facet-components";
+import { Badge, CardContent, CardDescription, CardHeader, CardTitle, Icon, ShineBorderCard } from "@fusorb/facet-components";
 
 const benefits = [
   {
@@ -57,7 +57,7 @@ export function HomeDevelop() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {benefits.map((b) => (
-            <GlowCard key={b.title} className="border-0 bg-muted/30">
+            <ShineBorderCard key={b.title} className="border-0 bg-muted/30">
               <CardHeader>
                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
                   <Icon name={b.icon} className="h-5 w-5 text-primary" />
@@ -67,7 +67,7 @@ export function HomeDevelop() {
               <CardContent>
                 <CardDescription>{b.description}</CardDescription>
               </CardContent>
-            </GlowCard>
+            </ShineBorderCard>
           ))}
         </div>
 

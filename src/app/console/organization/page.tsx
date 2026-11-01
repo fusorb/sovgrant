@@ -2,11 +2,11 @@
 
 import { PageHeader } from "@fusorb/facet-layout";
 import {
-  GlowCard,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  ShineBorderCard,
 } from "@fusorb/facet-components";
 import { useTenantStore } from "@fusorb/facet-store";
 import Link from "next/link";
@@ -22,7 +22,7 @@ export default function OrganizationPage() {
       />
       <main className="p-6">
         <div className="grid gap-6 md:max-w-3xl">
-          <GlowCard>
+          <ShineBorderCard>
             <CardHeader>
               <CardTitle>Workspace</CardTitle>
               <CardDescription>
@@ -37,9 +37,9 @@ export default function OrganizationPage() {
                 Switch tenant
               </Link>
             </CardContent>
-          </GlowCard>
+          </ShineBorderCard>
 
-          <GlowCard>
+          <ShineBorderCard>
             <CardHeader>
               <CardTitle>Members</CardTitle>
               <CardDescription>
@@ -54,7 +54,7 @@ export default function OrganizationPage() {
                 Manage members
               </Link>
             </CardContent>
-          </GlowCard>
+          </ShineBorderCard>
 
         </div>
       </main>

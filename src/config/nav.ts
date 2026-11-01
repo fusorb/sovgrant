@@ -39,7 +39,6 @@ export const navConfig: NavSection[] = [
   {
     title: "Identity",
     items: [
-      { href: "/console/admin", label: "Admin", icon: "shield", requiredPermission: "admin:system" },
       { href: "/console/identities", label: "Identities", icon: "users", requiredPermission: "admin:system" },
       { href: "/console/tenants", label: "Tenants", icon: "building-2" },
       { href: "/console/organization/members", label: "Members", icon: "badge-check" },
@@ -55,6 +54,7 @@ export const navConfig: NavSection[] = [
       { href: "/console/security/sessions", label: "Sessions", icon: "monitor" },
       { href: "/console/security/passkeys", label: "Passkeys", icon: "key" },
       { href: "/console/security/mfa", label: "Two-Factor", icon: "lock" },
+      { href: "/console/security/paired-devices", label: "Paired devices", icon: "smartphone" },
       { href: "/console/security/audit", label: "Audit Log", icon: "scroll-text", requiredPermission: "audit:read:any" },
     ],
   },

@@ -9,8 +9,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  GlowCard,
   Icon,
+  ShineBorderCard,
   type IconProps,
 } from "@fusorb/facet-components";
 import { HomeFeatures } from "./home-features";
@@ -107,7 +107,7 @@ export function HomeContent() {
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {steps.map((step) => (
-              <GlowCard
+              <ShineBorderCard
                 key={step.title}
                 className="flex flex-col overflow-hidden"
               >
@@ -127,7 +127,7 @@ export function HomeContent() {
                     {step.description}
                   </CardDescription>
                 </CardContent>
-              </GlowCard>
+              </ShineBorderCard>
             ))}
           </div>
         </div>
@@ -153,7 +153,7 @@ export function HomeContent() {
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             {securityFeatures.map((feature) => (
-              <GlowCard
+              <ShineBorderCard
                 key={feature.title}
                 className="flex flex-col overflow-hidden border-0 bg-transparent"
               >
@@ -173,7 +173,7 @@ export function HomeContent() {
                     {feature.description}
                   </CardDescription>
                 </CardContent>
-              </GlowCard>
+              </ShineBorderCard>
             ))}
           </div>
         </div>

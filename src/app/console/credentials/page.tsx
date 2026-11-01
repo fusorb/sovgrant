@@ -16,7 +16,7 @@ export default function CredentialsPage() {
       description="Verifiable credentials issued to your organization."
       actions={
         <AnimatedButton
-          animation="sparkle"
+          animation="shine"
           renderButton={(props) => (
             <Button {...props} size="sm" asChild>
               <Link href="/console/credentials/create">Issue</Link>

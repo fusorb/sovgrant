@@ -136,7 +136,7 @@ export default function CreateCredentialPage() {
 
               <div className="flex gap-3">
                 <AnimatedButton
-                  animation="sparkle"
+                  animation="shine"
                   renderButton={(props) => (
                     <Button {...props} type="submit" disabled={isSubmitting}>
                       {isSubmitting ? "Issuing…" : "Issue Credential"}

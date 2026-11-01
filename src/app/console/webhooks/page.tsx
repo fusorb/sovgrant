@@ -56,7 +56,7 @@ export default function WebhooksPage() {
       cell: (w) => (
         <div className="flex gap-2">
           <AnimatedButton
-            animation="sparkle"
+            animation="shine"
             renderButton={(props) => (
               <Button {...props} variant="outline" size="sm" onClick={() => test(w.id)}>
                 Test

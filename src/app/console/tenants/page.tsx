@@ -22,7 +22,7 @@ export default function TenantsPage() {
         <div className="mb-4 flex justify-between items-center">
           <h2 className="text-lg font-semibold">Workspaces</h2>
           <AnimatedButton
-            animation="sparkle"
+            animation="shine"
             renderButton={(props) => (
               <Button {...props} asChild>
                 <Link href="/console/tenants/new">New Tenant</Link>
