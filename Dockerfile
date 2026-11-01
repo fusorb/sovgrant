@@ -1,14 +1,10 @@
-# ── Stage 1: Install ALL dependencies ─────────────────────────────────────────
-# We install everything here (deps + devDeps) because:
-#   a) tsup marks every dependency as "external", so the build output is just
-#      compiled JS - node_modules must exist at runtime.
-#   b) Prisma CLI (devDep) is needed for `prisma generate` and `prisma migrate deploy`.
+﻿# ── Stage 1: Install ALL dependencies ─────────────────────────────────────────
 FROM node:22-alpine AS deps
 RUN apk add --no-cache libc6-compat
-RUN corepack enable && corepack prepare pnpm@latest --activate
+ENV PNPM_VERSION=9.15.4
+RUN corepack enable && corepack prepare pnpm@\ --activate
 WORKDIR /app
 
-# Hooks aren't available in CI/Docker, and `prepare` tries to install git hooks.
 ENV HUSKY=0
 
 COPY package.json pnpm-lock.yaml ./
@@ -17,8 +13,6 @@ RUN pnpm install --frozen-lockfile
 # ── Stage 2: Build ────────────────────────────────────────────────────────────
 FROM deps AS builder
 WORKDIR /app
-# .dockerignore excludes node_modules/, so only source files are copied.
-# node_modules is inherited from the deps stage via FROM.
 COPY . .
 
 RUN pnpm prisma:generate
@@ -27,25 +21,29 @@ RUN pnpm build:api
 # ── Stage 3: Runner ───────────────────────────────────────────────────────────
 FROM node:22-alpine AS runner
 RUN apk add --no-cache libc6-compat
-RUN corepack enable && corepack prepare pnpm@latest --activate
+ENV PNPM_VERSION=9.15.4
+RUN corepack enable && corepack prepare pnpm@\ --activate
 WORKDIR /app
 
 ENV HUSKY=0
 ENV NODE_ENV=production
 
-# Copy built artifacts and runtime dependencies
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/pnpm-lock.yaml ./
-COPY --from=builder /app/certs ./certs
+RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 fastify
 
-# By default, start the HTTP server. Override CMD for workers.
-EXPOSE 4000
+COPY --from=builder --chown=fastify:nodejs /app/dist ./dist
+COPY --from=builder --chown=fastify:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=fastify:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=fastify:nodejs /app/package.json ./
+COPY --from=builder --chown=fastify:nodejs /app/pnpm-lock.yaml ./
 
-COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN pnpm prune --prod --ignore-scripts
+
+COPY --chown=fastify:nodejs docker-entrypoint.sh /app/docker-entrypoint.sh
 RUN chmod +x /app/docker-entrypoint.sh
+
+USER fastify
+
+EXPOSE 4000
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["node", "dist/start-server.js"]

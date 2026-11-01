@@ -1,46 +1,37 @@
-services:
-  # ── PostgreSQL ──────────────────────────────────────────────────────────────
+﻿services:
   postgres:
     image: postgres:17-alpine
     container_name: sg-db
     restart: unless-stopped
-    ports:
-      - "5432:5432"
     environment:
-      POSTGRES_USER: arcevodev
-      POSTGRES_PASSWORD: REDACTED"  "
-      POSTGRES_DB: sovgrant
+      POSTGRES_USER: \
+      POSTGRES_PASSWORD: \
+      POSTGRES_DB: \
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U arcevodev -d sovgrant"]
+      test: ["CMD-SHELL", "pg_isready -U \ -d \"]
       interval: 5s
       timeout: 5s
       retries: 5
     mem_limit: 512m
 
-  # ── Redis ───────────────────────────────────────────────────────────────────
-  # SovGrant gracefully falls back to in-memory if Redis is unavailable,
-  # so this service is non-critical for basic operation. Recommended for
-  # production: JTI blocklist + challenge store performance.
   redis:
     image: redis:7-alpine
     container_name: sg-redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
+    command: ["redis-server", "--requirepass", "\"]
     volumes:
       - redisdata:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "\", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
     mem_limit: 128m
 
-  # ── Fastify HTTP API ────────────────────────────────────────────────────────
   api:
-    image: ${API_IMAGE:-sg-api}
+    image: \
     build:
       context: .
       dockerfile: Dockerfile
@@ -48,7 +39,7 @@ services:
     container_name: sg-api
     restart: unless-stopped
     ports:
-      - "${API_PORT:-4000}:4000"
+      - "\:4000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -56,12 +47,10 @@ services:
         condition: service_healthy
     env_file: .env
     environment:
-      # Override DATABASE_URL to point at the compose-managed Postgres.
-      # Uses the Docker network hostname (service name = container DNS name).
-      DATABASE_URL: postgresql://arcevodev:***REMOVED***@postgres:5432/sovgrant?schema=public
+      DATABASE_URL: postgresql://\:\@postgres:5432/\?schema=public
+      REDIS_URL: redis://:\@redis:6379
     mem_limit: 512m
 
-  # ── Background Workers ──────────────────────────────────────────────────────
   workers:
     build:
       context: .
@@ -76,7 +65,8 @@ services:
         condition: service_healthy
     env_file: .env
     environment:
-      DATABASE_URL: postgresql://arcevodev:***REMOVED***@postgres:5432/sovgrant?schema=public
+      DATABASE_URL: postgresql://\:\@postgres:5432/\?schema=public
+      REDIS_URL: redis://:\@redis:6379
     command: ["node", "dist/start-workers.js"]
     mem_limit: 256m
 
