@@ -1,8 +1,8 @@
 ﻿# ── Stage 1: Install ALL dependencies ─────────────────────────────────────────
 FROM node:22-alpine AS deps
 RUN apk add --no-cache libc6-compat
-ENV PNPM_VERSION=9.15.4
-RUN corepack enable && corepack prepare pnpm@\ --activate
+ENV PNPM_VERSION=12.6.0
+RUN corepack enable && corepack prepare pnpm@$PNPM_VERSION --activate
 WORKDIR /app
 
 ENV HUSKY=0
@@ -21,8 +21,8 @@ RUN pnpm build:api
 # ── Stage 3: Runner ───────────────────────────────────────────────────────────
 FROM node:22-alpine AS runner
 RUN apk add --no-cache libc6-compat
-ENV PNPM_VERSION=9.15.4
-RUN corepack enable && corepack prepare pnpm@\ --activate
+ENV PNPM_VERSION=12.6.0
+RUN corepack enable && corepack prepare pnpm@$PNPM_VERSION --activate
 WORKDIR /app
 
 ENV HUSKY=0

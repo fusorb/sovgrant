@@ -67,8 +67,8 @@ services:
         condition: service_healthy
     env_file: .env
     environment:
-      DATABASE_URL: postgresql://\:\@postgres:5432/\?schema=public
-      REDIS_URL: redis://:\@redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER:-arcevodev}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-sovgrant}?schema=public
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
     command: ["node", "dist/start-workers.js"]
     mem_limit: 256m
 
