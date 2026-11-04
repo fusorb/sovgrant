@@ -5,7 +5,7 @@
 // schema-only.
 //
 // Project = a product/section inside a Tenant (e.g. SovGrant, SovPort,
-// ArcVerify, Arcademy, Relnex, the Cirqle landing page all live as Projects
+// Scholium, Relnex, the Cirqle landing page all live as Projects
 // under the Fusorb tenant). `category` is an optional grouping label
 // ("identity", "knowledge", etc) for organizing the console UI — it carries
 // no isolation semantics; RBAC/billing/signing keys remain tenant-scoped.
