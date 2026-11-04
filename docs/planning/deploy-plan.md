@@ -12,8 +12,8 @@
 3. Public production behind Cloudflare with only 80/443 open
 
 ## Domain Rules
-- One real apex domain
-- Staging uses a subdomain
+- One real apex domain - fusorb.com
+- Staging uses a subdomain - sg.fusorb.com
 - Passkey RP ID, did:web, and OIDC issuer are domain-bound
 - Staging DB must be wiped before launch
 - Synthetic data only in staging

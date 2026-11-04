@@ -4,13 +4,13 @@ services:
     container_name: sg-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: \
-      POSTGRES_PASSWORD: \
-      POSTGRES_DB: \
+      POSTGRES_USER: ${POSTGRES_USER:-arcevodev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-sovgrant}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U \ -d \"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-arcevodev} -d ${POSTGRES_DB:-sovgrant}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -20,18 +20,20 @@ services:
     image: redis:7-alpine
     container_name: sg-redis
     restart: unless-stopped
-    command: ["redis-server", "--requirepass", "\"]
+    command: ["sh", "-c", "redis-server --requirepass $$REDIS_PASSWORD"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
     volumes:
       - redisdata:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "\", "ping"]
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping | grep PONG"]
       interval: 5s
       timeout: 5s
       retries: 5
     mem_limit: 128m
 
   api:
-    image: \
+    image: ${API_IMAGE:-ghcr.io/fusorb/sovgrant-api:latest}
     build:
       context: .
       dockerfile: Dockerfile
@@ -39,7 +41,7 @@ services:
     container_name: sg-api
     restart: unless-stopped
     ports:
-      - "\:4000"
+      - "${API_PORT:-4000}:4000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -47,8 +49,8 @@ services:
         condition: service_healthy
     env_file: .env
     environment:
-      DATABASE_URL: postgresql://\:\@postgres:5432/\?schema=public
-      REDIS_URL: redis://:\@redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER:-arcevodev}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-sovgrant}?schema=public
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
     mem_limit: 512m
 
   workers:

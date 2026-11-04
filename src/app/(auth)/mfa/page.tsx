@@ -20,8 +20,8 @@ export default function MfaPage() {
     setStatus("creating");
     setError(null);
     try {
-      const res: any = await identity.createDeviceApproval({ sessionId });
-      const ch = res?.data?.challenge ?? res?.challenge;
+      const res: any = await identity.createDeviceApproval({ type: "mfa" });
+      const ch = res?.data?.challenge ?? res?.challenge ?? res?.data?.id;
       setChallenge(ch);
       setStatus("pending");
       setShowDeviceApproval(true);

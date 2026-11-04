@@ -22,7 +22,7 @@ With API_BASE_URL="http://localhost:4000" (current .env), the callbacks are:
   GitHub:  http://localhost:4000/auth/github/callback
 
 For production you would use your real API domain, e.g.
-  https://api.sg.dev/auth/google/callback
+  https://api.sg.fusorb.com/auth/google/callback
 
 For Expo Go / a phone testing against your LAN, use your machine IP:
   http://<YOUR_LAN_IP>:4000/auth/google/callback

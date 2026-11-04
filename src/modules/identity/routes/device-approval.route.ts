@@ -14,6 +14,7 @@ export async function deviceApprovalRoute(fastify: FastifyInstance) {
     "/device-approvals",
     {
       preHandler: fastify.auth.requireUser,
+      config: { rateLimit: { max: 5, timeWindow: "1 minute" } },
       schema: {
         tags: ["SovPort Integration"],
         summary: "Create a device approval challenge",
@@ -67,6 +68,7 @@ export async function deviceApprovalRoute(fastify: FastifyInstance) {
     "/device-approvals/:challenge/approve",
     {
       preHandler: fastify.auth.requireUser,
+      config: { rateLimit: { max: 10, timeWindow: "1 minute" } },
       schema: {
         tags: ["SovPort Integration"],
         summary: "Approve a device approval challenge",
@@ -94,6 +96,7 @@ export async function deviceApprovalRoute(fastify: FastifyInstance) {
     "/device-approvals/:challenge/reject",
     {
       preHandler: fastify.auth.requireUser,
+      config: { rateLimit: { max: 10, timeWindow: "1 minute" } },
       schema: {
         tags: ["SovPort Integration"],
         summary: "Reject a device approval challenge",
