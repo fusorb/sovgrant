@@ -1,4 +1,4 @@
-# Presentation Envelope Design - ArcVerify Integration
+# Presentation Envelope Design - Verifier Integration
 
 > **✅ Built - shipped in 0.1.0.** `jws-proof.ts` (6 unit tests),
 > `verify-session.route.ts` (5 tests), `verify-present.route.ts` (9 tests).
@@ -7,8 +7,8 @@
 
 ## Problem
 
-ArcVerify (or any relying party) needs to ask SovPort "prove you hold
-credential X." The current stack can verify a VC in isolation
+A verifier - any relying party; SovPort is the first consumer - needs to ask SovPort
+"prove you hold credential X." The current stack can verify a VC in isolation
 (`verifyCredentialFlow`), but there's no way for a third party to bind
 that verification to a real-time challenge - without which any
 credential presentation is subject to replay.
@@ -17,10 +17,14 @@ A full OIDC4VP / Presentation Exchange implementation is deferred to v2.
 This design covers a lightweight, expressive enough container that SovGrant
 can host for SovPort via a simple two-step protocol.
 
+> There is no separate "ArcVerify" product. The verifier surface is these
+> SovGrant endpoints, which any relying party can call; SovPort is the first
+> consumer. Third-party verifiers get the same public contract.
+
 ## Flow (conceptual)
 
 ```
-ArcVerify                   SovGrant                          SovPort
+Verifier                      SovGrant                          SovPort
    |                          |                               |
    |  1. POST /verify/session |                               |
    |     { credentialRef }    |                               |
@@ -28,7 +32,7 @@ ArcVerify                   SovGrant                          SovPort
    |  2. ← { sessionId,     }|                               |
    |       challenge (nonce) }|                               |
    |                          |                               |
-   |  3. ArcVerify passes      |                               |
+   |  3. Verifier passes       |                               |
    |     sessionId + challenge |                               |
    |     to SovPort (deep    |                               |
    |     link / QR code)       |                               |
@@ -47,7 +51,7 @@ ArcVerify                   SovGrant                          SovPort
 ## Data structures (draft)
 
 ```typescript
-// 1. ArcVerify initiates a session
+// 1. Verifier initiates a session
 POST /verify/session
 Body: {
   credentialRef: string; // opaque hint - credential type or ID
@@ -93,8 +97,8 @@ Response: {
 ## Why not a full Vp / VerifiablePresentation
 
 OIDC4VP / W3C Vp requires `@context`, `type`, potentially `presentationSubmission`
-matching a `PresentationDefinition`. None of ArcVerify needs that complexity
-- ArcVerify and SovPort are both first-party apps you control. The hash +
+matching a `PresentationDefinition`. None of this needs that complexity
+- the verifier and SovPort are both first-party apps you control. The hash +
 nonce envelope is sufficient for v1 and can be embedded inside a real
 `VerifiablePresentation` later without changing the verification path.
 

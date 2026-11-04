@@ -1,15 +1,15 @@
 ================================================================
   SovGrant - OAuth / Social Login Secrets Setup Guide
-  Updated: 2026-08-14
+  Updated: 2026-11-04
 ================================================================
 
 WHY
 ---
 The SovGrant backend already implements social login (src/modules/auth/
 routes/social.route.ts) for Google, GitHub, Apple, Microsoft via the
-`arctic` library. The UI (login/register forms) already shows GitHub +
-Google buttons pointing at /auth/github and /auth/google. What is
-missing are REAL client credentials - the .env currently has placeholders.
+`arctic` library. Social-login buttons route to /auth/github and /auth/google
+(the auth UI is now `@fusorb/facet-auth`; the in-repo login/register forms were
+deleted). What is missing are REAL client credentials - the .env has placeholders.
 
 CALLBACK URLs (must match what you register with the provider)
 -------------------------------------------------------------
@@ -91,7 +91,7 @@ TESTING THE WHOLE FLOW FROM THE UI
    - /console  if they have an ACTIVE tenant membership (dev/org)
    - /console  if they are a general user (no active tenant yet — the
      console prompts them to create or join one).
-     (Arc-Wallet is a separate standalone app; /wallet is no longer mounted
+     (SovPort is a separate standalone app; /wallet is no longer mounted
      under sovgrant — users always land on /console now.)
 
 ================================================================

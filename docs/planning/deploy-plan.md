@@ -19,13 +19,13 @@
 - Synthetic data only in staging
 
 ## Hardening Checklist
-- [ ] No published DB/Redis ports
-- [ ] Redis password required
-- [ ] Non-root container user
-- [ ] Runtime image without devDependencies
-- [ ] Pinned pnpm version and image digests
+- [x] No published DB/Redis ports (compose exposes only `api:4000`)
+- [x] Redis password required (`REDIS_PASSWORD:?`, `redis-server --requirepass`)
+- [x] Non-root container user (`USER fastify`)
+- [x] Runtime image without devDependencies (`pnpm prune --prod` in the runner stage)
+- [ ] Pinned pnpm version and image digests (pnpm pinning in progress; images not digest-pinned)
 - [ ] Read-only filesystem where possible
-- [ ] Secrets via sops/age or Docker secrets
+- [ ] Secrets via sops/age or Docker secrets (still `env_file: .env`)
 - [ ] Caddy TLS
 - [ ] Host firewall allowing only 80/443 (prod) or nothing public (staging)
 - [ ] SSH keys only

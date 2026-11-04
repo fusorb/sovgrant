@@ -1,6 +1,6 @@
 # SovGrant - Claude Code Handbook
 
-> Verified against actual source on 2026-08-21. Do not trust claims from
+> Verified against actual source on 2026-11-04. Do not trust claims from
 > prior docs that aren't re-confirmed below - every status line here was
 > checked against running tests or live source files, not old summaries.
 
@@ -16,14 +16,14 @@ Fastify + Prisma + Next.js 16 monorepo (pnpm, ESM-only).
 - WebAuthn passkeys, TOTP MFA (setup/verify/recovery), magic-link auth, social login (Google/GitHub/Apple/Microsoft), SAML2 + OIDC federation
 - SD-JWT Verifiable Credentials - issue/verify/revoke, W3C BitstringStatusList, did:web + did:key
 - Presentation endpoint (challenge-response verification protocol) - jws-proof: 6 tests, verify-session: 5, verify-present: 9
-- Multi-tenant: tenant CRUD + TenantPolicy (6 enforced fields) + RBAC (19 permissions, requirePermission()) + signing keys (KMS-encrypted)
+- Multi-tenant: tenant CRUD + TenantPolicy (6 enforced fields) + RBAC (22 permissions, requirePermission()) + signing keys (KMS-encrypted)
 - Webhook delivery engine (Postgres queue, FOR UPDATE SKIP LOCKED, retry/backoff, dead-letter)
-- Rate limiting (per-route, per-IP), audit logging (51 action enum values), JTI blocklist (Redis two-tier + DB fallback)
+- Rate limiting (per-route, per-IP), audit logging (53 action enum values), JTI blocklist (Redis two-tier + DB fallback)
 - KMS encryption for signing keys at rest (AES-256-GCM, key rotation script, encrypt/decrypt passthrough)
 - Email via Resend (13 templates, React Email components; static template gallery at :3888, auth emails delivered to recipient inbox)
 - SMS via Brevo (transactional SMS for MFA codes + security alerts)
 
-**Test suite: 62 files / 358 tests / 0 code failures** - all passing clean, ~90s runtime on Windows (route-level + Prisma import chains dominate). Updated 2026-09-01.
+**Test suite: 70 files / 386 tests / 0 code failures** - all passing clean (`pnpm test`; the count includes the 10 `packages/cli` tests), ~90s runtime on Windows (route-level + Prisma import chains dominate). Updated 2026-11-04.
 
 ---
 
@@ -37,7 +37,8 @@ sovgrant/
 │   │   ├── routes/    # well-known, health, DID document, mail-preview
 │   │   └── server/    # build-server.ts, start-server.ts, start-workers.ts
 │   ├── app/           # Next.js 16 App Router - dashboard + auth routes
-│   ├── components/    # React components - auth forms + layout (in-repo)
+│   ├── components/    # App-level React pieces (navbar, page-shell, data-table,
+│   │                  # sidebar footer); ui/ keeps 3 facet wrappers only
 │   ├── core/          # Shared: config, db, errors, flows, mail
 │   ├── hooks/         # React hooks - use-*.ts over the facet SDKs
 │   ├── jobs/          # Background jobs - token-cleanup, webhook-worker
@@ -58,11 +59,10 @@ sovgrant/
 │   │   ├── api-key/   # CRUD flows + routes, SHA-256 hashed bearer tokens
 │   ├── providers/     # React context - ThemeProvider, AuthProvider
 │   ├── sdk/           # Thin singleton wiring over @fusorb/facet-sdk (index.ts only)
-│   ├── store/         # Zustand stores - auth, tenant, ui
-│   └── types/         # Shared TypeScript types
+│   └── test-utils/    # Vitest setup + mock DB helpers
 ├── prisma/
-│   ├── schema.prisma  # Single source of truth - 50+ models
-│   ├── seed.ts        # SYSTEM tenant, admin user, 19 permissions
+│   ├── schema.prisma  # Single source of truth - 48 models
+│   ├── seed.ts        # SYSTEM tenant, admin user, 22 permissions
 │   └── migrations/    # Never hand-edit - always `pnpm prisma:migrate`
 ├── docs/
 │   ├── planning/     # Planning documents
@@ -96,7 +96,7 @@ pnpm dev:workers         # Background workers only
 pnpm typecheck
 pnpm lint
 pnpm format
-pnpm test                # 387 tests, 71 files, all passing
+pnpm test                # 386 tests, 70 files, all passing
 pnpm test:watch
 pnpm test:coverage
 pnpm build:api
@@ -107,7 +107,7 @@ pnpm build:web
   ports are free. Memory: `NODE_OPTIONS='--max-old-space-size=4096'` for web.
 - `pnpm build:api` (tsup) uses Unix `rm -rf dist`; on Windows cmd use Git Bash/WSL
   or add `rimraf`. Prefer `pnpm cli:build` (same caveat applies to packages/cli).
-- Vitest runs fine on Windows for sovgrant (71 files / 387 tests). The facet repo's
+- Vitest runs fine on Windows for sovgrant (70 files / 386 tests). The facet repo's
   vitest workspace has Windows glob issues — run facet tests via WSL/Git Bash.
 - CORS: `ALLOWED_ORIGINS` must include the frontend origin; sovport dev origin
   (`http://localhost:8081` for Expo) should be added when wiring the wallet.
@@ -212,7 +212,7 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 | JTI blocklist (Redis + DB fallback) | ✅ 100% | `jti-blocklist.*` (14 tests across 3 files) |
 | SSRF defense | ✅ 100% | `url-safety` (7 tests), applied on webhooks + IdP metadata URLs |
 | Webhook delivery | ✅ 100% | `webhook-config.route` (6 tests), Postgres queue, retry/backoff |
-| SD-JWT VC issuance/verify/revoke | ✅ 100% | `verify-credential.flow` (3), `status-list.service` (5), CAS allocation |
+| SD-JWT VC issuance/verify/revoke | ✅ 100% | `verify-credential.flow` (4), `status-list.service` (5), CAS allocation |
 | BitstringStatusList | ✅ 100% | `status-list.service.test.ts` - `allocateIndex` with CAS + retry |
 | did:web + did:key | ✅ 100% | `provision-tenant-did.flow` (4), `did.route.test` (3), `register-wallet-did.flow` (created) |
 | Redis-backed distributed revocation | ✅ **100%** | jti-blocklist (3 files/14 tests): in-memory Map fallback, retries every call. Introspect route: Redis + DB dual check. Login-attempt: no permanent init cache. **Per-session access token revocation**: `AccessToken.sessionId` column added + migration + `DELETE /sessions/:id` now revokes bound access tokens and blocks their JTIs in Redis. Full kill chain: session → refresh tokens → access tokens. |
@@ -220,7 +220,7 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 | Credential offers | ✅ 100% | `offer-credential.flow` (8) + `offer.route` (5) = **13 tests** |
 | Multi-tenant CRUD | ✅ 100% | `create-tenant.flow` (7), `add-member.flow` (2), policy enforcement |
 | TenantPolicy enforcement | ✅ 6/6 fields | requireMfa, maxSessionsPerUser, sessionTtlMinutes, allowedEmailDomains, allowPasskeys, requireLegalConsent |
-| RBAC (requirePermission) | ✅ 100% | `rbac` (5 tests), 19 permissions, 0 `role.name === "ADMIN"` in new code |
+| RBAC (requirePermission) | ✅ 100% | `rbac` (5 tests), 22 permissions, 0 `role.name === "ADMIN"` in new code |
 | ExternalIdentifier | ✅ 100% | `link/list/unlink` (9 tests), SHA-256 hashed |
 | Wallet + identity-owned DID | ✅ 100% | `register-wallet-did.flow` - did:key + Wallet row in same tx |
 | KMS (signing key encryption) | ✅ Wired | `kms` (13 tests), called by `key-encryption.ts` → `signing.service.ts` + `provision-tenant-did.flow.ts` |
@@ -232,13 +232,13 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 | Email templates | ✅ 13 templates | All registered in `notification.service.ts`, compiled via React Email + Resend |
 | CI pipeline | ✅ 3 workflows (rewritten 2026-07-28) | `ci.yml` (self-hosted Postgres 17 service, no external DB), `deploy-api.yml` (GHCR push → SSH Docker Compose on target VM), `deploy-web.yml` (SSH git pull → pnpm build:web → PM2 restart) |
 | `GET /tenants` route | ✅ 100% | `list-tenants.route.ts` - returns all tenants the user has ACTIVE membership in, with role + plan |
-| SDK layer | ✅ **Migrated to `@fusorb/facet-sdk@1.1.0`** | `src/sdk/` is now `index.ts` only - an `SgClient` singleton (401 auto-refresh wired to the Zustand auth store) re-exporting the facet domain SDK classes (`AuthSdk`, `TenantSdk`, `VcSdk`, …). Old factory-pattern `src/sdk/*.sdk.ts` deleted (2026-08-05). |
-| UI components | ✅ **Migrated to `@fusorb/facet-components@1.10.0`** | shadcn/ui primitives purged; `src/components/ui/` retains 3 app-specific wrappers (`icon.tsx` tree-shaken `<Icon>`, `typewriter-text.tsx`, `icons.generated.tsx`). `src/lib/ui/icon-registry.ts` + `navigation.ts` deleted as duplicates. `cn` re-exported from `@/lib/utils`. Verified typecheck + 342 tests green (2026-08-20). |
-| Auth UI | ✅ **Migrated to `@fusorb/facet-auth@1.2.2`** | Login/register/mfa pages use `SignIn`/`SignUp`/`MfaDialog`; `SgProvider` bridged to the Zustand store via `zustandTokenStorage` (commit `d6f6707`). In-repo `login-form`/`register-form`/`mfa-form` deleted; forgot/reset password forms now on `@fusorb/facet-auth` (ForgotPasswordForm/ResetPasswordForm). |
-| Layout | ✅ **Migrated to `@fusorb/facet-layout@1.4.1`** | `(auth)` group uses `AuthLayout`, `console/` directory uses `ConsoleLayout`; in-repo sidebar/topbar/tenant-switcher deleted. |
-| CSS tokens | ✅ **Migrated to `@fusorb/facet-tokens@1.1.4`** | `tokens.css` imported before `globals.css` in `layout.tsx`; `:root` block removed from globals.css; sovgrant keeps its indigo primary via override. |
-| Mail templates | ✅ **Migrated to `@fusorb/facet-emails@^1.1.1`** (Phase 7) | `src/core/mail` rewired to `toTemplateTree`/`EmailBrand`; 13 templates via facet-emails; preview server on `:3888`. |
-| Stores | ✅ **Migrated to `@fusorb/facet-store@^0.1.0`** (Phase 8) | `src/store/` deleted; `useAuthStore`/`useTenantStore` from `@fusorb/facet-store` across ~26 hook sites. |
+| SDK layer | ✅ **Migrated to `@fusorb/facet-sdk@2.1.1`** | `src/sdk/` is now `index.ts` only - an `SgClient` singleton (401 auto-refresh wired to the Zustand auth store) re-exporting the facet domain SDK classes (`AuthSdk`, `TenantSdk`, `VcSdk`, …). Old factory-pattern `src/sdk/*.sdk.ts` deleted (2026-08-05). |
+| UI components | ✅ **Migrated to `@fusorb/facet-components@3.2.1`** | shadcn/ui primitives purged; `src/components/ui/` retains 3 app-specific wrappers (`icon.tsx` tree-shaken `<Icon>`, `typewriter-text.tsx`, `icons.generated.tsx`). `src/lib/ui/icon-registry.ts` + `navigation.ts` deleted as duplicates. `cn` re-exported from `@/lib/utils`. Verified typecheck + 386 tests green (2026-11-04). |
+| Auth UI | ✅ **Migrated to `@fusorb/facet-auth@2.1.0`** | Login/register/mfa pages use `SignIn`/`SignUp`/`MfaDialog`; `SgProvider` bridged to the Zustand store via `zustandTokenStorage` (commit `d6f6707`). In-repo `login-form`/`register-form`/`mfa-form` deleted; forgot/reset password forms now on `@fusorb/facet-auth` (ForgotPasswordForm/ResetPasswordForm). |
+| Layout | ✅ **Migrated to `@fusorb/facet-layout@1.7.2`** | `(auth)` group uses `AuthLayout`, `console/` directory uses `ConsoleLayout`; in-repo sidebar/topbar/tenant-switcher deleted. |
+| CSS tokens | ✅ **Migrated to `@fusorb/facet-tokens@1.5.1`** | `tokens.css` imported before `globals.css` in `layout.tsx`; `:root` block removed from globals.css; sovgrant keeps its indigo primary via override. |
+| Mail templates | ✅ **Migrated to `@fusorb/facet-emails@1.1.4`** (Phase 7) | `src/core/mail` rewired to `toTemplateTree`/`EmailBrand`; 13 templates via facet-emails; preview server on `:3888`. |
+| Stores | ✅ **Migrated to `@fusorb/facet-store@1.0.4`** (Phase 8) | `src/store/` deleted; `useAuthStore`/`useTenantStore` from `@fusorb/facet-store` across ~26 hook sites. |
 | Tenant store hydration | ✅ Wired | `AuthProvider` calls `tenants.list()` on mount, populates `useTenantStore` with enriched tenant data |
 | Tenant switcher UI | ✅ Built | `TenantSwitcher` component in Topbar - visible when user has 2+ tenants, triggers context switch |
 
@@ -246,13 +246,13 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 
 | Priority | Item | Why now |
 |----------|------|---------|
-| **P0** | Facet migration Phases 0–8 + Phase E | **Phases 0–8 + Phase E done (2026-08-19).** Phase 1: `src/sdk/` is a thin `SgClient` singleton wiring over `@fusorb/facet-sdk@1.1.0`. Phase 2: `@fusorb/facet-tokens/tokens.css` imported before `globals.css` in `layout.tsx`. Phase 3: shadcn/ui primitives purged from `src/components/ui/` (3 app-specific wrappers retained); all consumers import `@fusorb/facet-components@1.10.0`. Phase 4: auth pages on `@fusorb/facet-auth@1.2.2` via `SgProvider` + `zustandTokenStorage` bridge (commit `d6f6707`). Phase 5: layouts on `@fusorb/facet-layout@1.4.1`. **Done:** Phase 6 purge FULLY complete — forgot/reset password forms now on `@fusorb/facet-auth`; `src/components/auth/` + `src/components/layout/` deleted; shadcn/ui primitives purged from `src/components/ui/` (3 app-specific wrappers retained) (2026-08-19). |
+| **P0** | Facet migration Phases 0–8 + Phase E | **Phases 0–8 + Phase E done (2026-08-19).** Phase 1: `src/sdk/` is a thin `SgClient` singleton wiring over `@fusorb/facet-sdk@2.1.1`. Phase 2: `@fusorb/facet-tokens/tokens.css` imported before `globals.css` in `layout.tsx`. Phase 3: shadcn/ui primitives purged from `src/components/ui/` (3 app-specific wrappers retained); all consumers import `@fusorb/facet-components@3.2.1`. Phase 4: auth pages on `@fusorb/facet-auth@2.1.0` via `SgProvider` + `zustandTokenStorage` bridge (commit `d6f6707`). Phase 5: layouts on `@fusorb/facet-layout@1.7.2`. **Done:** Phase 6 purge FULLY complete — forgot/reset password forms now on `@fusorb/facet-auth`; `src/components/auth/` + `src/components/layout/` deleted; shadcn/ui primitives purged from `src/components/ui/` (3 app-specific wrappers retained) (2026-08-19). |
 | **P1** | Phase 3 - Security hardening | **✅ Closed (2026-07-28).** SSRF (4/4 fixed), CSRF review complete, Redis-backed distributed revocation wired. **Per-session access token revocation**: `AccessToken.sessionId` column + migration + `DELETE /sessions/:id` revokes bound access tokens + blocks JTIs in Redis. Full kill chain: session → refresh → access tokens. JTI blocklist (14 tests, 3 files): in-memory Map fallback, retries every call. Introspect route: Redis + DB dual check. |
 | **P2** | Phase 4 - Observability | **✅ Shipped (2026-07-28).** `requestId` in all error responses + audit log metadata. `@fastify-metrics` at `GET /metrics`. Correlation IDs flow through FlowContext.requestId → auditService.log → DB. Pino structured logs carry traceId on every flow init/ok/fail. |
 | **P3** | CLI + SDK packages | Phase 1 implemented in `packages/cli` (`@fusorb/sg-cli`, bin `sg`): init/doctor/migrate/setup/revert, Postgres + Cockroach adapters, safe overwrite/revert, secret gen, --dry-run/--force/--yes. 10 tests passing. Phase 2 pending. |
 | **P4** | LegalConsent → wire to flow | **✅ Done (2026-08-19).** LegalConsent gate wired into `issue-credential.flow.ts` (E2, lines 62-78) — checks `TenantPolicy.requireLegalConsent` + `legalConsent` table before issuing; throws 403 if no consent recorded. |
 | **P5** | ExternalIdentifier.verified → VC issuance | **✅ Done (2026-08-19).** Verified-identifier gate wired into `issue-credential.flow.ts` (E1, lines 52-60) — subject DID must resolve to an `Identity` with ≥1 verified external identifier (`where: { identityId, verified: true }`). |
-| **P4.1** | Dead audit enum values | **✅ Done (2026-08-22).** `ROLE_*` + `DELEGATION_*` removed from `AuditLogAction` enum (53 → 51 values); migration `20260822000000_remove_dead_audit_enum_values`. `OAUTH_CLIENT_UPDATED` audit call wired in `clients.route.ts`. 100% call-site coverage. |
+| **P4.1** | Dead audit enum values | **✅ Done (2026-08-22).** `ROLE_*` + `DELEGATION_*` removed from `AuditLogAction`; migration `20260822000000_remove_dead_audit_enum_values`. The two `API_KEY_*` values were later added for API-key auditing, so the enum currently holds **53** values. `OAUTH_CLIENT_UPDATED` audit call wired in `clients.route.ts`. 100% call-site coverage. |
 | **P4.2** | CI secret + dependency scanning | **✅ Done (2026-08-19).** `scan-secrets.ts` wired to CI (`pnpm scan:secrets` in ci.yml); Trivy dependency/vuln scan added to ci.yml. Secrets/PII-in-logs now scanned in CI. |
 | **P4.3** | SDK `TenantSdk.create()` coverage | ⏸️ **Carried to v2.** `sdk.test.ts` (6 tests) doesn't cover `TenantSdk.create()` or its token-injection fix; no changeset. Low-risk gap, not blocking v1. |
 | **P4.4** | Frontend chain-rule violations | **✅ Done (2026-08-21).** Verified: NO `src/app` page imports the sovgrant SDK (`@/sdk`) directly - only `use-*` hooks + `facet-store` hooks + facet UI (`login`/`register` on `@fusorb/facet-auth`, `billing` via `useBilling()`). `src/components/` purged to facet (no frontend `as any`). Chain rule (page → hook → store → SDK) enforced. |
@@ -269,25 +269,27 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 
 ## Test coverage detail
 
-### 61 test files, 342 tests - modules with coverage
+### 70 test files, 386 tests - modules with coverage
 
-> All 61 files pass on `pnpm test`. Typecheck clean (`tsc --noEmit`).
+> All 70 files pass on `pnpm test`. Typecheck clean (`tsc --noEmit`).
 
-| Module | Test files | Tests | Source files | Coverage breadth |
-|--------|-----------|-------|-------------|-----------------|
-| `auth` | 14 | 76 | 38 | All 13 flows covered (login, register, logout, email-verify, magic-link, mfa-setup/verify, passkey-register/auth, password-reset-request/confirm, set-username, switch-context) + session.service + `session.route` (DELETE /sessions/:id - 3 tests) |
-| `credentials` | 7 | 55 | 20 | Issue/verify/offer/revoke flows + route-level (offer, verify-session, verify-present) + status-list service |
-| `oauth` | 6 | 47 | 21 | authorize.flow, token-exchange.flow, token-refresh.flow, token-revoke.flow, revoke-token-by-id.flow + token.service |
-| `tenant` | 7 | 27 | 22 | create-tenant, add-member, remove-member, provision-tenant-did + did.route + cross-tenant-isolation (HTTP + unit) |
-| `identity` | 6 | 24 | 20 | register-wallet-did, delete-account, update-profile, link/list/unlink-external-id |
-| `idp` | 1 | 3 | 4 | federatedLogin service |
-| `billing` | 1 | 11 | 5 | subscription.route (Paystack + Stripe webhooks) |
-| `audit` | 1 | 3 | 7 | query-audit-logs flow |
-| `webhooks` | 1 | 6 | 4 | webhook-config route |
-| `lib/*` | 8 | 55 | ~15 | url-safety, rbac, password-rules, jws-proof, jti-blocklist (3 files, inc. Redis), kms |
-| `test-utils` | 2 | 5 | 2 | test-infra + sanity |
-| `sdk` | 1 | 4 | 1 | `src/sdk/index.ts` singleton wiring over `@fusorb/facet-sdk` - exports + client token round-trip |
-| `root` | 1 | 1 | - | root sanity test |
+| Module | Test files | Tests | Coverage breadth |
+|--------|-----------|-------|-----------------|
+| `auth` | 15 | 80 | All 13 flows covered (login, register, logout, email-verify, magic-link, mfa-setup/verify, passkey-register/auth, password-reset-request/confirm, set-username, switch-context) + session.service + `session.route` (DELETE /sessions/:id) |
+| `credentials` | 10 | 69 | issue/verify/offer/revoke/list flows + route-level (offer, list, verify-session, verify-present) + status-list service |
+| `oauth` | 6 | 47 | authorize.flow, token-exchange.flow, token-refresh.flow, token-revoke.flow, revoke-token-by-id.flow + token.service |
+| `tenant` | 7 | 27 | create-tenant, add-member, remove-member, provision-tenant-did + did.route + cross-tenant-isolation (HTTP + unit) |
+| `identity` | 9 | 43 | register-wallet-did, delete-account, update-profile, link/list/unlink-external-id, verify-identifier, confirm-identifier + external-id.verify route |
+| `api-key` | 4 | 16 | api-key.service + create/list/revoke flows |
+| `idp` | 1 | 3 | federatedLogin service |
+| `billing` | 1 | 11 | subscription.route (Paystack + Stripe webhooks) |
+| `audit` | 1 | 3 | query-audit-logs flow |
+| `webhooks` | 1 | 6 | webhook-config route |
+| `lib/*` | 8 | 55 | url-safety, rbac, password-rules, jws-proof, jti-blocklist (3 files, inc. Redis), kms |
+| `test-utils` | 2 | 5 | test-infra + sanity |
+| `sdk` | 1 | 6 | `src/sdk/index.ts` singleton wiring over `@fusorb/facet-sdk` - exports + client token round-trip |
+| `packages/cli` | 3 | 10 | safe-writer (6), init round-trip (2), detection (2) |
+| `prisma/migrations` | 1 | 5 | `rollback.test.ts` (migration chain integrity) |
 
 ### Modules with zero test coverage (14 files, all low-to-medium risk)
 
@@ -314,7 +316,7 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 |-------|--------|--------|
 | Cross-tenant isolation (HTTP + unit) | ✅ **Verified** | `cross-tenant-http.test.ts` - 3 HTTP-layer tests. `cross-tenant-isolation.test.ts` - 3 flow-level unit tests (mock fixed: `upsert`/`findMany`/`findUniqueOrThrow` + `auditLog.create`). All 6 tests pass clean with no audit-noise errors. |
 | Rate limiting per route | ✅ Verified | Every auth-sensitive route has `config: { rateLimit }` - login (10/min), register (5/hr), magic-link (3/15min), MFA (5/5min), password (5/15min), step-up (5/5min), verify-session (30/min), verify-present (30/min) |
-| Audit logging - called actions | ✅ 100% | 51 enum values in `AuditLogAction` (ROLE_* + DELEGATION_* removed). Call sites verified for all actions. `OAUTH_CLIENT_UPDATED` audit call wired in `clients.route.ts`. `PASSWORD_RESET_REQUESTED` audit call was missing - added. `magic-link.flow.ts` had zero audit calls - `SESSION_CREATED` + `USER_LOGIN_SUCCESS` added. |
+| Audit logging - called actions | ✅ 100% | 53 enum values in `AuditLogAction` (`ROLE_*` + `DELEGATION_*` removed; `API_KEY_*` added). Call sites verified for all actions. `OAUTH_CLIENT_UPDATED` audit call wired in `clients.route.ts`. `PASSWORD_RESET_REQUESTED` audit call was missing - added. `magic-link.flow.ts` had zero audit calls - `SESSION_CREATED` + `USER_LOGIN_SUCCESS` added. |
 | Secrets/PII in logs | ✅ **Verified** | `scan-secrets.ts` runs in CI (`pnpm scan:secrets`) - scans source/log strings for plaintext credentials and PII |
 | CORS config | ✅ Verified | Restricted to `config.base.allowedOrigins` (env-driven), not wildcard |
 | Token revocation (blockJti + revokedJti) | ✅ **Verified** | Both called together in all revoke paths. Introspect route now checks Redis + DB (was DB-only). |
@@ -323,7 +325,7 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 | SSRF allowlist (network-level) | ✅ **Verified** | `assertSafeUrl()` already has full network-layer private-IP blocks (RFC1918, loopback, link-local, CGNAT, IPv6 ULA) + DNS rebinding defence + `fetchWithSsrfGuard` redirect protection - verified 2026-07-26 |
 | CSRF protection | ✅ **Verified** | Only cookie-mutating routes are OAuth state cookies in `social.route.ts` - all `sameSite: "lax"` + `httpOnly` + `secure` + 600s TTL + cleared after use. All other routes return tokens in JSON body (no cookies). CORS restricted to `config.base.allowedOrigins`. |
 | Docker compose | ✅ **Exists** | `docker-compose.yml` - 4 services (postgres 17-alpine, redis 7-alpine, api, workers) with health checks + mem limits |
-| Integration tests against real Postgres | ✅ **Unblocked (facet shipped 2026-08-19)** | All tests are unit/mock-level with `createMockDb`. SDK tests (73) run against `fastify.inject()` with mock DB, covering the full API surface. No longer blocked by facet shipping; requires `testcontainers` or enhanced CI service container config |
+| Integration tests against real Postgres | ✅ **Unblocked (facet shipped 2026-08-19)** | All tests are unit/mock-level with `createMockDb`; route-level tests run against `fastify.inject()` with a mock DB, covering the full API surface. No longer blocked by facet shipping; requires `testcontainers` or enhanced CI service container config |
 | Migration rollback test | ✅ **Exists** | `rollback.test.ts` (Tier-1, runs in `pnpm test`) + `pnpm test:rollback` opt-in (Tier-2, needs live Postgres) |
 | Dependency/secret scanning in CI | ✅ **Verified** | `ci.yml`: Trivy dependency/vulnerability scan + `pnpm scan:secrets` (secrets/PII) on every run |
 | Production Dockerfile | ✅ **Exists** | Multi-stage (deps → builder → runner), node:22-alpine, auto-migrate entrypoint, 150MB |
@@ -334,7 +336,7 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 
 Current: `0.1.0` (package.json). Pre-release - no stability promises.
 
-- `0.1.0` ✅ **COMPLETE** (v1) - Backend complete: all Phase 0–8 + Phase E shipped; 62 test files / 358 tests, 0 code failures. Docker, security hardening, observability, LegalConsent + ExternalIdentifier gates all shipped.
+- `0.1.0` ✅ **COMPLETE** (v1) - Backend complete: all Phase 0–8 + Phase E shipped; 70 test files / 386 tests, 0 code failures. Docker, security hardening, observability, LegalConsent + ExternalIdentifier gates all shipped.
 - `0.2.0` 🔄 **ACTIVE (v2)** - SovPort companion app integration (end-to-end), CLI package extraction, integration tests against real Postgres. **API key management backend ✅ Done** (CRUD flows + routes, SHA-256 hashed bearer tokens, auth guard extension, migration + Tier 1 rollback tests).
 - `1.0.0` — Stable production milestone: full integration test suite, open-source release
 

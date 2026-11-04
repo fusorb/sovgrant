@@ -12,13 +12,13 @@ Identity verification today is siloed per institution. A student re-proves who t
 
 SovGrant is a **Fastify + PostgreSQL (Prisma)** backend with a **Next.js 16** admin dashboard. All state below is verified against source and CI.
 
-**Authentication** — email/password (bcrypt), WebAuthn passkey registration & authentication, TOTP MFA, magic links. Per-tenant policy enforcement (session TTL, max concurrent sessions, required MFA, allowed email domains, password rules).
+**Authentication** — email/password (argon2id), WebAuthn passkey registration & authentication, TOTP MFA, magic links. Per-tenant policy enforcement (session TTL, max concurrent sessions, required MFA, allowed email domains, password rules).
 
 **OAuth2 / OIDC** — full authorization code + PKCE flow, JWKS, token introspection, refresh-token rotation with reuse detection. OIDC discovery + userinfo endpoints. Social login (Google, GitHub, Apple, Microsoft) via `arctic`.
 
-**Verifiable Credentials** — SD-JWT issuance (with `requireLegalConsent` and `ExternalIdentifier.verified` gates) and revocation, `did:web` and `did_key` resolution, tenant-owned signing keys (KMS-encrypted at rest). Presentation protocol: `/verify/session` creates a challenge, `/verify/present` accepts a JWS-signed proof — anti-replay enforced (single-use sessions, 5-min TTL).
+**Verifiable Credentials** — SD-JWT issuance (with `requireLegalConsent` and `ExternalIdentifier.verified` gates) and revocation, `did:web` and `did:key` resolution, tenant-owned signing keys (KMS-encrypted at rest). Presentation protocol: `/verify/session` creates a challenge, `/verify/present` accepts a JWS-signed proof — anti-replay enforced (single-use sessions, 5-min TTL).
 
-**Multi-tenancy & RBAC** — tenant/project structure, membership with plan-based member caps, database-backed permissions (18 seeded actions), fine-grained access control.
+**Multi-tenancy & RBAC** — tenant/project structure, membership with plan-based member caps, database-backed permissions (22 seeded actions), fine-grained access control.
 
 **External identifiers** — linking of secondary identifiers (phone, NIN, BVN, etc.) to an identity, hashed at rest, with confirmation flows.
 
@@ -38,7 +38,7 @@ SovGrant is a **Fastify + PostgreSQL (Prisma)** backend with a **Next.js 16** ad
 
 ### Verification
 
-- **71 test files / 387 tests / 0 failures** (`pnpm test`)
+- **70 test files / 386 tests / 0 failures** (`pnpm test`)
 - **Typecheck clean** (`tsc --noEmit`)
 - **Migration chain integrity** verified (no-drift rollback tests)
 - CI pipeline: install → prisma generate → schema validate → typecheck → lint → secret scan → trivy → test → rollback guard → build

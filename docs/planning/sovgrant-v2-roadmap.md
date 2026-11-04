@@ -1,7 +1,7 @@
 # SovGrant v2 Roadmap
 
 > **Status**: Active development. v1 (0.1.0 backend) is **COMPLETE**.
-> Last updated: 2026-09-01.
+> Last updated: 2026-11-04.
 > Companion to CLAUDE.md (canonical handbook, single source of truth for
 > status tables and rationale).
 
@@ -9,7 +9,7 @@
 
 ## 🟢 v1 — COMPLETE (0.1.0)
 
-Backend complete. All Phase 0–8 + Phase E shipped. 62 test files / 358 tests / 0 code failures. Typecheck clean on `tsc --noEmit`.
+Backend complete. All Phase 0–8 + Phase E shipped. 70 test files / 386 tests / 0 code failures. Typecheck clean on `tsc --noEmit`.
 
 | Area | Status | Notes |
 |------|--------|-------|
@@ -17,12 +17,12 @@ Backend complete. All Phase 0–8 + Phase E shipped. 62 test files / 358 tests /
 | OAuth2/OIDC provider | ✅ | Auth code + PKCE, refresh rotation, introspection, revocation, JWKS, discovery, userinfo |
 | Verifiable Credentials (SD-JWT) | ✅ | Issue (E1, E2 gates), verify, presentation/exchange |
 | did:web + did:key | ✅ | Per-tenant DID resolution, KMS-encrypted signing keys |
-| Multi-tenant RBAC | ✅ | 19 seeded permissions, 16 permission-gated routes |
+| Multi-tenant RBAC | ✅ | 22 seeded permissions, 22 permission-gated call sites across 10 route files |
 | SAML2 + OIDC federation | ✅ | `idp` module — outbound SP-initiated federation |
 | Webhooks | ✅ | HMAC-signed delivery, retry, test-ping |
 | Sessions + revocation | ✅ | Redis-backed distributed revocation (`blockJti` + `revokedJti`) |
 | Tenant policy | ✅ | 6 enforced fields (requireMfa, maxSessionsPerUser, sessionTtlMinutes, allowedEmailDomains, allowPasskeys, requireLegalConsent) |
-| Audit logging | ✅ | 51 AuditLogAction enum values, 100% call-site coverage |
+| Audit logging | ✅ | 53 AuditLogAction enum values, 100% call-site coverage |
 | Rate limiting | ✅ | Per-route, per-IP, on all auth-sensitive endpoints |
 | CORS | ✅ | Restricted to `allowedOrigins` env |
 | Secrets/PII in logs | ✅ | CI secret + PII scan enforced |
@@ -35,8 +35,8 @@ Backend complete. All Phase 0–8 + Phase E shipped. 62 test files / 358 tests /
 | LegalConsent gate | ✅ | Wired in `issue-credential.flow.ts` (E2) |
 | ExternalIdentifier gate | ✅ | Wired in `issue-credential.flow.ts` (E1) |
 | Frontend rebuild | ✅ | Facet migration Phases 0–6 + E complete (2026-08-19) |
-| SDK | ✅ | Published `@fusorb/facet-sdk@1.1.0`, class-based `AuthSdk`/`TenantSdk`/etc. |
-| CLI | ✅ | Package scaffolded (`packages/cli`) on `@fusorb/facet-cli@0.8.0` |
+| SDK | ✅ | Published `@fusorb/facet-sdk@2.1.1`, class-based `AuthSdk`/`TenantSdk`/etc. |
+| CLI | ✅ | `packages/cli` (`@fusorb/sg-cli`, bins `sg` + `sovgrant`) — standalone (commander + clack); does not consume `@fusorb/facet-cli`'s core (facet-cli is a globally-installed tool, not a per-repo dependency) |
 
 **v1 is closed.** All items in `sg-v1-roadmap.md` are resolved. That file
 has been removed; this document supersedes it.
@@ -80,7 +80,7 @@ contract stabilized for the CLI package.
 | # | Item | Priority |
 |---|------|----------|
 | 1 | Full integration test suite against live Postgres 17 | P0 |
-| 2 | ArcVerify — verifier-facing counterpart (presentation verification endpoint) | P0 |
+| 2 | Verifier surface — document the public contract for the built `/verify/session` + `/verify/present` endpoints (SovPort is the first consumer; third parties call the same API). No separate "ArcVerify" product. | P1 |
 | 3 | Open-source release (repo public, license, contribution guide) | P0 |
 | 4 | Credential revocation via status lists (RFC 9397) | P1 |
 | 5 | Production monitoring: alerting on rate-limit breaches, audit-log volume drops | P1 |
@@ -107,7 +107,7 @@ contract stabilized for the CLI package.
 
 ## CLI + SDK packages
 
-- **SDK** — published `@fusorb/facet-sdk@1.1.0` (class-based `AuthSdk`,
+- **SDK** — published `@fusorb/facet-sdk@2.1.1` (class-based `AuthSdk`,
   `TenantSdk`, `OAuthSdk`, `CredentialSdk`, `WebhookSdk`). `src/sdk/index.ts`
   is a thin singleton that owns the `SgClient` + 401 auto-refresh (wired to
   the Zustand auth store) and re-exports the facet domain SDKs.

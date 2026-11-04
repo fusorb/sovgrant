@@ -20,7 +20,7 @@ line, no cross-repo coordination, apps stay thin.
 ```
 facet monorepo (single versioning + publish)
 ├─ @fusorb/facet-sdk        headless client (pure fetch, zero UI)
-├─ @fusorb/facet-store      framework-agnostic stores (zustand) + injectable persistence [DONE - @fusorb/facet-store@^0.1.0, src/store/ deleted]
+├─ @fusorb/facet-store      framework-agnostic stores (zustand) + injectable persistence [DONE - @fusorb/facet-store@1.0.4, src/store/ deleted]
 ├─ @fusorb/facet-cli        the CLI (docs/emails init, add, icons, pkg/doctor/update/up)
 ├─ @fusorb/facet-components UI kit (React + Radix, incl. animation family)
 ├─ @fusorb/facet-layout     shells (Console/Auth/Landing)
@@ -72,14 +72,13 @@ architecture convention:
 - **SDK**: pure fetch, dependency-free, typed domain classes
   (`AuthSdk`, `TenantSdk`, `VcSdk`, `OAuthSdk`, `PasskeySdk`, `IdpSdk`,
   ...). Works in browser, Node, edge. No React.
-- **Store** (planned): zustand stores extracted from sovgrant
-  (`auth.store`, `tenant.store`). Framework-agnostic. Token persistence
-  via an injected adapter interface. React agnostic. The stores are
-  PURE today (auth imports only `create` + the `User` type; tenant
-  imports only `create`) - fully extractable as-is.
-- **Hooks**: stay in the consumer for now. The 13 use-* hooks import
-  `@/sdk` (the app wiring singleton) + `@/store/*` - app-specific glue
-  (base URL, localStorage keys, 401 refresh). They are NOT extractable
+- **Store** (shipped: `@fusorb/facet-store@1.0.4`): zustand stores extracted
+  from sovgrant (`auth.store`, `tenant.store`). Framework-agnostic. Token
+  persistence via an injected adapter interface. React agnostic. The stores
+  import only `create` + the `User`/`Tenant` types.
+- **Hooks**: stay in the consumer for now. The 15 use-* hooks import
+  `@/sdk` (the app wiring singleton) + `@fusorb/facet-store` - app-specific
+  glue (base URL, localStorage keys, 401 refresh). They are NOT extractable
   until a dependency-inversion refactor makes the client injectable.
   Web/mobile devs own their hooks; the store is the shared agnostic
   layer.

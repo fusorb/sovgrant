@@ -5,11 +5,10 @@
 > and the implementation in `packages/cli` (Phase 1). Retained as historical
 > basis only.
 
-> Status: **Planned** (per `sovgrant-v2-roadmap.md`: "CLI package extraction"
-> rebuild stabilises API contract"). This doc is the initiated basis: the command
-> surface, the consumer-wiring detection, the scaffold safety model, and how it
-> reuses the facet CLI's shared command core. Code work starts once the API
-> contract is stable.
+> **Status: Planned (historical only).** Kept as the original design intent. The
+> shipped implementation in `packages/cli` is **standalone** and does not consume
+> `@fusorb/facet-cli`'s command core (facet-cli is a globally-installed tool, not
+> a per-repo dependency) - see the note under "Package shape".
 
 ---
 
@@ -25,17 +24,19 @@ without clobbering their work.
 ## Package shape
 
 ```
-@fusorb/sg-cli        (this repo, packages/cli, bin: "sovgrant")
-  └── reuses @fusorb/facet-cli's published command core:
-      lib/commands.ts     registry resolver, doctor report, update planner
-      lib/types.ts        package-manager + monorepo/workspace detection
-      lib/writer.ts       safe file writes (patch package.json, never clobber)
-      lib/generators-plain.ts  add-component layout + barrel merge
+@fusorb/sg-cli        (this repo, packages/cli, bins: "sg" + "sovgrant")
+  ⚠️ NOT FOLLOWED — the plan below was to reuse @fusorb/facet-cli's command core.
+  The shipped CLI is standalone (commander + @clack/prompts), with its own:
+      src/commands/   init, doctor, migrate, setup sdk|tenant, revert
+      src/detect/     package, db, env, existing-code
+      src/adapters/   postgres, cockroach
+      src/safety/     safe-writer, manifest, revert
+      src/templates/  inline .env / SgClient wiring / integration md
 ```
 
-The facet CLI already ships `pkg` / `doctor` / `update` and a docs scaffold. The
-sg CLI adds the identity-domain commands on top of that core rather than
-reimplementing it.
+`@fusorb/facet-cli` is a globally-installed tool (not a per-repo dependency), so
+it does not appear in `package.json`/`node_modules` here by design. The sg CLI did
+not build on its command core - it is standalone.
 
 ## Command surface (planned)
 
@@ -106,7 +107,7 @@ reimplementing it.
 
 ## Gating / sequencing
 
-1. **Now**: this design doc is the basis (frontend rebuild still in flight).
-2. After API contract stabilises: scaffold `packages/cli` in this repo, reuse
-   `@fusorb/facet-cli` core, implement `init` → `doctor` → `migrate` → `setup`.
-3. Then: `pkg`/`update`/`add` inheritance + hosted docs.
+1. **Done** — frontend rebuild finished; `packages/cli` scaffolded and shipped (Phase 1).
+2. **Done, with a change** — `init` → `doctor` → `migrate` → `setup` (plus `revert`)
+   shipped, but **standalone** (no `@fusorb/facet-cli` core).
+3. **Open** — `pkg`/`update`/`add` inheritance + hosted docs (`docs/sg-cli/*` not yet shipped).
