@@ -59,6 +59,9 @@ ArcevoCirqle_Design_Standards_Manual_v1.0..txt
 # agent state / scratch artifacts
 # .agent/
 
+# secret-purge working files (git filter-repo --replace-text maps - never commit)
+replacements*.txt
+
 # local e2e harness
 /scratch-e2e/
 
