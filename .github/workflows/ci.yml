@@ -76,6 +76,12 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: CLI typecheck
+        run: pnpm cli:typecheck
+
+      - name: CLI build
+        run: pnpm cli:build
+
       - name: Migration rollback guard (live Postgres)
         run: pnpm test:rollback
         env:
