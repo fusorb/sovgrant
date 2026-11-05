@@ -17,7 +17,6 @@ export async function runMigrate(opts: MigrateOptions = {}) {
   }
 
   const deploy = Boolean(opts.deploy);
-  const cmd = deploy ? "deploy" : "dev";
   const args = deploy ? ["prisma", "migrate", "deploy"] : ["prisma", "migrate", "dev"];
 
   if (!opts.yes) {

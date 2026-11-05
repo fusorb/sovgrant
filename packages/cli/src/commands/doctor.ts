@@ -20,7 +20,8 @@ export async function runDoctor(opts: DoctorOptions = {}) {
   // Env required
   checks.push({
     name: "package.json",
-    ok: detection.frontendStack !== "unknown" || true,
+    ok: detection.frontendStack !== "unknown",
+    warn: true,
     detail: `stack=${detection.frontendStack}`,
   });
 

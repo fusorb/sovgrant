@@ -46,8 +46,9 @@ setup
   .command("sdk")
   .description("Generate SgClient + env wiring for a frontend.")
   .option("--cwd <dir>", "working directory", process.cwd())
+  .option("--force", "overwrite the wiring file if it already exists (backs up first)")
   .action(async (opts) => {
-    await runSetupSdk({ cwd: opts.cwd });
+    await runSetupSdk({ cwd: opts.cwd, force: opts.force });
   });
 setup
   .command("tenant")

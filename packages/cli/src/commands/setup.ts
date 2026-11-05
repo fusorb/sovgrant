@@ -6,7 +6,7 @@ import { detect } from "../detect/index.js";
 import { safeWrite } from "../safety/index.js";
 import { SDK_WIRING_NEXT } from "../templates/index.js";
 
-export interface SetupOptions { cwd?: string; target?: string; }
+export interface SetupOptions { cwd?: string; target?: string; force?: boolean; }
 
 export async function runSetupSdk(opts: SetupOptions = {}) {
   const root = path.resolve(opts.cwd ?? process.cwd());
@@ -21,7 +21,7 @@ export async function runSetupSdk(opts: SetupOptions = {}) {
   const res = await safeWrite({
     root,
     file: { relativePath: relPath, content: SDK_WIRING_NEXT },
-    force: false,
+    force: Boolean(opts.force),
   });
   if (res.action === "skipped") {
     p.log.warn(`${res.path} already exists; not overwriting. Use --force to overwrite.`);
