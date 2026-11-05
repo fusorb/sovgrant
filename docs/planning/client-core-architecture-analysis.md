@@ -149,3 +149,35 @@ backend shape. The 401 auto-refresh re-entrancy guard lives here.
 - Hooks stay in-app until the injectable-client refactor; web/mobile
   devs own their hooks.
 - CLI v1 surface: docs/emails init, add, icons, pkg/doctor/update/up.
+
+## 9. Facet consumption decisions (SovGrant, decided 2026-11-04)
+
+These are *deliberate* divergences from the facet packages, not drift. Each was
+re-verified against the installed packages before being recorded here.
+
+- **TokenStorage is hand-rolled, not `createZustandTokenStorage`.**
+  `src/providers/facet-auth-bridge.ts` builds a `TokenStorage` by hand even though
+  `@fusorb/facet-store` exports `createZustandTokenStorage()`. The reason is
+  behavioural: `SgProvider` calls `clearTokens()` during its initial session-check
+  when `me()` fails (e.g. an expired token), and the store helper clears auth state
+  on that call. Here `clearTokens()` deliberately only clears the SDK client token,
+  so a session restored from `localStorage` is not wiped on mount. Full cleanup is
+  the SDK's `onAuthCleared` path instead. **Do not "align" this without re-testing
+  session restore.**
+- **Local icon registry, not facet's `registerIcon`/`IconProvider`.**
+  `src/components/ui/icon.tsx` + `icons.generated.tsx` keep a generated, tree-shaken
+  map. facet-components' registry is available but pulls the whole catalog.
+- **Local console sidebar footer.** `src/components/console-sidebar-footer.tsx`
+  composes the avatar/popover/sign-out directly instead of facet-layout's
+  `SidebarAuth`/`UserMenu`. Known divergence — revisit only if that surface needs
+  consolidation.
+- **`IdpSdk` is instantiated but unused.** `src/sdk/index.ts` wires the full facet
+  domain-SDK surface; the IdP admin UI simply does not exist yet. Not dead code —
+  it is the wiring point's completeness.
+- **`facet-docs` removed (2026-11-04).** It was installed with zero imports and a
+  `react-router-dom` transitive tree. Re-add it if/when a docs site is built on it.
+- **`facet-cli` is global-only.** Installed on the machine as a universal tool, never
+  a per-repo dependency. `@fusorb/sg-cli` is standalone and does not consume its core.
+- **Consumption policy:** prefer an existing facet export over a new local
+  implementation; treat large unused export surface as *available*, not *owed*.
+
