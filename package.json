@@ -56,7 +56,6 @@
     "@fastify/under-pressure": "^9.1.0",
     "@fusorb/facet-auth": "2.1.0",
     "@fusorb/facet-components": "3.2.1",
-    "@fusorb/facet-docs": "1.5.12",
     "@fusorb/facet-emails": "1.1.4",
     "@fusorb/facet-layout": "1.7.2",
     "@fusorb/facet-sdk": "2.1.1",

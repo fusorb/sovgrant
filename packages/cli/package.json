@@ -8,6 +8,9 @@
     "sovgrant": "./dist/index.js"
   },
   "main": "./dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsup",
@@ -18,16 +21,11 @@
   "dependencies": {
     "@clack/prompts": "^0.9.0",
     "commander": "^12.1.0",
-    "diff": "^7.0.0",
     "execa": "^9.5.0",
-    "fast-glob": "^3.3.2",
-    "fs-extra": "^11.3.0",
-    "picocolors": "^1.1.1",
-    "zod": "^4.0.0"
+    "pg": "^8.23.0",
+    "picocolors": "^1.1.1"
   },
   "devDependencies": {
-    "@types/diff": "^7.0.0",
-    "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.19.0",
     "tsup": "^8.5.0",
     "tsx": "^4.23.0",
