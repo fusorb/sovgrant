@@ -16,7 +16,7 @@ Version `0.1.0` in package.json (pre-release, no stability promises).
 Package manager is **pnpm**. Module system is **ESM only** (`"type": "module"`
 in package.json) - never emit `require()`/`module.exports`.
 
-**Test suite:** 70 files / 386 tests / 0 code failures on `pnpm test` (all passing clean on Windows; the count includes the 10 `packages/cli` tests - route-level + Prisma imports dominate). Migration-rollback Tier-2 is opt-in via `pnpm test:rollback` (needs a live Postgres). Typecheck clean (`tsc --noEmit`). Updated 2026-11-04.
+**Test suite:** 70 files / 386 tests / 0 code failures on `pnpm test` (all passing clean on Windows; the count includes the 10 `packages/cli` tests - route-level + Prisma imports dominate). Migration-rollback Tier-2 is opt-in via `pnpm test:rollback` (needs a live Postgres). Typecheck clean (`tsc --noEmit`). Updated 2026-11-05.
 
 ## Non-negotiable architecture rules (same - stable)
 
@@ -98,13 +98,14 @@ shipped. See `CLAUDE.md` for the full verified status table. Open work:
   Phase 5: layouts on **`@fusorb/facet-layout@1.7.2`** (`AuthLayout` +
   `ConsoleLayout`). Phase 6 purge is FULLY done (2026-08-19) - `src/components/auth/` deleted;
   `forgot-password-form`/`reset-password-form` now on `@fusorb/facet-auth` (ForgotPasswordForm/ResetPasswordForm).
-All eight facet packages pinned (exact): sdk 2.1.1, auth 2.1.0, components 3.2.1,
-   layout 1.7.2, tokens 1.5.1, emails 1.1.4, store 1.0.4, docs 1.5.12.
+All seven facet packages pinned (exact): sdk 2.1.1, auth 2.1.0, components 3.2.1,
+   layout 1.7.2, tokens 1.5.1, emails 1.1.4, store 1.0.4.
    `@fusorb/facet-cli` is **not** a per-repo dependency — it is installed
    globally on the machine as a universal tool, so it never appears in
    `package.json`/`node_modules`. `packages/cli` (`@fusorb/sg-cli`) is standalone
    (commander + clack) and does **not** consume facet-cli's command core.
-   `facet-docs` is currently an orphaned dependency (installed, zero imports).
+   `@fusorb/facet-docs` was dropped (installed with zero imports) — it appears
+   nowhere in `package.json`/`pnpm-lock.yaml`.
 - **Phase 3 - Security hardening** - ✅ **Closed (2026-07-28).** Cross-tenant HTTP integration test added (3 tests, fastify.inject, passes). SSRF call-site gaps (4/4 closed: idp.route OIDC discovery + token endpoint, webhook test-ping, SAML entryPoint). CSRF review complete - only OAuth state cookies in social.route.ts, all `sameSite: "lax"` + `httpOnly` + `secure`. Redis-backed distributed revocation done - `AccessToken.sessionId` column + migration + `DELETE /sessions/:id` revokes bound access tokens + blocks JTIs in Redis (full kill chain).
 - **Phase 4 - Observability** - ✅ **Shipped (2026-07-28).** Correlation IDs through `FlowContext.requestId` → audit log metadata. `@fastify-metrics` at `GET /metrics`. Pino structured logs carry traceId on every flow init/ok/fail.
 - **CLI package** - Phase 1 implemented in `packages/cli` (`@fusorb/sg-cli`,

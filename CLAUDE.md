@@ -1,6 +1,6 @@
 # SovGrant - Claude Code Handbook
 
-> Verified against actual source on 2026-11-04. Do not trust claims from
+> Verified against actual source on 2026-11-05. Do not trust claims from
 > prior docs that aren't re-confirmed below - every status line here was
 > checked against running tests or live source files, not old summaries.
 
@@ -23,7 +23,7 @@ Fastify + Prisma + Next.js 16 monorepo (pnpm, ESM-only).
 - Email via Resend (13 templates, React Email components; static template gallery at :3888, auth emails delivered to recipient inbox)
 - SMS via Brevo (transactional SMS for MFA codes + security alerts)
 
-**Test suite: 70 files / 386 tests / 0 code failures** - all passing clean (`pnpm test`; the count includes the 10 `packages/cli` tests), ~90s runtime on Windows (route-level + Prisma import chains dominate). Updated 2026-11-04.
+**Test suite: 70 files / 386 tests / 0 code failures** - all passing clean (`pnpm test`; the count includes the 10 `packages/cli` tests), ~110s runtime on Windows (route-level + Prisma import chains dominate). Updated 2026-11-05.
 
 ---
 
@@ -55,8 +55,8 @@ sovgrant/
 │   │   ├── idp/       # SAML2 + OIDC federation connections
 │   │   ├── oauth/     # authorize, token, revoke, introspect, userinfo, clients, consent
 │   │   ├── tenant/    # CRUD, policy, members, signing keys, projects, onboarding
-│   │   └── webhooks/  # endpoint config + delivery event routes
-│   │   ├── api-key/   # CRUD flows + routes, SHA-256 hashed bearer tokens
+│   │   ├── webhooks/  # endpoint config + delivery event routes
+│   │   └── api-key/   # CRUD flows + routes, SHA-256 hashed bearer tokens
 │   ├── providers/     # React context - ThemeProvider, AuthProvider
 │   ├── sdk/           # Thin singleton wiring over @fusorb/facet-sdk (index.ts only)
 │   └── test-utils/    # Vitest setup + mock DB helpers
@@ -70,9 +70,12 @@ sovgrant/
 │   │   ├── testing-guide.MD          # Manual API test matrix (65 checks)
 │   │   ├── sovgrant-cli-design.md       # CLI basis (planned)
 │   │   ├── client-core-architecture-analysis.md  # Canonical client-core conventions
-│   │   └── presentation-envelope-design.md       # Presentation endpoint design (built, ref)
+│   │   ├── presentation-envelope-design.md       # Presentation endpoint design (built, ref)
+│   │   ├── deploy-plan.md                        # VPS provisioning + launch deploy steps
+│   │   ├── oauth-secrets-setup.md                # OAuth provider secret setup
+│   │   └── LAUNCH-AUDIT-AND-PLAN.md              # Pre-launch P0/P1 audit + countdown
 ├── .github/workflows/
-│   ├── ci.yml         # PR push CI: lint, typecheck, test, build (api+web)
+│   ├── ci.yml         # PR/push CI: typecheck, lint, secret+trivy scan, test, cli gates, rollback, build
 │   ├── deploy-api.yml # Fastify API deploy (GHCR push → SSH Docker Compose)
 │   └── deploy-web.yml # Next.js deploy (SSH git pull → pnpm build:web → PM2)
 ├── AGENTS.md          # Loaded every session - compressed rules
@@ -230,10 +233,10 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 | `setUsernameFlow` route | ✅ 100% | Registered in `auth.plugin.ts`, audit-logged, TOCTOU-safe |
 | Refresh token expiry vs replay | ✅ Fixed | `token-refresh.flow.ts` Step 2b: expired → clean "re-authenticate", revoked → kill-chain. Tested (9 tests) |
 | Email templates | ✅ 13 templates | All registered in `notification.service.ts`, compiled via React Email + Resend |
-| CI pipeline | ✅ 3 workflows (rewritten 2026-07-28) | `ci.yml` (self-hosted Postgres 17 service, no external DB), `deploy-api.yml` (GHCR push → SSH Docker Compose on target VM), `deploy-web.yml` (SSH git pull → pnpm build:web → PM2 restart) |
+| CI pipeline | ✅ 3 workflows (rewritten 2026-07-28; CLI gates added 2026-11-05) | `ci.yml` (GitHub `ubuntu-latest` runner + `postgres:17-alpine` service container, no external DB: validate → typecheck → lint → `scan:secrets` → Trivy → test → cli:typecheck → cli:build → migrate-rollback guard → build api+web), `deploy-api.yml` (GHCR push → SSH Docker Compose on target VM), `deploy-web.yml` (SSH git pull → pnpm build:web → PM2 restart) |
 | `GET /tenants` route | ✅ 100% | `list-tenants.route.ts` - returns all tenants the user has ACTIVE membership in, with role + plan |
 | SDK layer | ✅ **Migrated to `@fusorb/facet-sdk@2.1.1`** | `src/sdk/` is now `index.ts` only - an `SgClient` singleton (401 auto-refresh wired to the Zustand auth store) re-exporting the facet domain SDK classes (`AuthSdk`, `TenantSdk`, `VcSdk`, …). Old factory-pattern `src/sdk/*.sdk.ts` deleted (2026-08-05). |
-| UI components | ✅ **Migrated to `@fusorb/facet-components@3.2.1`** | shadcn/ui primitives purged; `src/components/ui/` retains 3 app-specific wrappers (`icon.tsx` tree-shaken `<Icon>`, `typewriter-text.tsx`, `icons.generated.tsx`). `src/lib/ui/icon-registry.ts` + `navigation.ts` deleted as duplicates. `cn` re-exported from `@/lib/utils`. Verified typecheck + 386 tests green (2026-11-04). |
+| UI components | ✅ **Migrated to `@fusorb/facet-components@3.2.1`** | shadcn/ui primitives purged; `src/components/ui/` retains 3 app-specific wrappers (`icon.tsx` tree-shaken `<Icon>`, `typewriter-text.tsx`, `icons.generated.tsx`). `src/lib/ui/icon-registry.ts` + `navigation.ts` deleted as duplicates. `cn` re-exported from `@/lib/utils`. Verified typecheck + 386 tests green (2026-11-05). |
 | Auth UI | ✅ **Migrated to `@fusorb/facet-auth@2.1.0`** | Login/register/mfa pages use `SignIn`/`SignUp`/`MfaDialog`; `SgProvider` bridged to the Zustand store via `zustandTokenStorage` (commit `d6f6707`). In-repo `login-form`/`register-form`/`mfa-form` deleted; forgot/reset password forms now on `@fusorb/facet-auth` (ForgotPasswordForm/ResetPasswordForm). |
 | Layout | ✅ **Migrated to `@fusorb/facet-layout@1.7.2`** | `(auth)` group uses `AuthLayout`, `console/` directory uses `ConsoleLayout`; in-repo sidebar/topbar/tenant-switcher deleted. |
 | CSS tokens | ✅ **Migrated to `@fusorb/facet-tokens@1.5.1`** | `tokens.css` imported before `globals.css` in `layout.tsx`; `:root` block removed from globals.css; sovgrant keeps its indigo primary via override. |

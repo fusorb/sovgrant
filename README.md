@@ -41,13 +41,13 @@ SovGrant is a **Fastify + PostgreSQL (Prisma)** backend with a **Next.js 16** ad
 - **70 test files / 386 tests / 0 failures** (`pnpm test`)
 - **Typecheck clean** (`tsc --noEmit`)
 - **Migration chain integrity** verified (no-drift rollback tests)
-- CI pipeline: install → prisma generate → schema validate → typecheck → lint → secret scan → trivy → test → rollback guard → build
+- CI pipeline: install → prisma generate → schema validate → typecheck → lint → secret scan → trivy → test → CLI typecheck + build → migration rollback guard → build (api + web)
 
 ## What's next (v2 roadmap)
 
 See `docs/planning/sovgrant-v2-roadmap.md` for the current planning document. In short:
 
-- **API keys** — backend CRUD routes + Prisma model (frontend UI stub removed; tracked for v2).
+- **API keys** — backend CRUD routes + Prisma model done (SHA-256 hashed bearer tokens); the console UI for managing them is still pending.
 - **CLI & SDK packages** — Phase 1 implemented in `packages/cli` (`@fusorb/sg-cli`, bin `sg`): init/doctor/migrate/setup/revert with Postgres + Cockroach adapters.
 - **SovPort integration** — end-to-end wallet connection for credential possession.
 - **Production hardening** — full integration test suite against live Postgres, open-source release.

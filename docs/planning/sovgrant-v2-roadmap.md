@@ -1,7 +1,7 @@
 # SovGrant v2 Roadmap
 
 > **Status**: Active development. v1 (0.1.0 backend) is **COMPLETE**.
-> Last updated: 2026-11-04.
+> Last updated: 2026-11-05.
 > Companion to CLAUDE.md (canonical handbook, single source of truth for
 > status tables and rationale).
 
@@ -17,7 +17,7 @@ Backend complete. All Phase 0–8 + Phase E shipped. 70 test files / 386 tests /
 | OAuth2/OIDC provider | ✅ | Auth code + PKCE, refresh rotation, introspection, revocation, JWKS, discovery, userinfo |
 | Verifiable Credentials (SD-JWT) | ✅ | Issue (E1, E2 gates), verify, presentation/exchange |
 | did:web + did:key | ✅ | Per-tenant DID resolution, KMS-encrypted signing keys |
-| Multi-tenant RBAC | ✅ | 22 seeded permissions, 22 permission-gated call sites across 10 route files |
+| Multi-tenant RBAC | ✅ | 22 seeded permissions, 25 permission-gated call sites across 11 route files |
 | SAML2 + OIDC federation | ✅ | `idp` module — outbound SP-initiated federation |
 | Webhooks | ✅ | HMAC-signed delivery, retry, test-ping |
 | Sessions + revocation | ✅ | Redis-backed distributed revocation (`blockJti` + `revokedJti`) |
