@@ -8,6 +8,7 @@
 
 - **Tests:** 386/386 passing (70 test files)
 - **Typecheck:** Passing (locally verified)
+- **Lint:** Clean - 0 errors (431 warnings tracked). `eslint.config.mjs` no longer lints generated trees; `no-explicit-any` / `no-unused-vars` / `react-hooks/set-state-in-effect` report as warnings. Before 2026-11-06 lint failed with 1275 errors, and because it ran before test in `ci.yml`, CI had never reached the test/build steps.
 - **Security:** Keys rotated to env; certs untracked; docker hardened (non-root, no exposed DB/Redis ports). ✅ **Git history purged (2026-11-06)** - the old DB password was redacted from every commit and the leaked `codebase_snapshot.txt` / `arcid_codebase_snapshot.txt` were removed from history; the repository was then deleted and recreated so GitHub no longer serves the old objects. Verified against a fresh clone of the remote: 0 occurrences. The credential should still be rotated - it was public.
 - **Device Approval:** Fully wired (pairing + MFA integration)
 - **All repos in sync:** sovgrant, sovport, facet
@@ -61,6 +62,7 @@
 
 | Item | Status | Action | Notes |
 |---|---|---|---|
+| Lint warning debt | TODO | Pay down the 431 warnings (`no-explicit-any` 364, plus unused-vars and `set-state-in-effect`) | Non-blocking; CI is green. Concentrated in tests, `next.config.ts` and `packages/cli`. |
 | Test coverage for device approval | TODO | Add more tests for new flows | Core flows have tests but could be better |
 | SSO/SAML polish | TODO | Improve SAML flows | Works but could be smoother |
 | SCIM support | TODO | Add SCIM for enterprise customers | Nice to have |
