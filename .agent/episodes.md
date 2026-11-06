@@ -161,9 +161,10 @@ How we fixed it (2026-11-04):
 What survived:
   The ceremony: secrets live in env, never in tracked files.
 
-State: working tree sanitized. **Git history still contains the password** — the
-  `git filter-repo` purge + force-push remains open (launch TODO P0). A working-tree
-  sanitize is not a history purge.
+State: complete (2026-11-06). The history purge landed — `git filter-repo`
+  redacted the password across every commit and dropped two leaked
+  `codebase_snapshot.txt` files; the repo was then deleted and recreated so the
+  host no longer serves the old objects. See EP 13.
 
 Lesson: rotating a secret in one file is not rotating it. Audit *every* tracked file
   that can carry it — env examples, compose defaults, docs — and never leave the purge
@@ -332,6 +333,45 @@ Lesson: separate the engine from its consumers before planning a deliverable. A
 
 ================================================================================
 
+EP 13 -- The Force-Push That Did Not Un-Publish
+--------------------------------------------------------------------------------
+What broke:
+  The planned purge ran and every local signal said it had worked. `git
+  filter-repo` redacted the DB password from every commit and removed the two
+  leaked `codebase_snapshot.txt` files; the rewritten `main` was force-pushed
+  with `--force-with-lease`; the branch was clean and the local history was
+  verified free of the secret.
+
+  The exposure was untouched. A force-push removes commits from a **branch**;
+  it does not remove them from the **host**. GitHub went on serving the
+  pre-purge commits by SHA (`GET /commits/<sha>` returned 200), and one of those
+  commits - `LAUNCH-AUDIT-AND-PLAN.md` - quoted the live password in its own
+  prose. The audit document was the widest copy of the secret we had.
+
+  Two further surprises fell out of the same check: the old remote history had
+  diverged from local with *identical subjects and identical dates* but
+  different SHAs (a rewrite fingerprint - 112 "behind" commits that were really
+  duplicates), and no cert/key file had ever been committed at all, so the
+  "RSA keys in history" item in the audit was a claim nobody had checked.
+
+How we fixed it (2026-11-06):
+  Deleted `fusorb/sovgrant` and recreated it, then pushed the purged history
+  into a repository with no prior objects. Verified the only way that counts -
+  cloned the fresh public remote and searched its entire history for both the
+  encoded and decoded forms of the secret: 0 occurrences, 0 snapshot commits.
+  The old SHA now returns 422 "No commit found".
+
+What survived:
+  All content. 139 commits, rewritten with identical trees - the working-tree
+  hash before and after the rewrite was byte-identical. Only history changed.
+
+Lesson: "purged" means the *host* no longer serves it, not that your local refs
+  moved. Verify against a fresh clone of the remote, never against your own
+  working copy. And never write a credential into a tracker to describe a leak -
+  you have just created one more copy, in the file most likely to be shared.
+
+================================================================================
+
 ## The Rule Chain (why these episodes exist)
 --------------------------------------------------------------------------------
   MANUAL        -- a fix lives in someone's head or an unshared script.
@@ -344,8 +384,8 @@ Lesson: separate the engine from its consumers before planning a deliverable. A
                    every push; the drift gates that keep this canon's claims honest.)
 
 The line that matters: if a fix is still MANUAL after it has been released, the release
-is a lie. Most episodes above promoted one fix at least one rung. The ones that did not
-(EP 06's history purge, EP 09's Phase 2) are listed as **open**, not as **done**.
+is a lie. Most episodes above promoted one fix at least one rung. EP 06's history purge
+was promoted to done in EP 13; EP 09's Phase 2 is still **open**, not **done**.
 
 Lesson: evolution, not perfection. Ship the manual fix so you can measure it, then
-  automate the thing that hurt. The next bug becomes EP 13.
+  automate the thing that hurt. The next bug becomes EP 14.

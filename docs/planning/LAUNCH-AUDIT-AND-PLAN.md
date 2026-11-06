@@ -8,7 +8,7 @@
 
 - **Tests:** 386/386 passing (70 test files)
 - **Typecheck:** Passing (locally verified)
-- **Security:** Keys rotated to env; certs untracked; docker hardened (non-root, no exposed DB/Redis ports). ⚠️ The old DB password was still in tracked `.env.example` (sanitized 2026-11-04) and remains in git history — P0 purge still open.
+- **Security:** Keys rotated to env; certs untracked; docker hardened (non-root, no exposed DB/Redis ports). ✅ **Git history purged (2026-11-06)** - the old DB password was redacted from every commit and the leaked `codebase_snapshot.txt` / `arcid_codebase_snapshot.txt` were removed from history; the repository was then deleted and recreated so GitHub no longer serves the old objects. Verified against a fresh clone of the remote: 0 occurrences. The credential should still be rotated - it was public.
 - **Device Approval:** Fully wired (pairing + MFA integration)
 - **All repos in sync:** sovgrant, sovport, facet
 
@@ -38,7 +38,7 @@
 
 | Item | Status | Action | Notes |
 |---|---|---|---|
-| Git history secrets | TODO | Purge old DB password & RSA keys from history with git filter-repo/BFG | The old DB password (its `replacements.txt` map is deleted) and old certs are still in git history - compromised if the repo goes public |
+| Git history secrets | ✅ Done (2026-11-06) | Purged with `git filter-repo`, then the repo was deleted and recreated | Old DB password redacted in all commits. No cert/key files were ever committed (verified). A fresh clone of the remote shows 0 occurrences. **Still rotate the credential** - it was publicly readable. |
 | Production secrets management | TODO | Move from .env to proper secrets (Docker secrets, or orchestrator env vars) | Update deploy workflows |
 | VPS provisioning | TODO | Set up Hetzner VPS per deploy-plan.md | Follow the plan we created |
 | Caddy/reverse proxy + TLS | TODO | Configure Caddy for HTTPS, firewall (80/443 only) | Production setup |
@@ -84,7 +84,7 @@
 
 **Week 1 (This week):**
 - [ ] Complete E2E test of device approval flow
-- [ ] Purge git history of secrets
+- [x] Purge git history of secrets (done 2026-11-06)
 - [ ] Add rate limiting to device approval endpoints
 - [ ] Add audit logging
 - [ ] Set up staging environment
@@ -111,7 +111,7 @@
 ## Immediate Next Steps
 
 1. **E2E test** - Start docker compose locally and test the full flow
-2. **Purge secrets from history** - Use git filter-repo
+2. ~~**Purge secrets from history**~~ - **done** (2026-11-06) via `git filter-repo` + repo recreate; rotate the exposed credential
 3. ~~**Add rate limiting** - Protect device approval endpoints~~ **done** (`device-approval.route.ts`)
 4. **Add audit logs** - For compliance/tracking
 
@@ -121,7 +121,7 @@ Let us start executing.
 # SovGrant Launch TODO
 
 ## P0 - Critical (Must do before launch)
-- [ ] **Purge git history of secrets** - Remove the old DB password and old RSA keys from git history using git filter-repo or BFG Repo-Cleaner
+- [x] **Purge git history of secrets** - Done 2026-11-06: `git filter-repo` redacted the old DB password and removed the leaked snapshot files, then the repository was deleted and recreated so no old objects remain. Credential rotation still outstanding.
 - [x] **Add rate limiting to device-approval endpoints** - Done: `device-approval.route.ts` sets per-route rate limits (create 5/min, poll 10/min, approve/reject 10/min).
 - [ ] **Add audit logging for device approval** - Log DEVICE_APPROVED, DEVICE_REJECTED, DEVICE_APPROVAL_EXPIRED events
 - [ ] **E2E test device approval flow** - Test full flow with actual pairing
