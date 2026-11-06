@@ -158,7 +158,7 @@ async function handleCallback(
       resolvedIdentity = existing.identity;
     } else {
       // Find or create an Identity for this email
-      let newIdentity = profile.email
+      const newIdentity = profile.email
         ? await tx.identity.findFirst({
             where: { primaryEmail: profile.email },
           })

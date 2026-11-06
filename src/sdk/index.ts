@@ -66,6 +66,7 @@ let refreshInFlight = false;
 // client → onTokenRefresh → authSdk → client.
 // `authSdk` is assigned after `client` is created; onTokenRefresh only runs
 // at call-time, well after both are initialised.
+// eslint-disable-next-line prefer-const -- intentional forward declaration
 let authSdk: AuthSdk;
 
 const client: SgClient = new SgClient({
