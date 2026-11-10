@@ -11,7 +11,7 @@ import { z } from "zod";
 import type { Flow, FlowContext } from "@/core/flows";
 import { RevokeSchema } from "../validators/oauth.schemas";
 import { auditService } from "@/modules/audit/services/audit.service";
-import { blockJti } from "@/lib/security/jti-blocklist";
+import { blocklistAccessToken } from "@/lib/security/revoke-access-token";
 
 export const tokenRevokeFlow: Flow<z.infer<typeof RevokeSchema>> = {
   name: "oauth:token-revoke",
@@ -33,20 +33,13 @@ export const tokenRevokeFlow: Flow<z.infer<typeof RevokeSchema>> = {
       });
 
       if (accessToken.jti) {
-        const remainingTtlMs = accessToken.expiresAt.getTime() - Date.now();
-        const remainingTtlSec = Math.max(Math.ceil(remainingTtlMs / 1000), 1);
-
-        void blockJti(accessToken.jti, remainingTtlSec).catch(() => {});
-
-        // FIX: expiresAt now included — required by schema after last migration
-        void ctx.db.revokedJti
-          .create({
-            data: {
-              jti: accessToken.jti,
-              expiresAt: accessToken.expiresAt,
-            },
-          })
-          .catch(() => {});
+        // Paired revocation: durable revokedJti row (awaited) + Redis TTL
+        // fast-path, with the TTL derived from the token's own expiresAt.
+        await blocklistAccessToken(
+          ctx.db,
+          accessToken.jti,
+          accessToken.expiresAt,
+        );
       }
 
       void auditService

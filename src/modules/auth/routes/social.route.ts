@@ -43,6 +43,7 @@ import { TokenService } from "@/modules/oauth/services/token.service";
 import { presentTokenResponse } from "@/modules/oauth/presenters/token.presenter";
 import { config } from "@/core/config";
 import { ApiError } from "@/core/errors";
+import { logger } from "@/lib/logger";
 import { setRefreshCookie } from "@/lib/refresh-cookies";
 import { auditService } from "@/modules/audit/services/audit.service";
 
@@ -100,6 +101,59 @@ function getMicrosoft() {
 }
 
 // ── Shared callback logic ─────────────────────────────────────────────────────
+
+/**
+ * Fetch JSON from a provider profile endpoint, failing loudly instead of
+ * feeding an error payload into the identity upsert.
+ *
+ * Providers answer failures with a non-2xx status and an error object/string
+ * body; the previous raw `fetch(...).json()` calls parsed that straight into
+ * the profile, so a bad/expired token surfaced as `providerUserId: undefined`
+ * (or a silently wrong email) rather than a clear upstream error.
+ */
+async function fetchProviderJson<T>(
+  url: string,
+  init: RequestInit,
+  provider: string,
+): Promise<T> {
+  let resp: Response;
+  try {
+    resp = await fetch(url, init);
+  } catch (err) {
+    logger.warn(`[social:${provider}] profile request failed`, {
+      message: err instanceof Error ? err.message : String(err),
+    });
+    throw new ApiError(
+      `${provider} profile request failed`,
+      502,
+      "SOCIAL_PROVIDER_ERROR",
+    );
+  }
+
+  if (!resp.ok) {
+    const detail = await resp.text().catch(() => "");
+    logger.warn(`[social:${provider}] profile request returned non-2xx`, {
+      status: resp.status,
+      detail: detail.slice(0, 500),
+    });
+    throw new ApiError(
+      `${provider} profile request failed (${resp.status})`,
+      502,
+      "SOCIAL_PROVIDER_ERROR",
+    );
+  }
+
+  try {
+    return (await resp.json()) as T;
+  } catch {
+    logger.warn(`[social:${provider}] malformed profile payload`);
+    throw new ApiError(
+      `${provider} returned a malformed profile`,
+      502,
+      "SOCIAL_PROVIDER_ERROR",
+    );
+  }
+}
 
 interface ProviderProfile {
   providerUserId: string;
@@ -333,13 +387,11 @@ export async function socialRoute(instance: FastifyInstance) {
       const accessToken = tokens.accessToken();
 
       // Fetch profile from Google userinfo endpoint
-      const resp = await fetch(
+      const profile = await fetchProviderJson<GoogleUserInfo>(
         "https://openidconnect.googleapis.com/v1/userinfo",
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        },
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+        "google",
       );
-      const profile: GoogleUserInfo = await resp.json();
 
       const tokenData = await handleCallback(
         reply,
@@ -412,22 +464,28 @@ export async function socialRoute(instance: FastifyInstance) {
       const tokens = await github.validateAuthorizationCode(code);
       const accessToken = tokens.accessToken();
 
-      const [userResp, emailResp] = await Promise.all([
-        fetch("https://api.github.com/user", {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "User-Agent": "SovGrant",
+      const [user, emails] = await Promise.all([
+        fetchProviderJson<any>(
+          "https://api.github.com/user",
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "User-Agent": "SovGrant",
+            },
           },
-        }),
-        fetch("https://api.github.com/user/emails", {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "User-Agent": "SovGrant",
+          "github",
+        ),
+        fetchProviderJson<any[]>(
+          "https://api.github.com/user/emails",
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "User-Agent": "SovGrant",
+            },
           },
-        }),
+          "github",
+        ),
       ]);
-      const user = (await userResp.json()) as any;
-      const emails = (await emailResp.json()) as any[];
       const primaryEmail =
         emails.find((e: any) => e.primary && e.verified)?.email ??
         user.email ??
@@ -612,13 +670,11 @@ export async function socialRoute(instance: FastifyInstance) {
       const tokens = await ms.validateAuthorizationCode(code, storedVerifier);
       const accessToken = tokens.accessToken();
 
-      const resp = await fetch(
+      const user = await fetchProviderJson<any>(
         "https://graph.microsoft.com/v1.0/me?$select=id,displayName,mail,userPrincipalName,photo",
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        },
+        { headers: { Authorization: `Bearer ${accessToken}` } },
+        "microsoft",
       );
-      const user = (await resp.json()) as any;
       const email = user.mail ?? user.userPrincipalName ?? null;
 
       const tokenData = await handleCallback(

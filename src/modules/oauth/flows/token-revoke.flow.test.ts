@@ -38,15 +38,20 @@ describe("tokenRevokeFlow", () => {
       identityId: "identity-1",
       expiresAt: addHours(new Date(), 1),
     });
-    ctx.db.revokedJti.create.mockResolvedValue({ id: "rj-1" });
+    ctx.db.revokedJti.upsert.mockResolvedValue({ id: "rj-1" });
 
     await tokenRevokeFlow.execute({ token: "raw-access-token-value" }, ctx);
 
     expect(ctx.db.accessToken.update).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: "at-1" }, data: { revoked: true } }),
     );
-    expect(ctx.db.revokedJti.create).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ jti: "jti-abc" }) }),
+    // Durable tier: idempotent upsert keyed on the jti, with expiresAt from
+    // the token (never a flat default).
+    expect(ctx.db.revokedJti.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { jti: "jti-abc" },
+        create: expect.objectContaining({ jti: "jti-abc" }),
+      }),
     );
   });
 
@@ -88,7 +93,7 @@ describe("tokenRevokeFlow", () => {
       tokenRevokeFlow.execute({ token: "no-jti-token" }, ctx),
     ).resolves.toEqual({});
     // No JTI operations on null jti
-    expect(ctx.db.revokedJti.create).not.toHaveBeenCalled();
+    expect(ctx.db.revokedJti.upsert).not.toHaveBeenCalled();
   });
 
   it("does not crash when blockJti fails (void catch)", async () => {
@@ -102,7 +107,7 @@ describe("tokenRevokeFlow", () => {
       identityId: "identity-1",
       expiresAt: addHours(new Date(), 1),
     });
-    ctx.db.revokedJti.create.mockResolvedValue({ id: "rj-1" });
+    ctx.db.revokedJti.upsert.mockResolvedValue({ id: "rj-1" });
 
     await expect(
       tokenRevokeFlow.execute({ token: "raw-access-token-value" }, ctx),

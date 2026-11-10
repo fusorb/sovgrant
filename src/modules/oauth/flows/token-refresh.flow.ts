@@ -17,7 +17,7 @@ import { TokenService } from "../services/token.service";
 import { presentTokenResponse } from "../presenters/token.presenter";
 import { ApiError } from "@/core/errors/api-error";
 import { auditService } from "@/modules/audit/services/audit.service";
-import { blockJti } from "@/lib/security/jti-blocklist";
+import { blocklistAccessToken } from "@/lib/security/revoke-access-token";
 
 const RefreshSchema = z.object({
   refresh_token: z.string(),
@@ -320,13 +320,6 @@ async function blocklistLiveAccessTokens(
 
   for (const t of liveTokens) {
     if (!t.jti) continue;
-    const remainingTtlMs = t.expiresAt.getTime() - Date.now();
-    const remainingTtlSec = Math.max(Math.ceil(remainingTtlMs / 1000), 1);
-
-    void blockJti(t.jti, remainingTtlSec).catch(() => {});
-
-    void ctx.db.revokedJti
-      .create({ data: { jti: t.jti, expiresAt: t.expiresAt } })
-      .catch(() => {});
+    await blocklistAccessToken(ctx.db, t.jti, t.expiresAt);
   }
 }

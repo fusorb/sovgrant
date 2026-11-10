@@ -1,0 +1,46 @@
+# SovGrant - Session Tracker (audit + frontend rebuild)
+
+> Priority tiers: **P0** security/correctness · **P1** architecture integrity ·
+> **P2** frontend rebuild · **P3** DX/runtime · **P4** docs/verification.
+> Tags: importance **HIGH/MED/LOW** · effort **S/M/L** · status **OPEN/DONE/BLOCKED**.
+> Update this file at the end of every work batch (log what's done, keep it current).
+> Ordering rule: close P0 before opening a new development phase.
+
+Last updated: 2026-11-10
+
+---
+
+## P0 - security / correctness
+
+- [x] **P0-1 (HIGH / S) - DID provisioning used a throwaway key.** `tenant/routes/did.route.ts` minted an inline ES256 keypair, discarded the private half, and published a verification method whose `type` (`JsonWebKey2020`) did not match its key field (`publicKeyMultibase`) - so any VC issued after provisioning failed verification. **DONE:** the route now delegates to `provision-tenant-did.flow.ts` (reuses the tenant's real ACTIVE `TenantSigningKey`, publishes `publicKeyJwk`). Test rewritten to the flow-mock route-contract pattern; new case asserts flow delegation + 409 mapping. `did.route.test.ts` 4/4 green.
+- [x] **P0-2 (HIGH / S) - unguarded provider fetches in social login.** Google/GitHub/Microsoft profile fetches used raw `fetch(...).json()` with no `resp.ok` check, so an error payload parsed straight into the identity upsert (`providerUserId: undefined` / wrong email). **DONE:** added `fetchProviderJson()` (non-2xx, malformed JSON, and network failures all raise `ApiError(..., 502, "SOCIAL_PROVIDER_ERROR")`; provider detail is logged, not returned). Used at all 3 call sites.
+- [x] **P0-3 (MED / M) - revocation side effects were fire-and-forget.** The durable `RevokedJti` write was `void ... .catch(() => {})`, so a failed DB write was silently discarded and revocation could survive only in Redis' single-process in-memory fallback. **DONE:** new `src/lib/security/revoke-access-token.ts` pairs both tiers - `blocklistAccessToken()` awaits an idempotent `revokedJti.upsert` (TTL derived from the token's own `expiresAt`) then logs (never swallows) Redis failures; `blockJtiBestEffort()` is the Redis-only variant. Applied in `token-revoke.flow.ts`, `revoke-token-by-id.flow.ts`, `token-refresh.flow.ts` (`blocklistLiveAccessTokens`), `identity/routes/profile.route.ts`, `auth/routes/session.route.ts`. oauth flows + session route: 51/51 green.
+
+## P1 - architecture integrity
+
+- [ ] **P1-1 (MED / L) - red fat routes holding business logic instead of flows.** Routes own DB/tx/crypto/audit inline, violating rule #1. Migrate highest-risk first: `tenant/routes/{did,signing-key,membership,policy,invite,tenant}.route.ts`, `identity/routes/{profile,admin}.route.ts`, `auth/routes/{password,session,mfa,passkey,magic-link,social}.route.ts`, `oauth/routes/{clients,tokens}.route.ts`, `webhooks/routes/webhook-config.route.ts`, `idp/routes/idp.route.ts`. Reference pattern: `credentials/*`, `audit/*`, `auth/login`.
+- [ ] **P1-2 (LOW / S) - SDK<->API gap: `api-key` has no SDK class.** Backend `api-key` module (`POST /api-keys/create`, `GET /api-keys`, `DELETE /api-keys/:id`) has no `ApiKeySdk` in `@fusorb/facet-sdk`. Interim: the frontend `apiKeys` adapter uses `sgClient.get/post/del`. Request an `ApiKeySdk` upstream.
+
+## P2 - frontend rebuild (facet-native)
+
+- [ ] **F1 (HIGH / M) - teardown.** Delete `src/app`, `src/components`, `src/hooks`, `src/providers`, `src/sdk`, `src/styles`, `src/config/{layout.tsx,nav.ts}`. KEEP backend-shared: `src/lib/**` (incl. `refresh-cookies.ts`), `src/config/plan-caps.ts`, `src/modules/**`, `src/api/**`, `src/core/**`, `src/jobs/**`, `src/test-utils/**`.
+- [ ] **F2 (HIGH / M) - foundation & runtime.** `next.config.ts` Turbopack-first (`turbopack.root` + `turbopack.resolveAlias` for facet-tokens CSS + react-hook-form), webpack fallback retained; scripts `dev:web` (Turbopack) + `dev:web:webpack`; recreate `src/styles/globals.css`, `src/config/brand.ts`, `src/app/layout.tsx`.
+- [ ] **F3 (HIGH / M) - route map as stubs.** `src/components/stub-page.tsx` (`PageHeader` + `EmptyState`) + every route in the inventory as a ~6-line stub (public / auth / console / invites / oauth-consent / root redirect / not-found).
+- [ ] **F4 (HIGH / M) - enforcement layers.** Rebuild `src/sdk/index.ts` (SgClient + 10 domain singletons + `apiKeys` adapter), `src/providers/`, one `use-<domain>` hook per backend domain, `src/config/{nav.ts,layout.tsx}`.
+- [ ] **F5 (MED / L) - component wiring.** Replace each stub with facet components + hooks (forms from facet-auth, `DataTable`, `ConfirmAlertDialog`, `ApiKeyManager`, `BillingPage*`, `GlowCard`/`HoverScaleCard`/`ShineBorderCard`, `AnimatedButton`, `Toaster`). Do not hand-roll what facet ships.
+
+## P3 - DX / runtime
+
+- [ ] **P3-1 (MED / S)** Document the clean dev path: launch from PowerShell/cmd (proper-case cwd) to avoid the Windows casing module-duplication issue; `pnpm dev:all` runs web+api+workers.
+- [ ] **P3-2 (MED / S)** Keep `typecheck` (incremental) as the gate; run long gates in the background on this 8GB box.
+
+## P4 - docs / verification
+
+- [ ] **P4-1 (HIGH / S)** Re-run the full suite after F1 and write the **real** file/test counts into `CLAUDE.md` / `AGENTS.md` / `README` (never copy prior numbers). `src/sdk/sdk.test.ts` is deleted -> counts change.
+- [ ] **P4-2 (MED / S)** Reconcile the `CLAUDE.md`/`AGENTS.md` frontend section with the new architecture once F4/F5 land.
+
+---
+
+## Session log
+
+- 2026-11-10: Committed pre-existing working-tree changes (`27763e1`: dep bumps, pnpm overrides, `.env.example` encoding + DB-name fix, `link-external-id` note). Ran a full repo audit; wrote the fix tracker + frontend rebuild plan. **Closed all P0 items** (P0-1 DID flow delegation, P0-2 provider fetch guards, P0-3 paired durable revocation). Verified: `did.route.test.ts` 4/4, oauth flows + session route 51/51.

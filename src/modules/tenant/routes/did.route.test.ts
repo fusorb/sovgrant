@@ -1,8 +1,11 @@
 // src/modules/tenant/routes/did.route.test.ts
 //
-// Proves the route-level requirePermission("did:manage") preHandler works:
+// Proves the route-level requirePermission("did:manage") preHandler works and
+// that POST /:tenantId/did delegates provisioning to the canonical flow
+// (provisionTenantDidFlow) rather than minting a throwaway keypair inline:
 //   - A caller without "did:manage" gets 403
-//   - A caller with "did:manage" passes through to the handler
+//   - A caller with "did:manage" gets the flow result back as 201
+//   - A flow conflict surfaces as 409 through the shared errorHandler
 
 import {
   describe,
@@ -19,72 +22,57 @@ import {
   validatorCompiler,
 } from "fastify-type-provider-zod";
 import { ApiError } from "@/core/errors/api-error";
+import { errorHandler } from "@/core/errors/error-handler";
 import { tenantDidRoute } from "./did.route";
 
-// ── Hoisted mock DB (must run before vi.mock hoisting) ───────────────────────
+// ── Mock the flow layer (this is a route-contract test) ──────────────────────
 
-const mockDb = vi.hoisted(() => {
-  function modelProxy(name: string) {
-    return new Proxy<Record<string, ReturnType<typeof vi.fn>>>({} as any, {
-      get(target, key: string) {
-        if (!target[key]) target[key] = vi.fn();
-        return target[key];
-      },
-    });
-  }
-  const mock: Record<string, any> = {};
-  mock.tenantMembership = modelProxy("tenantMembership");
-  mock.decentralizedIdentifier = modelProxy("decentralizedIdentifier");
-  mock.tenantSigningKey = modelProxy("tenantSigningKey");
-  mock.$transaction = vi.fn(async (fn: (tx: any) => any) => fn(mock));
-  mock.$disconnect = vi.fn();
-  return mock;
-});
-
-vi.mock("@/core/db", () => ({ prisma: mockDb }));
-
-// Prevent jose from doing real crypto — return fixed values
-vi.mock("jose", () => ({
-  generateKeyPair: vi.fn().mockResolvedValue({
-    publicKey: "mock-public-key",
-    privateKey: "mock-private-key",
-  }),
-  exportSPKI: vi
-    .fn()
-    .mockResolvedValue(
-      "-----BEGIN PUBLIC KEY-----\nmock-spki-key\n-----END PUBLIC KEY-----",
-    ),
+vi.mock("@/core/flows", () => ({
+  FlowExecutor: vi.fn(),
+  flowExecutor: { run: vi.fn() },
 }));
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+const tenantId = "cltenant000001testtenant1";
 
 function buildApp(permissionGranted: boolean) {
   const fastify = Fastify();
   fastify.setValidatorCompiler(validatorCompiler);
   fastify.setSerializerCompiler(serializerCompiler);
+  fastify.setErrorHandler(errorHandler);
+
+  // Mirrors production: every auth guard delegates to requireUser, which
+  // populates req.identity from the bearer token.
+  const requireUser = vi.fn(async (req: any) => {
+    req.identity = {
+      id: "test-user",
+      tenantId,
+      scope: [],
+      plan: "PRO",
+    };
+  });
 
   fastify.decorate("auth", {
-    requireUser: vi.fn(async (req: any) => {
-      req.identity = {
-        id: "test-user",
-        tenantId: "test-tenant",
-        scope: [],
-        plan: "PRO",
-      };
+    requireUser,
+    requireScope: vi.fn(() => async (req: any) => {
+      await requireUser(req);
     }),
-    requireScope: vi.fn(),
-    requirePlan: vi.fn(() => async () => {}),
+    requirePlan: vi.fn(() => async (req: any) => {
+      await requireUser(req);
+    }),
     requireAal2: vi.fn(),
     requireElevated: vi.fn(),
     requirePermission: vi.fn(
-      (_action: string) => async (_req: any, _reply: any) => {
+      (_action: string) => async (req: any, _reply: any) => {
+        await requireUser(req);
         if (!permissionGranted) {
           throw ApiError.forbidden("Permission 'did:manage' is required");
         }
       },
     ),
   });
-  fastify.decorate("db", mockDb as any);
+  fastify.decorate("db", {} as any);
 
   return fastify;
 }
@@ -93,7 +81,6 @@ function buildApp(permissionGranted: boolean) {
 
 describe("DID route — requirePermission('did:manage')", () => {
   let fastify: ReturnType<typeof buildApp>;
-  const tenantId = "cltenant000001testtenant1";
 
   beforeAll(async () => {
     fastify = buildApp(false);
@@ -131,14 +118,11 @@ describe("DID route — requirePermission('did:manage')", () => {
       await fastify.ready();
     });
 
-    it("POST /tenants/:tenantId/did returns 201 when no DID exists", async () => {
-      mockDb.decentralizedIdentifier.findUnique.mockResolvedValue(null);
-      mockDb.decentralizedIdentifier.create.mockResolvedValue({
-        id: "did:web:example.com",
-        tenantId,
-        publicKeyBytes: Buffer.from("mock-key"),
-        keyType: "JsonWebKey2020",
-        didDocument: { "@context": [], id: "did:web:example.com" },
+    it("POST /tenants/:tenantId/did returns 201 with the flow result", async () => {
+      const { flowExecutor } = await import("@/core/flows");
+      (flowExecutor.run as any).mockResolvedValue({
+        did: "did:web:example.com",
+        document: { "@context": [], id: "did:web:example.com" },
       });
 
       const response = await fastify.inject({
@@ -153,10 +137,34 @@ describe("DID route — requirePermission('did:manage')", () => {
       expect(body.data.did).toBe("did:web:example.com");
     });
 
-    it("POST /tenants/:tenantId/did returns 409 when DID already exists", async () => {
-      mockDb.decentralizedIdentifier.findUnique.mockResolvedValue({
-        id: "did:web:existing.com",
+    it("delegates provisioning to provisionTenantDidFlow with the tenant context", async () => {
+      const { flowExecutor } = await import("@/core/flows");
+      (flowExecutor.run as any).mockResolvedValue({
+        did: "did:web:example.com",
+        document: {},
       });
+
+      await fastify.inject({
+        method: "POST",
+        url: `/tenants/${tenantId}/did`,
+        payload: { domain: "example.com" },
+      });
+
+      expect(flowExecutor.run).toHaveBeenCalledWith(
+        expect.any(Object),
+        { tenantId, domain: "example.com" },
+        expect.objectContaining({
+          identityId: "test-user",
+          tenantId,
+        }),
+      );
+    });
+
+    it("POST /tenants/:tenantId/did returns 409 when a DID already exists", async () => {
+      const { flowExecutor } = await import("@/core/flows");
+      (flowExecutor.run as any).mockRejectedValue(
+        ApiError.conflict("Tenant already has a DID provisioned"),
+      );
 
       const response = await fastify.inject({
         method: "POST",

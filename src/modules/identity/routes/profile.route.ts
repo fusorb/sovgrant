@@ -5,7 +5,7 @@ import { Prisma } from "@prisma-client";
 import { presentIdentity } from "../presenters/identity.presenter";
 import { UpdateProfileSchema } from "../validators/identity.schemas";
 import { auditService } from "@/modules/audit/services/audit.service";
-import { blockJti } from "@/lib/security/jti-blocklist";
+import { blockJtiBestEffort } from "@/lib/security/revoke-access-token";
 
 export async function profileRoute(fastify: FastifyInstance) {
   // GET /profile
@@ -152,11 +152,10 @@ export async function profileRoute(fastify: FastifyInstance) {
         ),
       ]);
 
-      // Redis blocklist — non-blocking
+      // Redis blocklist fast-path - the durable revokedJti rows were written
+      // in the transaction above, so this is best-effort only.
       for (const t of liveTokens) {
-        const remainingTtlMs = t.expiresAt.getTime() - Date.now();
-        const remainingTtlSec = Math.max(Math.ceil(remainingTtlMs / 1000), 1);
-        void blockJti(t.jti!, remainingTtlSec).catch(() => {});
+        blockJtiBestEffort(t.jti!, t.expiresAt);
       }
 
       await fastify.db.identity.delete({ where: { id: identityId } });

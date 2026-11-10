@@ -11,8 +11,9 @@
 //     Reading a DID document is a low-risk read. Any tenant member may
 //     need to inspect their tenant's DID for integration purposes.
 import type { FastifyInstance } from "fastify";
-import { generateKeyPair, exportSPKI } from "jose";
 import { z } from "zod";
+import { flowExecutor } from "@/core/flows";
+import { provisionTenantDidFlow } from "../flows/provision-tenant-did.flow";
 import { TenantService } from "../services/tenant.service";
 
 export async function tenantDidRoute(fastify: FastifyInstance) {
@@ -50,57 +51,23 @@ export async function tenantDidRoute(fastify: FastifyInstance) {
       const { tenantId } = req.params as { tenantId: string };
       const { domain } = req.body as { domain: string };
 
-      const existing = await fastify.db.decentralizedIdentifier.findUnique({
-        where: { tenantId },
-      });
-      if (existing) {
-        return reply.status(409).send({
-          success: false,
-          error: "CONFLICT",
-          message: "Tenant already has a DID provisioned",
-        });
-      }
-
-      const { publicKey } = await generateKeyPair("ES256");
-      const publicKeySpki = await exportSPKI(publicKey);
-      const cleanBase64 = publicKeySpki
-        .replace(/-----BEGIN [^-]+-----|-----END [^-]+-----/g, "")
-        .replace(/[\r\n\s]/g, "");
-      const publicKeyBytes = Buffer.from(cleanBase64, "base64");
-
-      const did = `did:web:${domain}`;
-      const didDocument = {
-        "@context": [
-          "https://www.w3.org/ns/did/v1",
-          "https://w3id.org/security/suites/jws-2020/v1",
-        ],
-        id: did,
-        verificationMethod: [
-          {
-            id: `${did}#key-1`,
-            type: "JsonWebKey2020",
-            controller: did,
-            publicKeyMultibase: `z${cleanBase64}`,
-          },
-        ],
-        authentication: [`${did}#key-1`],
-        assertionMethod: [`${did}#key-1`],
-      };
-
-      const record = await fastify.db.decentralizedIdentifier.create({
-        data: {
-          id: did,
+      // Business logic lives in the flow: it binds the DID document to the
+      // tenant's real ACTIVE TenantSigningKey (the same key that signs VCs),
+      // creating one if none exists. The previous inline handler generated a
+      // throwaway keypair, discarded the private half, and published a
+      // mismatched verification method - so issued VCs never verified.
+      const result = await flowExecutor.run(
+        provisionTenantDidFlow,
+        { tenantId, domain },
+        {
+          identityId: req.identity.id,
           tenantId,
-          publicKeyBytes,
-          keyType: "JsonWebKey2020",
-          didDocument,
+          ip: req.ip,
+          userAgent: req.headers["user-agent"],
         },
-      });
+      );
 
-      return reply.status(201).send({
-        success: true,
-        data: { did: record.id, document: record.didDocument },
-      });
+      return reply.status(201).send({ success: true, data: result });
     },
   );
 

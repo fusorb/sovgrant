@@ -13,7 +13,7 @@ import { z } from "zod";
 import type { Flow, FlowContext } from "@/core/flows";
 import { ApiError } from "@/core/errors";
 import { auditService } from "@/modules/audit/services/audit.service";
-import { blockJti } from "@/lib/security/jti-blocklist";
+import { blocklistAccessToken } from "@/lib/security/revoke-access-token";
 
 export const RevokeTokenByIdSchema = z.object({
   id: z.string().cuid(),
@@ -54,19 +54,13 @@ export const revokeTokenByIdFlow: Flow<z.infer<typeof RevokeTokenByIdSchema>> =
       });
 
       if (accessToken.jti) {
-        const remainingTtlMs = accessToken.expiresAt.getTime() - Date.now();
-        const remainingTtlSec = Math.max(Math.ceil(remainingTtlMs / 1000), 1);
-
-        void blockJti(accessToken.jti, remainingTtlSec).catch(() => {});
-
-        void ctx.db.revokedJti
-          .create({
-            data: {
-              jti: accessToken.jti,
-              expiresAt: accessToken.expiresAt,
-            },
-          })
-          .catch(() => {});
+        // Paired revocation: durable revokedJti row (awaited) + Redis TTL
+        // fast-path, with the TTL derived from the token's own expiresAt.
+        await blocklistAccessToken(
+          ctx.db,
+          accessToken.jti,
+          accessToken.expiresAt,
+        );
       }
 
       void auditService

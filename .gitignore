@@ -56,9 +56,10 @@ next-env.d.ts
 # design standards
 ArcevoCirqle_Design_Standards_Manual_v1.0..txt
 
-# agent state / scratch artifacts (keep the episodic canon tracked)
+# agent state / scratch artifacts (keep the episodic canon + tracker tracked)
 .agent/*
 !.agent/episodes.md
+!.agent/output.txt
 
 # secret-purge working files (git filter-repo --replace-text maps - never commit)
 replacements*.txt

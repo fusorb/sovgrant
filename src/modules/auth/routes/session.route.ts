@@ -11,7 +11,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { auditService } from "@/modules/audit/services/audit.service";
-import { blockJti } from "@/lib/security/jti-blocklist";
+import { blockJtiBestEffort } from "@/lib/security/revoke-access-token";
 
 export async function sessionRoute(fastify: FastifyInstance) {
   // GET /auth/sessions
@@ -129,15 +129,10 @@ export async function sessionRoute(fastify: FastifyInstance) {
         ),
       ]);
 
-      // Redis-block any access JTIs belonging to this session
+      // Redis-block any access JTIs belonging to this session (best-effort:
+      // the durable revokedJti rows were written in the transaction above).
       for (const at of liveTokens) {
-        if (at.jti) {
-          const remainingTtlSec = Math.max(
-            Math.ceil((at.expiresAt.getTime() - Date.now()) / 1000),
-            1,
-          );
-          void blockJti(at.jti, remainingTtlSec).catch(() => {});
-        }
+        if (at.jti) blockJtiBestEffort(at.jti, at.expiresAt);
       }
 
       await auditService.log({
