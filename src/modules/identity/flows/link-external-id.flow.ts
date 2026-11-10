@@ -4,10 +4,11 @@
 // value; the server SHA-256-hashes the value and stores only the hash.
 // The raw value is never persisted.
 //
-// NOTE: verified is always false at creation. No automated verification
-// path exists yet — VC issuance (issue-credential.flow.ts) does not
-// currently check or update ExternalIdentifier records. Tracked follow-up,
-// not a bug.
+// NOTE: `verified` is false at creation. Code-based verification exists
+// (verify-identifier.flow.ts -> confirm-identifier.flow.ts), but it only
+// supports the `email` and `phone` types, so nin/bvn/passport/driver_license
+// cannot be verified yet. VC issuance (issue-credential.flow.ts) requires at
+// least one verified external identifier.
 
 import { z } from "zod";
 import type { Flow, FlowContext } from "@/core/flows";
