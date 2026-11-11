@@ -72,7 +72,6 @@ export function buildMetadata({
   description,
   path,
 }: BuildMetadataOptions = {}) {
-  const resolvedTitle = title ?? SgMetadata.tagline;
   const resolvedDescription = description ?? SgMetadata.description;
   const url = path ? `${SgMetadata.url}${path}` : SgMetadata.url;
 
