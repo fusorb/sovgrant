@@ -1,11 +1,11 @@
 "use client";
 
-import { useAuthStore } from "@fusorb/facet-store";
 import { NotFound } from "@fusorb/facet-components";
+import { useAuthStore } from "@fusorb/facet-store";
 import { PublicNavbar } from "@/components/public-navbar";
 
 export default function GlobalNotFound() {
-  const { accessToken } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -19,7 +19,7 @@ export default function GlobalNotFound() {
           title="Page not found"
           description="The page you are looking for does not exist or you do not have permission to access it."
           actionLabel="Go home"
-          actionHref={accessToken ? "/console" : "/home"}
+          actionHref={isAuthenticated ? "/console" : "/home"}
           animation="gradient"
         />
       </main>

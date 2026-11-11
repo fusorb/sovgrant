@@ -1,12 +1,12 @@
-import { buildMetadata } from "@/components/metadata";
-import { HomeContent } from "./_components/home-content";
+import { buildMetadata } from "@/config/brand";
+import { StubPage } from "@/components/stub-page";
 
 export const metadata = buildMetadata({
-  title: "SovGrant - Sovereign identity platform",
-  description: "OIDC provider, WebAuthn passkeys, TOTP MFA, SD-JWT verifiable credentials, and did:web for the decentralized web.",
+  title: "Home",
+  description: "Sovereign identity for the open web",
   path: "/home",
 });
 
-export default function HomePage() {
-  return <HomeContent />;
+export default function Page() {
+  return <StubPage title="Home" description="Sovereign identity for the open web" />;
 }

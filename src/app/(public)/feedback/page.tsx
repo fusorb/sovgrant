@@ -1,12 +1,12 @@
-import { buildMetadata } from "@/components/metadata";
-import { FeedbackContent } from "./_components/feedback-content";
+import { buildMetadata } from "@/config/brand";
+import { StubPage } from "@/components/stub-page";
 
 export const metadata = buildMetadata({
   title: "Feedback",
-  description: "Have a question, bug report, or feature request? Let us know.",
+  description: "Tell us what to build next",
   path: "/feedback",
 });
 
-export default function FeedbackPage() {
-  return <FeedbackContent />;
+export default function Page() {
+  return <StubPage title="Feedback" description="Tell us what to build next" />;
 }

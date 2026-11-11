@@ -1,7 +1,7 @@
 import { LandingLayout } from "@fusorb/facet-layout";
-import { Footer, CookieConsent } from "@fusorb/facet-components";
-import { ConditionalHero } from "./_components/conditional-hero";
+import { CookieConsent, Footer } from "@fusorb/facet-components";
 import { PublicNavbar } from "@/components/public-navbar";
+import { ConditionalHero } from "./_components/conditional-hero";
 
 export default function PublicLayout({
   children,

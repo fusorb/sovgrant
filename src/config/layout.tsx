@@ -1,16 +1,22 @@
 import { Icon } from "@fusorb/facet-components";
-import { enterpriseLayoutPreset, type LayoutConfig, type NavSection } from "@fusorb/facet-layout";
+import {
+  enterpriseLayoutPreset,
+  type LayoutConfig,
+  type NavSection,
+} from "@fusorb/facet-layout";
 import { navConfig } from "@/config/nav";
+import { SgMetadata } from "@/config/brand";
 
 /**
- * SovGrant layout config - drives @fusorb/facet-layout's AuthLayout + ConsoleLayout.
+ * SovGrant layout config - drives @fusorb/facet-layout's AuthLayout +
+ * ConsoleLayout.
  *
  * Merges the facet-layout `enterpriseLayoutPreset` (B2B IAM features) with
  * SovGrant's own brand identity + nav tree from @/config/nav.
  *
  * The sidebar nav tree is defined once in @/config/nav (string icon names).
- * facet-layout's NavSection expects icon ReactNodes, so we map the icon
- * name to the facet <Icon /> element here.
+ * facet-layout's NavSection expects icon ReactNodes, so we map the icon name
+ * to the facet <Icon /> element here.
  */
 export function buildLayoutConfig(): LayoutConfig {
   const navigation: NavSection[] = navConfig.map((section) => ({
@@ -34,8 +40,8 @@ export function buildLayoutConfig(): LayoutConfig {
     // underneath SovGrant's brand + nav overrides.
     ...enterpriseLayoutPreset,
     brand: {
-      name: "SovGrant",
-      tagline: "Sovereign Identity Engine",
+      name: SgMetadata.name,
+      tagline: SgMetadata.tagline,
       benefits: [
         "Passkey-native authentication",
         "Multi-tenant by design",

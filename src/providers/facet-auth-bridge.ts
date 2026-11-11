@@ -21,9 +21,9 @@ export const zustandTokenStorage: TokenStorage = {
   clearTokens: () => {
     // SgProvider calls this during its init session-check when me() fails
     // (e.g. expired token). We must NOT wipe the Zustand store here - that
-    // would erase the auth state AuthProvider just restored from localStorage.
-    // The SDK's onAuthCleared (triggered after a failed token refresh) is the
-    // correct place for full cleanup.
+    // would erase the auth state SessionBootstrap just restored. The SDK's
+    // onAuthCleared (triggered after a failed token refresh) is the correct
+    // place for full cleanup.
     sgClient.setAccessToken(null);
   },
 };

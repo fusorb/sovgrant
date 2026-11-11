@@ -1,12 +1,12 @@
-import { buildMetadata } from "@/components/metadata";
-import { PricingContent } from "./_components/pricing-content";
+import { buildMetadata } from "@/config/brand";
+import { StubPage } from "@/components/stub-page";
 
 export const metadata = buildMetadata({
-  title: "SovGrant - Pricing",
-  description: "Simple, transparent pricing for sovereign identity infrastructure. Start for free, upgrade as you grow.",
+  title: "Pricing",
+  description: "Plans and limits",
   path: "/pricing",
 });
 
-export default function PricingPage() {
-  return <PricingContent />;
+export default function Page() {
+  return <StubPage title="Pricing" description="Plans and limits" />;
 }

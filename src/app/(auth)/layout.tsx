@@ -2,29 +2,29 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@fusorb/facet-store";
 import { AuthLayout } from "@fusorb/facet-layout";
+import { useAuthStore } from "@fusorb/facet-store";
 import { buildLayoutConfig } from "@/config/layout";
 
+/**
+ * Auth page shell. Authenticated users never see these surfaces - they are
+ * bounced to the console.
+ */
 export default function AuthRootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { accessToken, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading } = useAuthStore();
 
   useEffect(() => {
-    if (!isLoading && accessToken) {
+    if (!isLoading && isAuthenticated) {
       router.replace("/console");
     }
-  }, [accessToken, isLoading, router]);
+  }, [isAuthenticated, isLoading, router]);
 
-  if (isLoading || accessToken) return null;
+  if (isLoading || isAuthenticated) return null;
 
-  return (
-    <AuthLayout config={buildLayoutConfig()}>
-      {children}
-    </AuthLayout>
-  );
+  return <AuthLayout config={buildLayoutConfig()}>{children}</AuthLayout>;
 }

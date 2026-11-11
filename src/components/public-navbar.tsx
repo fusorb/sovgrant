@@ -1,21 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
-import { Navbar, Button, UserAvatar } from "@fusorb/facet-components";
-import { useAuthStore } from "@fusorb/facet-store";
+import { usePathname, useRouter } from "next/navigation";
+import { Button, Navbar, UserAvatar } from "@fusorb/facet-components";
+import { useAuth } from "@fusorb/facet-auth";
 import type { RouterAdapter, RouterLinkProps } from "@fusorb/facet-layout";
-import { useAuth } from "@/hooks/use-auth";
+import { SgMetadata } from "@/config/brand";
 
 export const navLinks = [
   { label: "Features", href: "/home#features" },
-  { label: "Console", href: "/console" },
   { label: "Pricing", href: "/pricing" },
+  { label: "About", href: "/about" },
 ];
 
+/**
+ * Public (marketing) navbar - pill-style glass variant, text-only brand
+ * identity, theme toggle, and an authenticated UserAvatar once signed in.
+ */
 export function PublicNavbar() {
-  const { user } = useAuthStore();
-  const { clearSession } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -33,7 +36,7 @@ export function PublicNavbar() {
       }
     : undefined;
 
-  const nextRouterAdapter: RouterAdapter = {
+  const routerAdapter: RouterAdapter = {
     Link: ({ href, children, ...props }: RouterLinkProps) => (
       <Link href={href} {...props}>
         {children}
@@ -51,18 +54,20 @@ export function PublicNavbar() {
 
   return (
     <Navbar
-        variant="glass"
+      variant="glass"
       brand={
-        <Link href="/" className="flex items-center gap-2 font-display text-xl font-semibold">
-          <img src="/sg-bw.png" alt="SovGrant" className="h-7 w-auto dark:invert" />
-          <span>SovGrant</span>
+        <Link
+          href="/home"
+          className="font-display text-xl font-semibold tracking-tight"
+        >
+          {SgMetadata.name}
         </Link>
       }
       showThemeToggle
       links={navLinks}
-      router={nextRouterAdapter}
+      router={routerAdapter}
       actions={
-        navUser ? (
+        navUser && isAuthenticated ? (
           <UserAvatar
             user={navUser}
             className="hidden md:block"
@@ -74,15 +79,15 @@ export function PublicNavbar() {
               },
             ]}
             settingsHref="/console/user"
-            onSignOut={() => {
-              clearSession();
+            onSignOut={async () => {
+              await logout();
               router.push("/login");
             }}
           />
         ) : (
           <Link href="/login">
             <Button variant="ghost" size="sm">
-              Login
+              Sign in
             </Button>
           </Link>
         )

@@ -1,35 +1,12 @@
-"use client";
+import { buildMetadata } from "@/config/brand";
+import { StubPage } from "@/components/stub-page";
 
-import Link from "next/link";
-import { AnimatedButton, Button } from "@fusorb/facet-components";
-import { PageShell } from "@/components/page-shell";
-import { ConsoleDataTable } from "@/components/console-data-table";
-import { credentialsColumns } from "./_components/credentials-table";
-import { useCredentialsList } from "./_components/use-credentials-list";
+export const metadata = buildMetadata({
+  title: "Credentials",
+  description: "Verifiable credentials you hold and issue",
+  path: "/console/credentials",
+});
 
-export default function CredentialsPage() {
-  const { items, loading } = useCredentialsList();
-
-  return (
-    <PageShell
-      title="Credentials"
-      description="Verifiable credentials issued to your organization."
-      actions={
-        <AnimatedButton
-          animation="shine"
-          renderButton={(props) => (
-            <Button {...props} size="sm" asChild>
-              <Link href="/console/credentials/create">Issue</Link>
-            </Button>
-          )}
-        />
-      }
-    >
-      <ConsoleDataTable
-        data={items}
-        columns={credentialsColumns}
-        loading={loading}
-      />
-    </PageShell>
-  );
+export default function Page() {
+  return <StubPage title="Credentials" description="Verifiable credentials you hold and issue" />;
 }

@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "@fusorb/facet-tokens/tokens.css";
 import "@/styles/globals.css";
 import { Providers } from "@/providers";
-import { SgMetadata } from "@/components/metadata";
+import { SgMetadata } from "@/config/brand";
 
 export const metadata: Metadata = {
   title: {

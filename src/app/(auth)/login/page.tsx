@@ -1,26 +1,12 @@
-"use client";
+import { buildMetadata } from "@/config/brand";
+import { StubPage } from "@/components/stub-page";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { SignIn, enterprisePreset } from "@fusorb/facet-auth";
+export const metadata = buildMetadata({
+  title: "Sign in",
+  description: "Access your SovGrant account",
+  path: "/login",
+});
 
-export default function LoginPage() {
-  const router = useRouter();
-
-  return (
-    <SignIn
-      config={enterprisePreset}
-      onSuccess={() => router.replace("/console")}
-      slots={{
-        footer: (
-          <p className="text-center text-sm text-muted-foreground">
-            No account yet?{" "}
-            <Link href="/register" className="text-primary underline">
-              Register
-            </Link>
-          </p>
-        ),
-      }}
-    />
-  );
+export default function Page() {
+  return <StubPage title="Sign in" description="Access your SovGrant account" />;
 }

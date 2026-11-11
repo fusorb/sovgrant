@@ -23,16 +23,16 @@ Last updated: 2026-11-10
 
 ## P2 - frontend rebuild (facet-native)
 
-- [ ] **F1 (HIGH / M) - teardown.** Delete `src/app`, `src/components`, `src/hooks`, `src/providers`, `src/sdk`, `src/styles`, `src/config/{layout.tsx,nav.ts}`. KEEP backend-shared: `src/lib/**` (incl. `refresh-cookies.ts`), `src/config/plan-caps.ts`, `src/modules/**`, `src/api/**`, `src/core/**`, `src/jobs/**`, `src/test-utils/**`.
-- [ ] **F2 (HIGH / M) - foundation & runtime.** `next.config.ts` Turbopack-first (`turbopack.root` + `turbopack.resolveAlias` for facet-tokens CSS + react-hook-form), webpack fallback retained; scripts `dev:web` (Turbopack) + `dev:web:webpack`; recreate `src/styles/globals.css`, `src/config/brand.ts`, `src/app/layout.tsx`.
-- [ ] **F3 (HIGH / M) - route map as stubs.** `src/components/stub-page.tsx` (`PageHeader` + `EmptyState`) + every route in the inventory as a ~6-line stub (public / auth / console / invites / oauth-consent / root redirect / not-found).
-- [ ] **F4 (HIGH / M) - enforcement layers.** Rebuild `src/sdk/index.ts` (SgClient + 10 domain singletons + `apiKeys` adapter), `src/providers/`, one `use-<domain>` hook per backend domain, `src/config/{nav.ts,layout.tsx}`.
+- [x] **F1 (HIGH / M) - teardown.** **DONE:** deleted `src/app`, `src/components`, `src/hooks`, `src/providers`, `src/sdk`, `src/styles`, `src/config/{layout.tsx,nav.ts}`. Kept backend-shared (`src/lib/**` incl. `refresh-cookies.ts`, `src/config/plan-caps.ts`, `src/modules/**`, `src/api/**`, `src/core/**`, `src/jobs/**`, `src/test-utils/**`). No dangling imports remained.
+- [x] **F2 (HIGH / M) - foundation & runtime.** **DONE:** `next.config.ts` is Turbopack-first (`turbopack.root` + `turbopack.resolveAlias` for both facet-tokens CSS files + react-hook-form) with the webpack block retained for the fallback; `dev:web` = Turbopack, new `dev:web:webpack` fallback; recreated `src/styles/globals.css`, `src/config/brand.ts`, `src/app/layout.tsx`, rebuilt `src/sdk/index.ts` (SgClient + 10 domain singletons + `apiKeys` adapter), `src/providers/*` (ThemeProvider -> SgProvider -> SessionBootstrap -> Toaster), `src/app/page.tsx` (auth-state routing).
+- [x] **F3 (HIGH / M) - route map as stubs.** **DONE:** `src/components/stub-page.tsx` (+`src/components/public-navbar.tsx`) and 40 stub pages across `(public)` / `(auth)` / `console` / `invites` / `oauth` / root redirect / not-found, plus `(public)`, `(auth)`, `console` layouts, `src/config/nav.ts` + `src/config/layout.tsx`.
+- [ ] **F4 (HIGH / M) - enforcement layers.** `use-auth`, `use-profile`, `use-credentials`, `use-mfa`, `use-passkeys`, `use-sessions`, `use-devices`, `use-paired-devices`, `use-identities`, `use-external-ids`, `use-delegations`, `use-oauth`, `use-webhooks`, `use-api-keys`, `use-idp`, `use-policy`, `use-signing-keys`, `use-projects`, `use-onboarding`, `use-billing`, `use-audit-log`, `use-post-auth-redirect`, `use-sg-client`. (`use-tenant` done.)
 - [ ] **F5 (MED / L) - component wiring.** Replace each stub with facet components + hooks (forms from facet-auth, `DataTable`, `ConfirmAlertDialog`, `ApiKeyManager`, `BillingPage*`, `GlowCard`/`HoverScaleCard`/`ShineBorderCard`, `AnimatedButton`, `Toaster`). Do not hand-roll what facet ships.
 
 ## P3 - DX / runtime
 
-- [ ] **P3-1 (MED / S)** Document the clean dev path: launch from PowerShell/cmd (proper-case cwd) to avoid the Windows casing module-duplication issue; `pnpm dev:all` runs web+api+workers.
-- [ ] **P3-2 (MED / S)** Keep `typecheck` (incremental) as the gate; run long gates in the background on this 8GB box.
+- [x] **P3-1 (MED / S) - DONE.** Documented the clean dev path: launch from PowerShell/cmd (proper-case cwd) to avoid the Windows casing module-duplication issue; `pnpm dev:all` runs web+api+workers; Turbopack is the default with `dev:web:webpack` as the escape hatch.
+- [x] **P3-2 (MED / S) - DONE.** `typecheck` kept as the gate (incremental); long gates run in the background on this 8GB box.
 
 ## P4 - docs / verification
 

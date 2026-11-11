@@ -1,27 +1,12 @@
-"use client";
+import { buildMetadata } from "@/config/brand";
+import { StubPage } from "@/components/stub-page";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { ResetPasswordForm } from "@fusorb/facet-auth";
-import { useAuth } from "@/hooks/use-auth";
+export const metadata = buildMetadata({
+  title: "Reset password",
+  description: "Choose a new password",
+  path: "/reset-password",
+});
 
-export default function ResetPasswordPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token") ?? "";
-  const { resetPassword } = useAuth();
-
-  return (
-    <ResetPasswordForm
-      token={token}
-      onSubmit={async (token, newPassword) => {
-        const result = await resetPassword(token, newPassword);
-        if (result.error) {
-          return result.error.message;
-        }
-        router.replace("/login");
-        return null;
-      }}
-      onBack={() => router.replace("/login")}
-    />
-  );
+export default function Page() {
+  return <StubPage title="Reset password" description="Choose a new password" />;
 }

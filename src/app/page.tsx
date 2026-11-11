@@ -4,14 +4,19 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@fusorb/facet-store";
 
-export default function HomePage() {
+/**
+ * Root entry: route by auth state (never by URL convention).
+ *   authenticated -> /console   (tenant-scoped console)
+ *   anonymous     -> /home      (public landing)
+ */
+export default function RootPage() {
   const router = useRouter();
-  const { accessToken, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading } = useAuthStore();
 
   useEffect(() => {
     if (isLoading) return;
-    router.replace(accessToken ? "/console" : "/home");
-  }, [accessToken, isLoading, router]);
+    router.replace(isAuthenticated ? "/console" : "/home");
+  }, [isAuthenticated, isLoading, router]);
 
   return null;
 }

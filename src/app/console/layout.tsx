@@ -4,24 +4,28 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConsoleLayout } from "@fusorb/facet-layout";
 import type { RouterAdapter, RouterLinkProps } from "@fusorb/facet-layout";
+import { useAuthSession } from "@fusorb/facet-auth";
 import { buildLayoutConfig } from "@/config/layout";
-import { useAuthStore, useTenantStore } from "@fusorb/facet-store";
-import { ConsoleSidebarFooter } from "@/components/console-sidebar-footer";
+import { useTenant } from "@/hooks/use-tenant";
 
+/**
+ * Console shell - facet ConsoleLayout driven by @/config/nav + @/config/layout,
+ * with Next-native routing and the tenant switcher bound to the tenant store.
+ */
 export default function ConsoleRootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { accessToken, isLoading, user } = useAuthStore();
-  const { activeTenant, setActiveTenant } = useTenantStore();
+  const session = useAuthSession();
+  const { activeTenant, tenants, switchTenant } = useTenant();
 
-  if (isLoading || !accessToken) {
+  if (session.isLoading || !session.isAuthenticated) {
     return null;
   }
 
-  const nextRouterAdapter: RouterAdapter = {
+  const routerAdapter: RouterAdapter = {
     Link: ({ href, children: linkChildren, className }: RouterLinkProps) => (
       <Link href={href} className={className}>
         {linkChildren}
@@ -36,35 +40,35 @@ export default function ConsoleRootLayout({
     },
   };
 
-  const tenants = (user?.memberships ?? []).map((m) => ({
-    id: m.tenantId,
-    name: m.name ?? m.tenantId,
+  const tenantRefs = tenants.map((t) => ({
+    id: t.id,
+    name: t.name ?? t.slug ?? t.id,
+    slug: t.slug,
+    plan: t.plan,
   }));
-
-  const handleTenantSwitch = (id: string) => {
-    const tenant = tenants.find((t) => t.id === id);
-    setActiveTenant(
-      tenant
-        ? {
-            ...tenant,
-            slug: tenant.id,
-            createdAt: "",
-          }
-        : null,
-    );
-  };
 
   return (
     <ConsoleLayout
       config={buildLayoutConfig()}
-      router={nextRouterAdapter}
-      tenants={tenants}
-      activeTenant={activeTenant ?? null}
-      onTenantSwitch={handleTenantSwitch}
+      router={routerAdapter}
+      session={session}
+      tenants={tenantRefs}
+      activeTenant={
+        activeTenant
+          ? {
+              id: activeTenant.id,
+              name: activeTenant.name ?? activeTenant.slug ?? activeTenant.id,
+              slug: activeTenant.slug,
+              plan: activeTenant.plan,
+            }
+          : null
+      }
+      onTenantSwitch={(id) => {
+        void switchTenant(id);
+      }}
       themeToggle
     >
       {children}
-      <ConsoleSidebarFooter />
     </ConsoleLayout>
   );
 }

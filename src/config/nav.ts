@@ -1,12 +1,11 @@
 /**
  * SovGrant Navigation Configuration
  *
- * Single source of truth for the sidebar nav tree.
- * The facet-ConsoleLayout's Sidebar reads this - not hardcoded JSX.
+ * Single source of truth for the console sidebar nav tree.
+ * The facet ConsoleLayout's Sidebar reads this - not hardcoded JSX.
  *
- * Permission gating (requiredPermission) is defined here but
- * is NOT enforced in v1. All nav items are shown to authenticated
- * users. The backend is the real enforcement boundary.
+ * Permission gating (`requiredPermission`) is declared here but is NOT
+ * enforced in the UI. The backend is the real enforcement boundary.
  */
 
 import type { IconName } from "@fusorb/facet-components";
@@ -16,11 +15,11 @@ export interface NavItem {
   href: string;
   /** Display label */
   label: string;
-  /** Icon name from the icon registry */
+  /** Icon name from the facet icon registry (lucide kebab-case) */
   icon: IconName;
   /** Optional RBAC permission string - reserved for future gating */
   requiredPermission?: string;
-  /** Sub-items (rendered as collapsible group in sidebar) */
+  /** Sub-items (rendered as a collapsible group in the sidebar) */
   children?: NavItem[];
 }
 
@@ -34,28 +33,92 @@ export interface NavSection {
 export const navConfig: NavSection[] = [
   {
     title: "Overview",
-    items: [{ href: "/console", label: "Dashboard", icon: "chart-column" }],
+    items: [{ href: "/console", label: "Dashboard", icon: "layout-dashboard" }],
   },
   {
     title: "Identity",
     items: [
-      { href: "/console/identities", label: "Identities", icon: "users", requiredPermission: "admin:system" },
+      {
+        href: "/console/identities",
+        label: "Identities",
+        icon: "users",
+        requiredPermission: "admin:system",
+        children: [
+          {
+            href: "/console/identities/delegations",
+            label: "Delegations",
+            icon: "route",
+          },
+          {
+            href: "/console/identities/external-ids",
+            label: "External IDs",
+            icon: "badge-check",
+          },
+        ],
+      },
       { href: "/console/tenants", label: "Tenants", icon: "building-2" },
-      { href: "/console/organization/members", label: "Members", icon: "badge-check" },
+    ],
+  },
+  {
+    title: "Organization",
+    items: [
+      { href: "/console/organization", label: "Overview", icon: "building" },
+      {
+        href: "/console/organization/members",
+        label: "Members",
+        icon: "users",
+      },
+      {
+        href: "/console/organization/policies",
+        label: "Policies",
+        icon: "shield-check",
+      },
+      {
+        href: "/console/organization/signing-keys",
+        label: "Signing keys",
+        icon: "key",
+      },
+      { href: "/console/organization/did", label: "DID", icon: "globe" },
+      {
+        href: "/console/organization/projects",
+        label: "Projects",
+        icon: "folder-kanban",
+      },
+      {
+        href: "/console/organization/sso",
+        label: "SSO",
+        icon: "fingerprint",
+      },
     ],
   },
   {
     title: "Credentials",
-    items: [{ href: "/console/credentials", label: "Credentials", icon: "file-check" }],
+    items: [
+      { href: "/console/credentials", label: "Credentials", icon: "file-check" },
+    ],
   },
   {
     title: "Security",
     items: [
       { href: "/console/security/sessions", label: "Sessions", icon: "monitor" },
       { href: "/console/security/passkeys", label: "Passkeys", icon: "key" },
-      { href: "/console/security/mfa", label: "Two-Factor", icon: "lock" },
-      { href: "/console/security/paired-devices", label: "Paired devices", icon: "smartphone" },
-      { href: "/console/security/audit", label: "Audit Log", icon: "scroll-text", requiredPermission: "audit:read:any" },
+      { href: "/console/security/mfa", label: "Two-factor", icon: "lock" },
+      {
+        href: "/console/security/paired-devices",
+        label: "Paired devices",
+        icon: "smartphone",
+      },
+      {
+        href: "/console/security/devices",
+        label: "Devices",
+        icon: "server",
+      },
+      {
+        href: "/console/security/audit",
+        label: "Audit log",
+        icon: "scroll-text",
+        requiredPermission: "audit:read:any",
+      },
     ],
   },
   {
@@ -63,17 +126,19 @@ export const navConfig: NavSection[] = [
     items: [
       {
         href: "/console/oauth/applications",
-        label: "OAuth Applications",
+        label: "OAuth applications",
         icon: "globe",
       },
-      { href: "/console/oauth/tokens", label: "OAuth Tokens", icon: "key" },
+      { href: "/console/oauth/tokens", label: "OAuth tokens", icon: "key" },
       { href: "/console/webhooks", label: "Webhooks", icon: "send" },
+      { href: "/console/api-keys", label: "API keys", icon: "plug" },
     ],
   },
   {
     title: "Account",
     items: [
       { href: "/console/user", label: "Account", icon: "user" },
+      { href: "/console/billing", label: "Billing", icon: "credit-card" },
     ],
   },
 ];

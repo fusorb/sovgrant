@@ -9,7 +9,8 @@
     "seed": "tsx prisma/seed.ts"
   },
   "scripts": {
-    "dev:web": "cross-env NODE_OPTIONS='--max-old-space-size=4096' next dev --webpack",
+    "dev:web": "cross-env NODE_OPTIONS='--max-old-space-size=4096' next dev",
+    "dev:web:webpack": "cross-env NODE_OPTIONS='--max-old-space-size=4096' next dev --webpack",
     "build:web": "cross-env NODE_OPTIONS='--max-old-space-size=4096' next build",
     "start:web": "next start",
     "dev:api": "tsx watch --tsconfig tsconfig.api.json src/api/server/start-server.ts",

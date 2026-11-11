@@ -2,87 +2,107 @@
 
 import { useCallback } from "react";
 import { useAuthStore, useTenantStore } from "@fusorb/facet-store";
-import { tenants, sgClient, persistSession } from "@/sdk";
+import { tenants as tenantsSdk, sgClient, persistSession } from "@/sdk";
 
+const ACTIVE_TENANT_KEY = "sg-active-tenant";
+
+/**
+ * useTenant - tenant list, active tenant, and switching.
+ *
+ * Switching calls POST /auth/switch-context and pushes the returned
+ * tenant-scoped token bundle into the auth store + SDK client, so every
+ * subsequent request carries the new tenant's `tid` claim.
+ */
 export function useTenant() {
-  const { activeTenant, tenants: tenantList, isLoading, setActiveTenant, setTenants, setLoading } =
-    useTenantStore();
+  const {
+    activeTenant,
+    tenants,
+    isLoading,
+    setActiveTenant,
+    setTenants,
+    setLoading,
+  } = useTenantStore();
 
   const hydrateTenants = useCallback(async () => {
     setLoading(true);
-    const result = await tenants.list();
+    const result = await tenantsSdk.list();
+
     if (result.data && result.data.length > 0) {
       setTenants(result.data);
-      const stored = localStorage.getItem("sg-active-tenant");
-      const saved = stored ? JSON.parse(stored) : null;
-      const target = saved ? result.data.find((t) => t.id === saved.id) : result.data[0];
+
+      let saved: { id?: string } | null = null;
+      try {
+        const raw = localStorage.getItem(ACTIVE_TENANT_KEY);
+        saved = raw ? (JSON.parse(raw) as { id?: string }) : null;
+      } catch {
+        saved = null;
+      }
+
+      const target = saved
+        ? result.data.find((t) => t.id === saved?.id)
+        : result.data[0];
       if (target) setActiveTenant(target);
     } else {
       setTenants([]);
       setActiveTenant(null);
     }
+
     setLoading(false);
   }, [setActiveTenant, setTenants, setLoading]);
 
-  const listMembers = useCallback(
-    async (tenantId: string) => {
-      if (!useAuthStore.getState().accessToken) {
-        return { data: null, error: { statusCode: 401, error: "Unauthorized", message: "No access token" } as const };
-      }
-      return tenants.listMembers(tenantId);
-    },
-    [],
-  );
-
   const switchTenant = useCallback(
     async (tenantId: string) => {
-      const result = await tenants.switchTenant(tenantId);
-      if (result.data) {
-        const target = tenantList.find((t) => t.id === tenantId) ?? null;
-        setActiveTenant(target);
-        if (target) localStorage.setItem("sg-active-tenant", JSON.stringify(target));
+      const result = await tenantsSdk.switchTenant(tenantId);
 
-        // switch-context returns a fresh token bundle scoped to the new
-        // tenant - push it into the auth store + client or every subsequent
-        // call keeps using the old tenant's token.
+      if (result.data) {
+        const target = tenants.find((t) => t.id === tenantId) ?? null;
+        setActiveTenant(target);
+        if (target) {
+          localStorage.setItem(ACTIVE_TENANT_KEY, JSON.stringify(target));
+        }
+
         const { accessToken, refreshToken } = result.data;
         const { user } = useAuthStore.getState();
         if (user) {
           useAuthStore.getState().setAuth(user, accessToken, refreshToken ?? "");
+          persistSession(user);
         } else {
           useAuthStore.getState().setTokens(accessToken, refreshToken ?? "");
         }
         sgClient.setAccessToken(accessToken);
-        if (user) persistSession(user);
       }
+
       return result;
     },
-    [tenantList, setActiveTenant],
+    [tenants, setActiveTenant],
   );
 
   const createTenant = useCallback(
     async (name: string, slug: string) => {
-      if (!useAuthStore.getState().accessToken) {
-        return { data: null, error: { statusCode: 401, error: "Unauthorized", message: "No access token" } as const };
-      }
-      const result = await tenants.create({ name, slug });
+      const result = await tenantsSdk.create({ name, slug });
       if (result.data) {
-        setTenants([result.data, ...tenantList]);
+        setTenants([result.data, ...tenants]);
         setActiveTenant(result.data);
-        localStorage.setItem("sg-active-tenant", JSON.stringify(result.data));
+        localStorage.setItem(ACTIVE_TENANT_KEY, JSON.stringify(result.data));
       }
       return result;
     },
-    [tenantList, setActiveTenant, setTenants],
+    [tenants, setActiveTenant, setTenants],
   );
 
-  const acceptInvite = useCallback(async (token: string) => {
-    return tenants.acceptInvite({ token });
-  }, []);
+  const listMembers = useCallback(
+    (tenantId: string) => tenantsSdk.listMembers(tenantId),
+    [],
+  );
+
+  const acceptInvite = useCallback(
+    (token: string) => tenantsSdk.acceptInvite({ token }),
+    [],
+  );
 
   return {
     activeTenant,
-    tenants: tenantList,
+    tenants,
     isLoading,
     setActiveTenant,
     setTenants,

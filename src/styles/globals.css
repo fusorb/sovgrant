@@ -1,11 +1,11 @@
 /* src/styles/globals.css */
 /*
- * FONT FIX:
- * Fonts are resolved through facet-tokens CSS variables, which default to
- * branded family names ("Inter", "Montserrat", "JetBrains Mono"). Those
- * names only render when the font is installed locally (self-hosted or
- * OS-installed) - so we layer robust system stacks underneath them here.
- * No next/font/google downloads, no network dependency, no build wedge.
+ * FONT STRATEGY:
+ * Fonts resolve through facet-tokens CSS variables, which default to branded
+ * family names ("Inter", "Montserrat", "JetBrains Mono"). Those names only
+ * render when the font is installed locally - so we layer robust system stacks
+ * underneath them here. No next/font/google downloads, no network dependency,
+ * no build wedge (Google Fonts is unreachable on this machine).
  */
 
 @import "tailwindcss";
@@ -20,11 +20,11 @@
 @source "../../node_modules/@fusorb/facet-tokens/dist";
 @source "../../node_modules/@fusorb/facet-auth/dist";
 
-/* facet-tokens maps the design-token CSS variables into Tailwind v4
- * utility classes (@theme) and ships the .glass/.glow-indigo/... classes
- * in tokens.css (imported first in src/app/layout.tsx). tailwind.css also
- * pulls in tw-animate-css and the [data-theme="dark"] variant used by the
- * facet ThemeProvider. (Resolved via webpack alias in next.config.ts.) */
+/* facet-tokens maps the design-token CSS variables into Tailwind v4 utility
+ * classes (@theme) and ships the .glass/.glow-indigo/... classes in
+ * tokens.css (imported first in src/app/layout.tsx). tailwind.css also pulls
+ * in tw-animate-css and the [data-theme="dark"] variant used by the facet
+ * ThemeProvider. (Resolved via the bundler alias in next.config.ts.) */
 @import "@fusorb/facet-tokens/tailwind.css";
 
 /* ── Font stack resolution ────────────────────────────────────────────────────
@@ -49,7 +49,6 @@
   html {
     @apply font-sans;
     scroll-behavior: smooth;
-    /* Improve font rendering and layout scaling across browsers */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
     text-rendering: optimizeLegibility;

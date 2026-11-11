@@ -1,11 +1,13 @@
 /**
  * SovGrant SDK - singleton wiring for @fusorb/facet-sdk.
  *
- * The domain SDKs live in the published `@fusorb/facet-sdk` package
- * (class-based: `new AuthSdk(client)`). This module owns the single
- * `SgClient` instance, wired to the Zustand auth store for token
- * refresh + auth-cleared handling, and re-exports the domain SDKs as
- * singletons so consumers keep the same `import { auth } from "@/sdk"` API.
+ * The domain SDKs are class-based (`new AuthSdk(client)`) and live in the
+ * published @fusorb/facet-sdk package. This module owns the single SgClient
+ * instance - wired to the Zustand auth store for 401 auto-refresh and
+ * auth-cleared handling - and re-exports the domain SDKs as singletons so
+ * consumers keep a stable `import { auth, tenants, ... } from "@/sdk"` API.
+ *
+ * Chain: page -> component -> hook -> store -> SDK -> API.
  */
 
 import {
@@ -20,9 +22,9 @@ import {
   WebhooksSdk,
   PasskeySdk,
   IdpSdk,
-  type AuditListParams,
   type ApiError,
   type ApiResponse,
+  type AuditListParams,
   type User,
 } from "@fusorb/facet-sdk";
 import { useAuthStore, useTenantStore } from "@fusorb/facet-store";
@@ -31,13 +33,16 @@ import {
   REFRESH_COOKIE_OPTIONS,
 } from "@/lib/refresh-cookies";
 
-// ── Client singleton ─────────────────────────────────────────────────────────
+// ── Config ──────────────────────────────────────────────────────────────────
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
 const AUTH_STORAGE_KEY = "sg-session";
 
-/** Persist the current user so AuthProvider can restore identity on page load. */
+// ── Session persistence (user only - tokens live in httpOnly cookies) ───────
+
+/** Persist the current user so SessionBootstrap can restore identity on load. */
 export function persistSession(user: User) {
   if (typeof window === "undefined") return;
   localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ user }));
@@ -48,6 +53,20 @@ export function clearPersistedSession() {
   if (typeof window === "undefined") return;
   localStorage.removeItem(AUTH_STORAGE_KEY);
 }
+
+/** Read the persisted user (identity only - never tokens). */
+export function readPersistedUser(): User | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!raw) return null;
+    return (JSON.parse(raw) as { user?: User }).user ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// ── Client singleton ────────────────────────────────────────────────────────
 
 function onAuthCleared() {
   useAuthStore.getState().clearAuth();
@@ -62,30 +81,33 @@ function onAuthCleared() {
 // original failure path (onAuthCleared) runs instead.
 let refreshInFlight = false;
 
-// Declared before `client` to break the circular type dependency:
-// client → onTokenRefresh → authSdk → client.
-// `authSdk` is assigned after `client` is created; onTokenRefresh only runs
-// at call-time, well after both are initialised.
-// eslint-disable-next-line prefer-const -- intentional forward declaration
-let authSdk: AuthSdk;
+// Holds the AuthSdk so onTokenRefresh can reach it. The client must be built
+// before the SDK instances exist, so a holder object avoids a forward-declared
+// binding (which `prefer-const` would flag).
+const sdkRef: { auth?: AuthSdk } = {};
 
-const client: SgClient = new SgClient({
+const client = new SgClient({
   baseUrl: BASE_URL,
   onTokenRefresh: async (): Promise<string | null> => {
     if (refreshInFlight) return null;
 
+    const authSdk = sdkRef.auth;
+    if (!authSdk) return null;
+
     refreshInFlight = true;
     try {
       // The refresh token lives in an httpOnly cookie (set by the backend).
-      // Pass an empty string — the /oauth/token endpoint reads from the
-      // cookie when the body value is empty.
+      // Pass an empty string - /oauth/token reads from the cookie when the
+      // body value is empty.
       const { data, error } = await authSdk.refresh("");
       if (error || !data?.accessToken) {
         onAuthCleared();
         return null;
       }
 
-      useAuthStore.getState().setTokens(data.accessToken, data.refreshToken ?? "");
+      useAuthStore
+        .getState()
+        .setTokens(data.accessToken, data.refreshToken ?? "");
       return data.accessToken;
     } finally {
       refreshInFlight = false;
@@ -96,7 +118,8 @@ const client: SgClient = new SgClient({
 
 // ── Domain SDKs (facet-sdk classes) ─────────────────────────────────────────
 
-authSdk = new AuthSdk(client);
+const authSdk = new AuthSdk(client);
+sdkRef.auth = authSdk;
 
 export const auth = authSdk;
 export const tenants = new TenantSdk(client);
@@ -109,11 +132,41 @@ export const webhooks = new WebhooksSdk(client);
 export const passkeys = new PasskeySdk(client);
 export const idp = new IdpSdk(client);
 
-// Re-export the client so providers can push token updates.
+// ── API keys ────────────────────────────────────────────────────────────────
+// facet-sdk 2.1.1 ships no ApiKeySdk, but the backend exposes the api-key
+// module. Until an ApiKeySdk lands upstream, adapt the generic client.
+// (Tracked as P1-2 in .agent/output.txt.)
+
+export interface ApiKeyRecord {
+  id: string;
+  name: string;
+  keyPrefix: string;
+  scopes: string[];
+  status: string;
+  lastUsedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreatedApiKey {
+  id: string;
+  key: string; // plaintext - returned once, never stored
+  name: string;
+  keyPrefix: string;
+  scopes: string[];
+  createdAt: string;
+}
+
+export const apiKeys = {
+  list: () => client.get<ApiKeyRecord[]>("/api-keys"),
+  create: (data: { name: string; scopes?: string[] }) =>
+    client.post<CreatedApiKey>("/api-keys/create", data),
+  revoke: (id: string) => client.del<void>(`/api-keys/${id}`),
+};
+
+// ── Re-exports ──────────────────────────────────────────────────────────────
+
 export const sgClient = client;
 
-// Re-export cookie constants (single source of truth: src/lib/refresh-cookies.ts).
 export { REFRESH_COOKIE_NAME, REFRESH_COOKIE_OPTIONS };
-
-// Re-export shared types for consumers.
-export type { AuditListParams, ApiError, ApiResponse };
+export type { AuditListParams, ApiError, ApiResponse, User };
