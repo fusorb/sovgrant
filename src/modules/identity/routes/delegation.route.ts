@@ -1,15 +1,21 @@
 // src/modules/identity/routes/delegation.route.ts
 //
-// Delegation endpoints — planned feature, not yet implemented.
-// Registered here so identity.plugin.ts can import it without a missing-
-// module TS error. Returns 501 consistently with other planned-feature
-// stubs in the codebase (social OAuth, IDP federation).
+// Delegation endpoints — deliberately not implemented; these return 501.
 //
-// When implementing: delegations allow an identity to grant a limited
-// set of OAuth scopes to another identity (or service) without sharing
-// credentials — similar to Google's delegated access model.
-// The planned schema: a Delegation model with grantor/grantee identityId,
-// scopes[], expiresAt, and revoked.
+// AccessDelegation exists in prisma/schema.prisma, but nothing reads or writes
+// it: no repository, flow or service references the model (its only mention is
+// the tenant-isolation allow-list). Shipping CRUD here would let a caller
+// "grant" scopes that no code path honours — worse than an honest 501 for an
+// IAM product. The console nav entry, stub page and useDelegations hook were
+// removed for the same reason.
+//
+// Before implementing, settle:
+//   1. Which scopes are delegatable? (an allow-list, not free-form strings)
+//   2. Who may be a grantee — another identity only, or a service client?
+//   3. Where is a grant enforced? No token-issuing path consults it today;
+//      enforcement has to land in the same change as the CRUD.
+//   4. Revocation semantics: hard delete, or a revokedAt column for audit?
+// Tracked as P1-3 in .agent/output.txt.
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 

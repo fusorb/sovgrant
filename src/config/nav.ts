@@ -45,11 +45,6 @@ export const navConfig: NavSection[] = [
         requiredPermission: "admin:system",
         children: [
           {
-            href: "/console/identities/delegations",
-            label: "Delegations",
-            icon: "route",
-          },
-          {
             href: "/console/identities/external-ids",
             label: "External IDs",
             icon: "badge-check",
