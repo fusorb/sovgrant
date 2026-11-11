@@ -89,6 +89,15 @@ const sdkRef: { auth?: AuthSdk } = {};
 
 const client = new SgClient({
   baseUrl: BASE_URL,
+  // The refresh token is an httpOnly cookie. `fetch` defaults to
+  // credentials: "same-origin", and this app calls the API on a different
+  // origin (:3000 -> :4000), so without this the browser neither stores the
+  // cookie set at login nor sends it on refresh - the entire cookie-based
+  // refresh path is inert. The backend already sends
+  // Access-Control-Allow-Credentials (build-server.ts registers cors with
+  // credentials: true against ALLOWED_ORIGINS). Safe same-origin too.
+  // Tracked as P0-7 in .agent/output.txt.
+  fetchInit: { credentials: "include" },
   onTokenRefresh: async (): Promise<string | null> => {
     if (refreshInFlight) return null;
 
