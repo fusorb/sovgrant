@@ -24,6 +24,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { execSync } from "child_process";
 import fs from "fs";
+import os from "os";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
@@ -37,8 +38,15 @@ const MIGRATIONS_DIR = path.join(ROOT, "prisma", "migrations");
 // the default `pnpm test` never depends on a running Postgres/shadow DB.
 const TIER2_ENABLED = process.env.ARC_ID_ROLLBACK_TEST === "1";
 
+// The local CLI entry point. `npx prisma ...` is not usable here - it resolves
+// through the network and hangs until the timeout - so every call below goes
+// straight to the installed entry point.
+const PRISMA_CLI = path.join(ROOT, "node_modules", "prisma", "build", "index.js");
+
+const prismaCli = (args: string) => `node "${PRISMA_CLI}" ${args}`;
+
 function run(cmd: string): string {
-  return execSync(cmd, { cwd: ROOT, encoding: "utf8", timeout: 120000 }).trim();
+  return execSync(cmd, { cwd: ROOT, encoding: "utf8", timeout: 180000 }).trim();
 }
 
 function migrationDirs(): string[] {
@@ -100,7 +108,10 @@ function dbReachable(): Promise<boolean> {
   if (!dbUrl) return Promise.resolve(false);
   try {
     const { Client } = require("pg") as typeof import("pg");
-    const client = new Client({ connectionString: dbUrl, connectionTimeoutMillis: 3000 });
+    // 15s, not 3s: on a loaded Windows box the 3s probe timed out, dbReachable
+    // returned false, and both Tier-2 checks silently returned - so an opted-in
+    // run could go green having verified nothing.
+    const client = new Client({ connectionString: dbUrl, connectionTimeoutMillis: 15000 });
     return new Promise<boolean>((resolve) => {
       client
         .connect()
@@ -117,23 +128,42 @@ describe("live migration deploy (requires ARC_ID_ROLLBACK_TEST=1 + reachable DAT
   let reachable = false;
 
   beforeAll(async () => {
-    reachable = TIER2_ENABLED && (await dbReachable());
+    if (!TIER2_ENABLED) return;
+    reachable = await dbReachable();
+    // Opting in has to mean something: if the flag is set but the database is
+    // not reachable, fail loudly rather than silently passing checks that
+    // proved nothing.
+    expect(
+      reachable,
+      "ARC_ID_ROLLBACK_TEST=1 but DATABASE_URL is not reachable - Tier 2 verified nothing",
+    ).toBe(true);
   });
 
-  it("migration chain reproduces schema.prisma with zero drift", { timeout: 120000 }, () => {
+  it("migration chain reproduces schema.prisma with zero drift", { timeout: 300000 }, () => {
     if (!reachable) return; // skip gracefully
     // Prisma 7: --to-schema (the old --to-schema-datamodel was removed).
-    // --script renders the drift as SQL; empty output = no drift.
-    const diff = run(
-      "npx prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema.prisma --script",
+    // Rendered to a FILE, not stdout: with --script piped to stdout the CLI
+    // hangs on Windows and never returns. Empty output would mean no drift,
+    // but Prisma renders zero drift as a placeholder comment instead.
+    const outFile = path.join(os.tmpdir(), `sg-drift-${Date.now()}.sql`);
+    run(
+      prismaCli(
+        `migrate diff --from-migrations prisma/migrations --to-schema prisma/schema.prisma --script -o "${outFile}"`,
+      ),
     );
-    expect(diff.trim(), `migration drift detected:\n${diff}`).toBe("");
+    const diff = fs.readFileSync(outFile, "utf8");
+    fs.rmSync(outFile, { force: true });
+    // Prisma 7 renders a zero-drift diff as the placeholder comment
+    // "-- This is an empty migration." rather than an empty string.
+    const isEmpty =
+      diff.trim() === "" || /^--\s*This is an empty migration\.?$/.test(diff.trim());
+    expect(isEmpty, `migration drift detected:\n${diff}`).toBe(true);
   });
 
-  it("prisma migrate deploy applies cleanly and status reports up to date", { timeout: 120000 }, () => {
+  it("prisma migrate deploy applies cleanly and status reports up to date", { timeout: 300000 }, () => {
     if (!reachable) return;
     const out = run(
-      "npx prisma migrate deploy --schema=prisma/schema.prisma && npx prisma migrate status --schema=prisma/schema.prisma",
+      `${prismaCli("migrate deploy --schema=prisma/schema.prisma")} && ${prismaCli("migrate status --schema=prisma/schema.prisma")}`,
     );
     // Prisma 7 status prints "Database schema is up to date!" when clean.
     expect(out).toMatch(/Database schema is up to date/i);
