@@ -23,7 +23,7 @@ Fastify + Prisma + Next.js 16 monorepo (pnpm, ESM-only).
 - Email via Resend (13 templates, React Email components; static template gallery at :3888, auth emails delivered to recipient inbox)
 - SMS via Brevo (transactional SMS for MFA codes + security alerts)
 
-**Test suite: 69 files / 381 tests / 0 code failures** - all passing clean (`pnpm test`; the count includes the 10 `packages/cli` tests), ~90s runtime on Windows (route-level + Prisma import chains dominate). Updated 2026-11-11 - down from 70/386 because the frontend teardown deleted `src/sdk/sdk.test.ts`.
+**Test suite: 71 files / 393 tests / 0 code failures** - all passing clean (`pnpm test`; the count includes the 10 `packages/cli` tests). Updated 2026-11-11.
 
 ---
 
@@ -102,7 +102,7 @@ pnpm dev:workers         # Background workers only
 pnpm typecheck
 pnpm lint
 pnpm format
-pnpm test                # 381 tests, 69 files, all passing
+pnpm test                # 393 tests, 71 files, all passing
 pnpm test:watch
 pnpm test:coverage
 pnpm build:api
@@ -113,7 +113,7 @@ pnpm build:web
   ports are free. Memory: `NODE_OPTIONS='--max-old-space-size=4096'` for web.
 - `pnpm build:api` (tsup) uses Unix `rm -rf dist`; on Windows cmd use Git Bash/WSL
   or add `rimraf`. Prefer `pnpm cli:build` (same caveat applies to packages/cli).
-- Vitest runs fine on Windows for sovgrant (69 files / 381 tests). The facet repo's
+- Vitest runs fine on Windows for sovgrant (71 files / 393 tests). The facet repo's
   vitest workspace has Windows glob issues — run facet tests via WSL/Git Bash.
 - CORS: `ALLOWED_ORIGINS` must include the frontend origin; sovport dev origin
   (`http://localhost:8081` for Expo) should be added when wiring the wallet.
@@ -275,17 +275,17 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 
 ## Test coverage detail
 
-### 69 test files, 381 tests - modules with coverage
+### 71 test files, 393 tests - modules with coverage
 
-> All 69 files pass on `pnpm test`. Typecheck clean (`tsc --noEmit`).
+> All 71 files pass on `pnpm test`. Typecheck clean (`tsc --noEmit`).
 
 | Module | Test files | Tests | Coverage breadth |
 |--------|-----------|-------|-----------------|
 | `auth` | 15 | 80 | All 13 flows covered (login, register, logout, email-verify, magic-link, mfa-setup/verify, passkey-register/auth, password-reset-request/confirm, set-username, switch-context) + session.service + `session.route` (DELETE /sessions/:id) |
 | `credentials` | 10 | 69 | issue/verify/offer/revoke/list flows + route-level (offer, list, verify-session, verify-present) + status-list service |
-| `oauth` | 6 | 47 | authorize.flow, token-exchange.flow, token-refresh.flow, token-revoke.flow, revoke-token-by-id.flow + token.service |
-| `tenant` | 7 | 27 | create-tenant, add-member, remove-member, provision-tenant-did + did.route + cross-tenant-isolation (HTTP + unit) |
-| `identity` | 9 | 43 | register-wallet-did, delete-account, update-profile, link/list/unlink-external-id, verify-identifier, confirm-identifier + external-id.verify route |
+| `oauth` | 7 | 53 | authorize.flow, token-exchange.flow, token-refresh.flow, token-revoke.flow, revoke-token-by-id.flow + token.service + `jwks.route` (relying-party verification contract) |
+| `tenant` | 7 | 28 | create-tenant, add-member, remove-member, provision-tenant-did + did.route + cross-tenant-isolation (HTTP + unit) |
+| `identity` | 10 | 49 | register-wallet-did, delete-account, update-profile, link/list/unlink-external-id, verify-identifier, confirm-identifier, approve-device-approval + external-id.verify route |
 | `api-key` | 4 | 16 | api-key.service + create/list/revoke flows |
 | `idp` | 1 | 3 | federatedLogin service |
 | `billing` | 1 | 11 | subscription.route (Paystack + Stripe webhooks) |
@@ -293,7 +293,6 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 | `webhooks` | 1 | 6 | webhook-config route |
 | `lib/*` | 8 | 55 | url-safety, rbac, password-rules, jws-proof, jti-blocklist (3 files, inc. Redis), kms |
 | `test-utils` | 2 | 5 | test-infra + sanity |
-| `sdk` | 1 | 6 | `src/sdk/index.ts` singleton wiring over `@fusorb/facet-sdk` - exports + client token round-trip |
 | `packages/cli` | 3 | 10 | safe-writer (6), init round-trip (2), detection (2) |
 | `prisma/migrations` | 1 | 5 | `rollback.test.ts` (migration chain integrity) |
 
@@ -342,7 +341,7 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 
 Current: `0.1.0` (package.json). Pre-release - no stability promises.
 
-- `0.1.0` ✅ **COMPLETE** (v1) - Backend complete: all Phase 0–8 + Phase E shipped; 69 test files / 381 tests, 0 code failures. Docker, security hardening, observability, LegalConsent + ExternalIdentifier gates all shipped.
+- `0.1.0` ✅ **COMPLETE** (v1) - Backend complete: all Phase 0–8 + Phase E shipped; 71 test files / 393 tests, 0 code failures. Docker, security hardening, observability, LegalConsent + ExternalIdentifier gates all shipped.
 - `0.2.0` 🔄 **ACTIVE (v2)** - SovPort companion app integration (end-to-end), CLI package extraction, integration tests against real Postgres. **API key management backend ✅ Done** (CRUD flows + routes, SHA-256 hashed bearer tokens, auth guard extension, migration + Tier 1 rollback tests).
 - `1.0.0` — Stable production milestone: full integration test suite, open-source release
 
