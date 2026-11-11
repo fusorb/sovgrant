@@ -412,6 +412,118 @@ Lesson: a gate that has never been observed passing is not a gate. The local
 
 ================================================================================
 
+EP 15 -- The Drift Under the Green
+--------------------------------------------------------------------------------
+What broke:
+  `pnpm test` was green, typecheck was green, and the backend could not run
+  against its own database. Diffing the live schema against `schema.prisma`
+  returned far more than the change being made: three gaps, accumulated over
+  months, none of them visible to any test - because every DB-touching test
+  mocks the client.
+
+  1. `PairedDevice` and `DeviceApproval` were declared in `schema.prisma` and
+     created by NO migration at all. Seven flows read them - device pairing and
+     device approvals, the whole SovPort ceremony - and each would have failed
+     on its first real query.
+  2. `20260822000000_remove_dead_audit_enum_values` set out to delete two dead
+     `AuditLogAction` values. Postgres cannot DROP VALUE, so the migration
+     recreated the type - from a hand-copied list that also omitted
+     `PASSKEY_USED`, `CREDENTIAL_ISSUED` and `CREDENTIAL_REVOKED`. Those three
+     were live: credential issuance, credential revocation and passkey login
+     each write one. Issuing a credential would have died on an invalid enum
+     value.
+  3. `ApiKey` and `ExternalIdentifier` columns had drifted from the schema
+     (column types, a stale default, a missing index and both foreign keys).
+
+How we fixed it:
+  - Generated `20261111000010_repair_schema_drift` with
+    `prisma migrate diff --from-migrations prisma/migrations --to-schema
+    prisma/schema.prisma --script` - the chain produces its own repair, so it
+    cannot be another hand-copied list.
+  - Kept the model drop (`20261111000000`) and the repair as separate
+    migrations, so either can be reverted on its own.
+  - Took a `pg_dump` first, created the `sg_shadow` database the config already
+    expected, applied both with `pnpm prisma:deploy`, then read the result back
+    out of the database instead of trusting an exit code.
+  - Fixed the guard that should have caught all of it, which could not fail:
+    its connectivity probe used a 3s timeout this machine reliably exceeded, so
+    both Tier-2 checks hit an early return and an opted-in run went green having
+    verified nothing; its assertion expected an empty diff, but Prisma 7 renders
+    zero drift as a placeholder comment; and it shelled out through `npx`, which
+    hangs here.
+
+What survived:
+  The repair is proven, not assumed - the diff from migrations now returns only
+  Prisma's empty-migration placeholder, and with the guard repaired both live
+  checks genuinely run (15.1s, 8.6s) and pass. The database matches the schema
+  for the first time in months, and credential issuance, revocation, passkey
+  login and device pairing have working storage underneath them.
+
+Lesson: a suite that mocks the database cannot tell you the database is wrong.
+  "Green" was true and meant far less than it looked. The only check covering
+  this class of bug was opt-in - and broken in three independent ways, which is
+  why nobody noticed. Two rules: never hand-copy an enum's value list (diff it),
+  and never trust a gate you have not watched fail. Note the shape of the trap -
+  the guard's early return made a broken check indistinguishable from a passing
+  one, so every run was a green light that meant "I did not look".
+
+================================================================================
+
+EP 16 -- The Key Nobody Published, and the Cookie Nobody Sent
+--------------------------------------------------------------------------------
+What broke:
+  Two contracts the system advertised and did not honour. Both were invisible
+  from inside, because each half looked individually reasonable.
+
+  A relying party - Relnex, wiring its first integration - fetched the
+  `jwks_uri` from our own discovery document and could not verify an access
+  token. That endpoint publishes only the ACTIVE `TenantSigningKey` rows, the
+  tenant VC/DID EC keys; the RSA key that signs access tokens was never in it.
+  `signJwt` also set no `kid`, so even with the key present a verifier had
+  nothing to select it by. The consuming repo had a pinned public key as a
+  fallback - the kind of workaround that hides exactly this.
+
+  The same shape sat in the browser session. The refresh token is an httpOnly
+  cookie, which is the whole point of the design - but the SDK never sets a
+  `credentials` option and the app calls the API cross-origin, so the browser
+  discarded the `Set-Cookie` at login and never sent it back. Refresh had
+  therefore never worked; the access token just expired after 15 minutes. On top
+  of that, `SgProvider` only attempts the refresh-cookie exchange when its
+  storage already holds a token, and the client only retries a 401 when it
+  already holds one - so after a reload no token could be obtained by any path,
+  while the persisted user was still restored and the UI still redirected into a
+  console that could load nothing.
+
+How we fixed it:
+  - Key identity moved into `src/lib/jwt/jwks.ts`: the `kid` is the RFC 7638
+    thumbprint of the RSA public key, so the token and the published JWK cannot
+    disagree and rotation is automatic. Derived from the PUBLIC key, because the
+    alternative - importing the signing key as extractable - would have changed
+    the signing key's posture just to compute an identifier.
+  - `signJwt` takes an optional `kid`; `/oauth/jwks` publishes the RSA key.
+  - `fetchInit: { credentials: "include" }` on the client: one line, available
+    in the published SDK, fixing a path that had never worked.
+  - `AuthBootstrap` mounts above `SgProvider` and does the cookie exchange
+    first, so the provider comes up holding a token. Tokens still never touch
+    localStorage.
+  - Both were prototyped against the real `certs/` key pair before any repo
+    change, and each acceptance criterion is now an assertion in the suite.
+
+What survived:
+  Relnex can set `SG_JWKS_URL` and drop its pinned key. The token and session
+  paths are real for the first time - issuance, verification, refresh, reload -
+  and both fixes stay correct if facet later defaults them, since they only make
+  explicit what the design always assumed.
+
+Lesson: a contract nobody can observe failing is a contract you do not have.
+  Both were "implemented" in the sense that the code existed and the endpoint
+  answered 200; what was missing was anyone being able to use them. Watch for the
+  workaround - a pinned public key and a "just log in again" habit were both
+  symptoms in plain sight. Probe your own advertised contracts from the outside,
+  the way a stranger would.
+
+================================================================================
+
 ## The Rule Chain (why these episodes exist)
 --------------------------------------------------------------------------------
   MANUAL        -- a fix lives in someone's head or an unshared script.
