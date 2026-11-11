@@ -18,7 +18,7 @@
 // or writes directly. That call site must also pass familyId/parentJti;
 // see token-refresh.flow.ts Step 6.
 
-import { signJwt, AccessTokenClaims } from "@/lib/jwt";
+import { signJwt, AccessTokenClaims, accessTokenKid } from "@/lib/jwt";
 import { generateToken } from "@/lib/crypto";
 import { randomUUID } from "crypto";
 import { addMinutes, addHours, addDays } from "date-fns";
@@ -128,8 +128,17 @@ export class TokenService {
     const publicKeyPem = resolvePemContent(config.security.jwt.publicKey);
     const useRsa = Boolean(privateKeyPem && publicKeyPem);
 
+    // Stamp every token we sign with the id of the key published in the JWKS,
+    // so a relying party can select the key that verifies it. Only meaningful
+    // for the asymmetric path - HS256 tokens have no published key to name.
+    const kid = useRsa ? await accessTokenKid(publicKeyPem) : null;
+
     const signOptions = useRsa
-      ? { privateKeyOrSecret: privateKeyPem, alg: "RS256" as const }
+      ? {
+          privateKeyOrSecret: privateKeyPem,
+          alg: "RS256" as const,
+          ...(kid ? { kid } : {}),
+        }
       : {
           privateKeyOrSecret: config.security.jwt.secret,
           alg: "HS256" as const,

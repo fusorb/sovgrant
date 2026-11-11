@@ -32,11 +32,17 @@ export async function signJwt(
     expiresIn: string;
     issuer?: string;
     alg?: "RS256" | "HS256";
+    /**
+     * Key id advertised in the JWT header. Set for RS256 so a relying party can
+     * select the right key from the JWKS endpoint - it has no other way to know
+     * which published key signed this token. Omit for HS256: there is no JWKS.
+     */
+    kid?: string;
   },
 ): Promise<string> {
   const alg = options.alg ?? "RS256";
   const jwt = new SignJWT(payload)
-    .setProtectedHeader({ alg })
+    .setProtectedHeader({ alg, ...(options.kid ? { kid: options.kid } : {}) })
     .setIssuedAt()
     .setIssuer(options.issuer ?? "sovgrant")
     .setExpirationTime(options.expiresIn);
