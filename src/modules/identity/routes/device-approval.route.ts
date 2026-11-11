@@ -74,14 +74,17 @@ export async function deviceApprovalRoute(fastify: FastifyInstance) {
         summary: "Approve a device approval challenge",
         security: [{ bearerAuth: [] }],
         params: z.object({ challenge: z.string() }),
-        body: z.object({ signature: z.string().optional() }).optional(),
+        body: z.object({
+          deviceId: z.string().min(1),
+          signature: z.string().min(1),
+        }),
         response: {
           200: z.object({ success: z.boolean(), data: z.any() }),
         },
       },
     },
     async (req) => {
-      const body = (req.body as any) || {};
+      const body = req.body as { deviceId: string; signature: string };
       const result = await (flowExecutor as any).run(approveDeviceApprovalFlow, { challenge: (req.params as any).challenge, ...body }, {
         identityId: (req.identity as any)?.id,
         tenantId: null,

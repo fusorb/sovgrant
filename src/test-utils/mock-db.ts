@@ -54,6 +54,8 @@ export function createMockDb() {
      externalIdentifier: modelProxy("externalIdentifier"),
      legalConsent: modelProxy("legalConsent"),
     wallet: modelProxy("wallet"),
+    pairedDevice: modelProxy("pairedDevice"),
+    deviceApproval: modelProxy("deviceApproval"),
     auditLog: modelProxy("auditLog"),
     $transaction: vi.fn(async (fn: (tx: any) => any) => fn(mock)),
     $disconnect: vi.fn(),

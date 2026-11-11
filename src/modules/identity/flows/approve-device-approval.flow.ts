@@ -2,10 +2,12 @@ import { z } from "zod";
 import type { Flow } from "@/core/flows/flow";
 import type { FlowContext } from "@/core/flows/flow-context";
 import { ApiError } from "@/core/errors/api-error";
+import { verifyEd25519Signature } from "@/lib/crypto";
 
 const ApproveDeviceApprovalInputSchema = z.object({
   challenge: z.string().min(1),
-  signature: z.string().min(1).optional(),
+  deviceId: z.string().min(1),
+  signature: z.string().min(1),
 });
 
 const ApproveDeviceApprovalOutputSchema = z.object({
@@ -34,11 +36,15 @@ export const approveDeviceApprovalFlow: Flow<
       throw ApiError.badRequest("Approval request expired");
     }
 
+    // Proof-of-possession: the approving device must sign the challenge with the
+    // private key matching the public key it registered at pairing time.
     const device = await ctx.db.pairedDevice.findFirst({
-      where: { identityId, revokedAt: null, trusted: true },
-      orderBy: { lastSeenAt: "desc" },
+      where: { identityId, deviceId: input.deviceId, revokedAt: null, trusted: true },
     });
-    if (!device) throw ApiError.badRequest("No valid paired device");
+    if (!device) throw ApiError.forbidden("Unknown or untrusted device");
+    if (!verifyEd25519Signature(device.publicKey, input.challenge, input.signature)) {
+      throw ApiError.forbidden("Invalid device signature");
+    }
 
     await ctx.db.deviceApproval.update({
       where: { id: approval.id },
