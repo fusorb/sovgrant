@@ -191,9 +191,6 @@ model Identity {
   legalConsents      LegalConsent[]
   apiKeys            ApiKey[]
 
-  delegationsGranted  AccessDelegation[] @relation("DelegationGrantor")
-  delegationsReceived AccessDelegation[] @relation("DelegationGrantee")
-
   auditLogs AuditLog[]
 
   @@index([primaryEmail])
@@ -355,7 +352,6 @@ model Tenant {
   memberships       TenantMembership[]
   projects          Project[]
   policies          TenantPolicy[]
-  accessDelegations AccessDelegation[]       @relation("TenantDelegations")
   signingKeys       TenantSigningKey[]
   idpConnections    IdpConnection[]
   branding          TenantBranding?
@@ -742,19 +738,16 @@ model IdToken {
 
 // SYSTEM BRIDGES & UTILITIES
 
-model AccessDelegation {
-  id        String    @id @default(cuid())
-  grantorId String
-  granteeId String
-  tenantId  String?
-  scopes    Json
-  expiresAt DateTime?
-  createdAt DateTime  @default(now())
-
-  grantor Identity @relation("DelegationGrantor", fields: [grantorId], references: [id], onDelete: Cascade)
-  grantee Identity @relation("DelegationGrantee", fields: [granteeId], references: [id], onDelete: Cascade)
-  tenant  Tenant?  @relation("TenantDelegations", fields: [tenantId], references: [id], onDelete: Cascade)
-}
+// AccessDelegation was dropped in migration 20261111000000_drop_access_delegation.
+// It had been in the schema since the initial setup and was never wired: no
+// repository, flow or service read or wrote it, and it had no link to Client,
+// so no token-issuing path could ever have consulted it. Its DELEGATION_* audit
+// enums were already removed in 20260822000000. Dropping it now - while nothing
+// depends on it and the table is necessarily empty - is a pure forward
+// migration; leaving it would have implied a capability that did not exist.
+// If delegation is built later, model it as client-anchored token exchange
+// (RFC 8693, `act`/`sub` claims) rather than a standalone table. The open
+// design questions live in src/modules/identity/routes/delegation.route.ts.
 
 model Device {
   id             String   @id @default(cuid())

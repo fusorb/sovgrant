@@ -1,0 +1,23 @@
+-- Drop AccessDelegation: an unfinished sketch that was never wired.
+--
+-- The table has existed since 20260527200711_db_schema_lockedin, but no code
+-- path ever read or wrote it - no repository, flow or service references the
+-- model - so it is necessarily empty in every environment. There is no data to
+-- lose. It also had no relation to Client, which is what tokens are minted
+-- against, so it could never have functioned as a scopes grant.
+--
+-- Done now, while nothing depends on it, because this is the cheapest possible
+-- moment: a pure forward migration that touches no live rows. Leaving it in
+-- place implies a capability that does not exist, and every future schema
+-- change would have to keep an unenforced table consistent for no reason.
+--
+-- IF EXISTS is deliberate rather than Prisma's usual bare DROP TABLE: it keeps
+-- the migration idempotent so a partially-drifted environment (or a replayed
+-- migration log) cannot wedge a deployment on a table whose absence is already
+-- the desired end state.
+--
+-- Reverse: recreate the table from the CREATE TABLE in
+-- 20260527200711_db_schema_lockedin/migration.sql and restore the model block
+-- from prisma/schema.prisma at the parent commit.
+
+DROP TABLE IF EXISTS "AccessDelegation";

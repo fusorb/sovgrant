@@ -64,7 +64,7 @@ sovgrant/
 │   ├── sdk/           # SgClient singleton + facet domain SDKs + contract adapters
 │   └── test-utils/    # Vitest setup + mock DB helpers
 ├── prisma/
-│   ├── schema.prisma  # Single source of truth - 48 models
+│   ├── schema.prisma  # Single source of truth - 47 models
 │   ├── seed.ts        # SYSTEM tenant, admin user, 22 permissions
 │   └── migrations/    # Never hand-edit - always `pnpm prisma:migrate`
 ├── docs/

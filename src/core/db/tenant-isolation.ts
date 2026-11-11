@@ -15,7 +15,6 @@ const REQUIRED_TENANT_MODELS = new Set([
 
 const OPTIONAL_TENANT_MODELS = new Set([
   "Client",
-  "AccessDelegation",
   "AuditLog",
   "WebhookEvent",
   "Subscription",

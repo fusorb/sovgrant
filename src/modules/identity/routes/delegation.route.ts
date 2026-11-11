@@ -2,19 +2,20 @@
 //
 // Delegation endpoints — deliberately not implemented; these return 501.
 //
-// AccessDelegation exists in prisma/schema.prisma, but nothing reads or writes
-// it: no repository, flow or service references the model (its only mention is
-// the tenant-isolation allow-list). Shipping CRUD here would let a caller
-// "grant" scopes that no code path honours — worse than an honest 501 for an
-// IAM product. The console nav entry, stub page and useDelegations hook were
-// removed for the same reason.
+// There is no delegation storage any more: AccessDelegation was an unfinished
+// sketch (present since the initial setup, never wired, and with no link to
+// Client, so no token-issuing path could ever have consulted it) and was
+// dropped in migration 20261111000000_drop_access_delegation. The console nav
+// entry, stub page and useDelegations hook were removed at the same time.
 //
-// Before implementing, settle:
+// Building this is a design task, not a CRUD task. Settle these first:
 //   1. Which scopes are delegatable? (an allow-list, not free-form strings)
 //   2. Who may be a grantee — another identity only, or a service client?
-//   3. Where is a grant enforced? No token-issuing path consults it today;
-//      enforcement has to land in the same change as the CRUD.
-//   4. Revocation semantics: hard delete, or a revokedAt column for audit?
+//   3. Where is a grant enforced? Model it as client-anchored token exchange
+//      (RFC 8693, `act`/`sub` claims) enforced in the token flows, so that a
+//      grant and its enforcement land in the same change.
+//   4. Revocation semantics — plus which audit actions to (re-)introduce, the
+//      DELEGATION_* enum values having been removed in 20260822000000.
 // Tracked as P1-3 in .agent/output.txt.
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
