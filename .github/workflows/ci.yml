@@ -13,6 +13,10 @@ concurrency:
 env:
   HUSKY: 0
   DATABASE_URL: postgresql://test:test@localhost:5432/sovgrant_test
+  # The migration drift check replays the whole chain into this database. The
+  # service container only creates DATABASE_URL's database, so a step below
+  # creates this one before the guard runs.
+  SHADOW_DATABASE_URL: postgresql://test:test@localhost:5432/sovgrant_shadow
   JWT_SECRET: ci-test-secret-must-be-at-least-32-chars
   COOKIE_SECRET: ci-test-cookie-secret-32-chars-min
   WEBHOOK_SIGNING_SECRET: ci-test-webhook-secret
@@ -82,11 +86,16 @@ jobs:
       - name: CLI build
         run: pnpm cli:build
 
+      - name: Create shadow database (migration drift check)
+        run: node scripts/create-shadow-db.mjs
+
       - name: Migration rollback guard (live Postgres)
         run: pnpm test:rollback
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/sovgrant_test
-          SHADOW_DATABASE_URL: postgresql://test:test@localhost:5432/sovgrant_shadow
+          # Tier 2 of this guard is opt-in on this flag. Without it the step ran
+          # only the static Tier-1 checks and verified nothing about drift: green
+          # on every push, which is how the 2026-11-11 schema drift survived.
+          ARC_ID_ROLLBACK_TEST: "1"
 
       - name: Build API
         run: pnpm build:api
