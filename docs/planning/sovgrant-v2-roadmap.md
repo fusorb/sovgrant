@@ -52,13 +52,13 @@ contract stabilized for the CLI package.
 
 | # | Item | Priority | Status |
 |---|------|----------|--------|
-| 1 | SovPort companion app — end-to-end wallet issuance/verify/presentation flow (separate package) | P0 | ⏳ Not started |
+| 1 | SovPort companion app — end-to-end wallet issuance/verify/presentation flow (separate package) | P0 | 🔄 **In progress in its own repo** (`../sovport`, Expo/React Native, not tracked in this tree): real Ed25519 crypto, MFA wiring, on-device credential custody, and the device-approval signing side (`91be7a4`). |
 | 2 | API key management backend — CRUD flows + routes (OAuth2 bearer-token style keys) | P1 | ✅ Done — `ApiKey` model + migration, CRUD flows/routes, SHA-256 hashed tokens, auth guard bearer detection + `requirePermission` scope fallback, 16 unit tests + Tier 1 migration check |
 | 3 | CLI package extraction — move `packages/cli` to published `@fusorb/sg-cli` npm package | P1 | ⏸️ Scaffolded; pending API contract stability |
-| 4 | Integration tests against real Postgres (`pnpm test:rollback`) | P2 | ✅ Unblocked (facet shipped 2026-08-19); needs Postgres 17 service |
-| 5 | SDK `TenantSdk.create()` test coverage gap (P4.3) | P2 | ⏸️ Not blocking; 6-test `sdk.test.ts` passes |
-| 6 | Console dashboard — final cleanup (remaining SDK-direct imports in pages) | P3 | ⏸️ Pragmatically acceptable |
-| 7 | Billing UI — pricing from `src/config/plan-caps.ts` displayed via `BillingPage` (facet-components) | P2 | ✅ In progress (working tree) |
+| 4 | Integration tests against real Postgres (`pnpm test:rollback`) | P2 | ✅ **Running (2026-11-11)** — the Tier-2 guard was broken three ways (3s probe timeout, wrong empty-diff assertion, `npx` invocation) and silently no-op'd, so it had never verified anything; repaired, it now runs 5/5 against `sg` + `sg_shadow`. Make `ARC_ID_ROLLBACK_TEST=1` a pre-release gate. |
+| 5 | SDK `TenantSdk.create()` test coverage gap (P4.3) | P2 | ✅ Superseded — `src/sdk/sdk.test.ts` tested the deleted in-repo SDK and went with it in the frontend teardown (F1); the published facet SDK owns its own tests. |
+| 6 | Console dashboard — final cleanup (remaining SDK-direct imports in pages) | P3 | ✅ Obsolete — the pages that imported the SDK directly were deleted in F1. `src/hooks/` is now the only layer that imports `@/sdk`, which is what enforces the chain. |
+| 7 | Billing UI — pricing from `src/config/plan-caps.ts` displayed via `BillingPage` (facet-components) | P2 | ⏳ Reopened — the old billing page went with the F1 teardown; `/console/billing` is a stub awaiting F5 wiring. |
 
 ### 0.2.1 — "Edge cleanup"
 
@@ -110,7 +110,11 @@ contract stabilized for the CLI package.
 - **SDK** — published `@fusorb/facet-sdk@2.1.1` (class-based `AuthSdk`,
   `TenantSdk`, `OAuthSdk`, `CredentialSdk`, `WebhookSdk`). `src/sdk/index.ts`
   is a thin singleton that owns the `SgClient` + 401 auto-refresh (wired to
-  the Zustand auth store) and re-exports the facet domain SDKs.
+  the Zustand auth store) and re-exports the facet domain SDKs. It also sets
+  `fetchInit.credentials = "include"` (the refresh token is an httpOnly cookie;
+  without this the browser discards it on a cross-origin call) and carries
+  `externalIds` / `devices` / `policies` adapters where the published types
+  drift from the API schemas.
 - **CLI** — Phase 1 implemented in `packages/cli` (`@fusorb/sg-cli`, bin `sg`):
   init/doctor/migrate/setup/revert, Postgres + Cockroach adapters, safe
   overwrite/revert, secret generation, --dry-run/--force/--yes. Tests: 10

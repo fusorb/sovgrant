@@ -55,6 +55,11 @@ be a *general-purpose* IdP, not an internal-only service.
   per-request round-trip. SovGrant issues, relying parties verify.
 - Shared-secret verification (`SG_JWT_SECRET`) is a **temporary, first-party-only**
   shortcut (Relnex today); the target for everyone is JWKS.
+- `jwks_uri` publishes the **access-token signing key**: the global RSA public
+  key, identified by a `kid` (the RFC 7638 thumbprint of that key), and every
+  RS256 token carries the same `kid` in its header. The tenant EC keys published
+  alongside it sign VC/DID documents, not access tokens. A relying party can
+  therefore verify an access token using nothing but `jwks_uri`.
 - New relying parties register as **OIDC clients** (authorization code + PKCE).
 
 ### Sync

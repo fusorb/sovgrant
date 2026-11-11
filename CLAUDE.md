@@ -36,11 +36,7 @@ sovgrant/
 │   │   ├── plugins/   # auth-guard, jwt, db, rate-limit, swagger, cors
 │   │   ├── routes/    # well-known, health, DID document, mail-preview
 │   │   └── server/    # build-server.ts, start-server.ts, start-workers.ts
-│   ├── app/           # Next.js 16 App Router - dashboard + auth routes
-│   ├── components/    # App-level React pieces (navbar, page-shell, data-table,
-│   │                  # sidebar footer); ui/ keeps 3 facet wrappers only
 │   ├── core/          # Shared: config, db, errors, flows, mail
-│   ├── hooks/         # React hooks - use-*.ts over the facet SDKs
 │   ├── jobs/          # Background jobs - token-cleanup, webhook-worker
 │   ├── lib/           # Utilities: jwt, crypto, kms, security, url-safety
 │   │   ├── kms/       # AES-256-GCM key encryption/decryption + rotation
@@ -60,13 +56,16 @@ sovgrant/
 │   ├── app/           # Next.js App Router - (public) / (auth) / console / invites / oauth
 │   ├── components/    # Only StubPage + PublicNavbar - everything else comes from facet
 │   ├── hooks/         # One hook per backend domain - the ONLY layer that imports @/sdk
-│   ├── providers/     # ThemeProvider -> SgProvider -> SessionBootstrap -> Toaster
+│   ├── providers/     # ThemeProvider -> AuthBootstrap -> SgProvider -> SessionBootstrap -> Toaster
 │   ├── sdk/           # SgClient singleton + facet domain SDKs + contract adapters
 │   └── test-utils/    # Vitest setup + mock DB helpers
 ├── prisma/
 │   ├── schema.prisma  # Single source of truth - 47 models
 │   ├── seed.ts        # SYSTEM tenant, admin user, 22 permissions
-│   └── migrations/    # Never hand-edit - always `pnpm prisma:migrate`
+│   └── migrations/    # Mostly generated; hand-written SQL is used where Postgres
+│                      # cannot express the change (enum recreation 20260822000000,
+│                      # the drift repair 20261111000010). Always verify with
+│                      # `ARC_ID_ROLLBACK_TEST=1` - see the Tier-2 guard.
 ├── docs/
 │   ├── planning/     # Planning documents
 │   │   ├── sovgrant-v2-roadmap.md       # Operative roadmap (v2)
@@ -238,14 +237,14 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 | Email templates | ✅ 13 templates | All registered in `notification.service.ts`, compiled via React Email + Resend |
 | CI pipeline | ✅ 3 workflows (rewritten 2026-07-28; CLI gates added 2026-11-05; lint unblocked 2026-11-06) | `ci.yml` (GitHub `ubuntu-latest` runner + `postgres:17-alpine` service container, no external DB: validate → typecheck → lint → `scan:secrets` → Trivy → test → cli:typecheck → cli:build → migrate-rollback guard → build api+web). **Note:** lint ran before test, so a pre-existing lint failure meant CI never reached the test/build steps until 2026-11-06 - `eslint.config.mjs` now ignores generated trees and carries `no-explicit-any` / `no-unused-vars` / `react-hooks/set-state-in-effect` as warnings. |
 | `GET /tenants` route | ✅ 100% | `list-tenants.route.ts` - returns all tenants the user has ACTIVE membership in, with role + plan |
-| SDK layer | ✅ **Migrated to `@fusorb/facet-sdk@2.1.1`** | `src/sdk/` is now `index.ts` only - an `SgClient` singleton (401 auto-refresh wired to the Zustand auth store) re-exporting the facet domain SDK classes (`AuthSdk`, `TenantSdk`, `VcSdk`, …). Old factory-pattern `src/sdk/*.sdk.ts` deleted (2026-08-05). |
+| SDK layer | ✅ **Migrated to `@fusorb/facet-sdk@2.1.1`** | `src/sdk/` is now `index.ts` only - an `SgClient` singleton (401 auto-refresh wired to the Zustand auth store) re-exporting the facet domain SDK classes (`AuthSdk`, `TenantSdk`, `VcSdk`, …). Old factory-pattern `src/sdk/*.sdk.ts` deleted (2026-08-05). Also carries three contract adapters (`externalIds`, `devices`, `policies`) where the published SDK types drift from the API schemas, and sets `fetchInit.credentials = "include"` so the httpOnly refresh cookie is actually stored and sent. |
 | UI components | ✅ **Migrated to `@fusorb/facet-components@3.2.1`** | shadcn/ui primitives purged; consumers use the package's native `<Icon name=… />` registry. The 3 temporary app-specific wrappers (`icon.tsx`, `typewriter-text.tsx`, `icons.generated.tsx`) were **deleted** in the F1 teardown (2026-11-11) - `src/components/` now holds only `stub-page.tsx` + `public-navbar.tsx`. |
 | Auth UI | ✅ **Migrated to `@fusorb/facet-auth@2.1.0`** | Login/register/mfa pages use `SignIn`/`SignUp`/`MfaDialog`; `SgProvider` bridged to the Zustand store via `zustandTokenStorage` (commit `d6f6707`). In-repo `login-form`/`register-form`/`mfa-form` deleted; forgot/reset password forms now on `@fusorb/facet-auth` (ForgotPasswordForm/ResetPasswordForm). |
 | Layout | ✅ **Migrated to `@fusorb/facet-layout@1.7.2`** | `(auth)` group uses `AuthLayout`, `console/` directory uses `ConsoleLayout`; in-repo sidebar/topbar/tenant-switcher deleted. |
 | CSS tokens | ✅ **Migrated to `@fusorb/facet-tokens@1.5.1`** | `tokens.css` imported before `globals.css` in `layout.tsx`; `:root` block removed from globals.css; sovgrant keeps its indigo primary via override. |
 | Mail templates | ✅ **Migrated to `@fusorb/facet-emails@1.1.4`** (Phase 7) | `src/core/mail` rewired to `toTemplateTree`/`EmailBrand`; 13 templates via facet-emails; preview server on `:3888`. |
 | Stores | ✅ **Migrated to `@fusorb/facet-store@1.0.4`** (Phase 8) | `src/store/` deleted; `useAuthStore`/`useTenantStore` from `@fusorb/facet-store` across ~26 hook sites. |
-| Tenant store hydration | ⚠️ Wired, but **breaks across a reload** | `SessionBootstrap` calls `tenants.list()` after restore and populates `useTenantStore`; `AuthProvider` no longer exists (deleted in the F1 teardown). **Caveat:** after a page reload no access token can be obtained at all, so hydration silently no-ops and every later call 401s - see **P0-4** in `.agent/output.txt`. Must be fixed before F5. |
+| Tenant store hydration | ✅ **Fixed (2026-11-11)** | `AuthBootstrap` (mounted ABOVE `SgProvider`) exchanges the httpOnly refresh cookie for an access token before the provider mounts, then `SessionBootstrap` hydrates `useTenantStore` once a token exists. Before this, no access token could be obtained after a reload at all, so hydration silently no-oped and every later call 401'd - see **P0-4/P0-7** in `.agent/output.txt`. |
 | Tenant switcher UI | ✅ Built | `TenantSwitcher` component in Topbar - visible when user has 2+ tenants, triggers context switch |
 
 ### 🔵 Status - working tree (2026-08-21)

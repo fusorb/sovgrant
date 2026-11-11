@@ -47,6 +47,14 @@ in package.json) - never emit `require()`/`module.exports`.
    - Never hardcode a crypto algorithm - read it from the key or JWT header.
    - Federated login auto-link gated on `emailVerified === true` - both
      `social.route.ts` and `idp.service.ts` enforce this.
+   - Approving a device approval requires proof-of-possession: the approving
+     device must sign the challenge with the Ed25519 key matching the
+     `PairedDevice.publicKey` it registered, and that row must be the caller's
+     own, unrevoked and trusted (`verifyEd25519Signature` in
+     `approve-device-approval.flow.ts`). A bare `deviceId` is never sufficient.
+   - The refresh token is an httpOnly cookie: the SDK client must send
+     `credentials: "include"` (set via `fetchInit` in `src/sdk/index.ts`), or
+     the cookie is neither stored nor sent and the whole refresh path is inert.
 
 ## File naming
 
@@ -72,15 +80,25 @@ shipped. See `CLAUDE.md` for the full verified status table. Open work:
 - **Docker deployment** - ✅ Done. Multi-stage `Dockerfile` (node:22-alpine),
   `docker-compose.yml` (Postgres 17 + Redis 7 + API + workers), `.dockerignore`,
   auto-migrate entrypoint, `.env.example`. `docker compose up -d` to run.
-- **Frontend rebuild (Prompt 2) - SDK/stores/hooks/providers/layout complete.**
-  SDK layer migrated to the published **`@fusorb/facet-sdk`** package (class-based
-  `AuthSdk`/`TenantSdk`/etc.) - `src/sdk/index.ts` is now a thin singleton wiring
-  that owns the `SgClient` + 401 auto-refresh (wired to the Zustand auth
-  store) and re-exports the facet domain SDKs. The old in-repo factory-pattern
-  `src/sdk/*.sdk.ts` files are deleted. Hooks for credentials, MFA, webhooks
-  use the facet SDKs. Pages still need final cleanup (some import
-  SDK directly instead of through hooks - pragmatically acceptable).
-  **Tenant list route (`GET /tenants`) + tenant switcher wired (2026-07-28).**
+- **Frontend rebuild** - F1–F4 landed 2026-11-11; **F5 (page wiring) is the only
+  open part**.
+  - **F1 teardown** (`f334674`): the pre-facet surface is deleted - legacy page
+    components, the 16 in-repo hooks, the in-repo SDK and its test, provider
+    wrappers (incl. `AuthProvider`), and the local icon / table / shell
+    components.
+  - **F2/F3 foundation + route map** (`1729f8a`): brand + nav config, provider
+    wiring, and the App Router route map scaffolded as `StubPage` stubs
+    (public / auth / console / invites / oauth).
+  - **F4 hooks** (`c318198`): one hook per backend domain (24 files) plus
+    `use-api-guard`, which centralises the "no session token -> 401" contract.
+    `src/hooks/` is the only layer that imports `@/sdk` - that is what enforces
+    page → component → hook → store → SDK → API.
+  - **Provider stack**: `ThemeProvider → AuthBootstrap → SgProvider →
+    SessionBootstrap → children + Toaster`. **`AuthBootstrap` must stay ABOVE
+    `SgProvider`**: `SgProvider` only attempts the refresh-cookie exchange when
+    its storage already holds an access token, so no component inside it can
+    bootstrap a session after a reload (P0-4/P0-7 in `.agent/output.txt`).
+  - **F5 (open)**: page-by-page component wiring for the 40 stubs.
 - **Facet migration** - ✅
   **Phases 1–5 done.** Phase 1: SDK migrated to the published
   **`@fusorb/facet-sdk@2.1.1`** - `src/sdk/index.ts` is a thin
@@ -89,7 +107,7 @@ shipped. See `CLAUDE.md` for the full verified status table. Open work:
   old in-repo factory-pattern `src/sdk/*.sdk.ts` files are deleted.
   Phase 2: `@fusorb/facet-tokens/tokens.css` imported before
   `globals.css` in `layout.tsx`; `:root` token block removed from
-  globals.css. Phase 3: `src/components/ui/` shadcn/ui primitives purged (3 app-specific wrappers `icon.tsx`, `typewriter-text.tsx`, `icons.generated.tsx` retained); all consumers
+  globals.css. Phase 3: `src/components/ui/` purged entirely - the 3 temporary app-specific wrappers (`icon.tsx`, `typewriter-text.tsx`, `icons.generated.tsx`) were deleted in the F1 teardown; all consumers
   switched to **`@fusorb/facet-components@3.2.1`** (icons use the
   package's native `<Icon name="…" />` registry - no local icon registry).
   Phase 4: auth pages on **`@fusorb/facet-auth@2.1.0`** via `SgProvider` +
