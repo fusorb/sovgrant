@@ -34,11 +34,11 @@ SovGrant is a **Fastify + PostgreSQL (Prisma)** backend with a **Next.js 16** ad
 
 **Security hardening** — SSRF protection (`assertSafeUrl` on all user-supplied URLs), CSRF state on OAuth cookies (`sameSite: lax`, `httpOnly`, `secure`), cross-tenant HTTP isolation tested, distributed token revocation (Redis blocklist + sessionId binding).
 
-**Frontend** — full admin dashboard built on published `@fusorb/facet-*` packages: `@fusorb/facet-sdk` (class-based client + singleton wiring), `@fusorb/facet-components` (all UI primitives), `@fusorb/facet-layout` (`AuthLayout` + `ConsoleLayout`), `@fusorb/facet-auth` (auth forms), `@fusorb/facet-tokens` (CSS tokens), `@fusorb/facet-store` (Zustand state). No local UI primitives to maintain.
+**Frontend** — admin console rebuilt on the published `@fusorb/facet-*` packages (`facet-sdk` class-based client + singleton wiring, `facet-components` for UI, `facet-layout` `AuthLayout`/`ConsoleLayout`, `facet-auth` forms, `facet-tokens` CSS, `facet-store` Zustand). No local UI primitives to maintain. The full route map (public / auth / console) is scaffolded and compiling, and `src/hooks/` is the only layer that imports the SDK, enforcing the page → component → hook → store → SDK → API chain. Page-by-page component wiring is the remaining step.
 
 ### Verification
 
-- **70 test files / 386 tests / 0 failures** (`pnpm test`)
+- **69 test files / 381 tests / 0 failures** (`pnpm test`)
 - **Typecheck clean** (`tsc --noEmit`)
 - **Lint clean (0 errors)** (`pnpm lint`). Generated trees (`prisma/generated`, `dist`, `coverage`) are ignored; `no-explicit-any`, `no-unused-vars` and `react-hooks/set-state-in-effect` report as warnings while their existing debt is paid down.
 - **Migration chain integrity** verified (no-drift rollback tests)

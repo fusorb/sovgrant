@@ -23,7 +23,7 @@ Fastify + Prisma + Next.js 16 monorepo (pnpm, ESM-only).
 - Email via Resend (13 templates, React Email components; static template gallery at :3888, auth emails delivered to recipient inbox)
 - SMS via Brevo (transactional SMS for MFA codes + security alerts)
 
-**Test suite: 70 files / 386 tests / 0 code failures** - all passing clean (`pnpm test`; the count includes the 10 `packages/cli` tests), ~110s runtime on Windows (route-level + Prisma import chains dominate). Updated 2026-11-05.
+**Test suite: 69 files / 381 tests / 0 code failures** - all passing clean (`pnpm test`; the count includes the 10 `packages/cli` tests), ~90s runtime on Windows (route-level + Prisma import chains dominate). Updated 2026-11-11 - down from 70/386 because the frontend teardown deleted `src/sdk/sdk.test.ts`.
 
 ---
 
@@ -51,14 +51,17 @@ sovgrant/
 │   │   ├── audit/     # audit log write + query
 │   │   ├── billing/   # subscription (Paystack/Stripe webhooks)
 │   │   ├── credentials/ # DID, SD-JWT VC, issue/verify/revoke/offer, presentation
-│   │   ├── identity/  # profile, delete-account, admin, delegation, external-ids, wallet-did
+│   │   ├── identity/  # profile, delete-account, admin, external-ids, wallet-did (delegation = 501 stub)
 │   │   ├── idp/       # SAML2 + OIDC federation connections
 │   │   ├── oauth/     # authorize, token, revoke, introspect, userinfo, clients, consent
 │   │   ├── tenant/    # CRUD, policy, members, signing keys, projects, onboarding
 │   │   ├── webhooks/  # endpoint config + delivery event routes
 │   │   └── api-key/   # CRUD flows + routes, SHA-256 hashed bearer tokens
-│   ├── providers/     # React context - ThemeProvider, AuthProvider
-│   ├── sdk/           # Thin singleton wiring over @fusorb/facet-sdk (index.ts only)
+│   ├── app/           # Next.js App Router - (public) / (auth) / console / invites / oauth
+│   ├── components/    # Only StubPage + PublicNavbar - everything else comes from facet
+│   ├── hooks/         # One hook per backend domain - the ONLY layer that imports @/sdk
+│   ├── providers/     # ThemeProvider -> SgProvider -> SessionBootstrap -> Toaster
+│   ├── sdk/           # SgClient singleton + facet domain SDKs + contract adapters
 │   └── test-utils/    # Vitest setup + mock DB helpers
 ├── prisma/
 │   ├── schema.prisma  # Single source of truth - 48 models
@@ -99,7 +102,7 @@ pnpm dev:workers         # Background workers only
 pnpm typecheck
 pnpm lint
 pnpm format
-pnpm test                # 386 tests, 70 files, all passing
+pnpm test                # 381 tests, 69 files, all passing
 pnpm test:watch
 pnpm test:coverage
 pnpm build:api
@@ -110,7 +113,7 @@ pnpm build:web
   ports are free. Memory: `NODE_OPTIONS='--max-old-space-size=4096'` for web.
 - `pnpm build:api` (tsup) uses Unix `rm -rf dist`; on Windows cmd use Git Bash/WSL
   or add `rimraf`. Prefer `pnpm cli:build` (same caveat applies to packages/cli).
-- Vitest runs fine on Windows for sovgrant (70 files / 386 tests). The facet repo's
+- Vitest runs fine on Windows for sovgrant (69 files / 381 tests). The facet repo's
   vitest workspace has Windows glob issues — run facet tests via WSL/Git Bash.
 - CORS: `ALLOWED_ORIGINS` must include the frontend origin; sovport dev origin
   (`http://localhost:8081` for Expo) should be added when wiring the wallet.
@@ -236,13 +239,13 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 | CI pipeline | ✅ 3 workflows (rewritten 2026-07-28; CLI gates added 2026-11-05; lint unblocked 2026-11-06) | `ci.yml` (GitHub `ubuntu-latest` runner + `postgres:17-alpine` service container, no external DB: validate → typecheck → lint → `scan:secrets` → Trivy → test → cli:typecheck → cli:build → migrate-rollback guard → build api+web). **Note:** lint ran before test, so a pre-existing lint failure meant CI never reached the test/build steps until 2026-11-06 - `eslint.config.mjs` now ignores generated trees and carries `no-explicit-any` / `no-unused-vars` / `react-hooks/set-state-in-effect` as warnings. |
 | `GET /tenants` route | ✅ 100% | `list-tenants.route.ts` - returns all tenants the user has ACTIVE membership in, with role + plan |
 | SDK layer | ✅ **Migrated to `@fusorb/facet-sdk@2.1.1`** | `src/sdk/` is now `index.ts` only - an `SgClient` singleton (401 auto-refresh wired to the Zustand auth store) re-exporting the facet domain SDK classes (`AuthSdk`, `TenantSdk`, `VcSdk`, …). Old factory-pattern `src/sdk/*.sdk.ts` deleted (2026-08-05). |
-| UI components | ✅ **Migrated to `@fusorb/facet-components@3.2.1`** | shadcn/ui primitives purged; `src/components/ui/` retains 3 app-specific wrappers (`icon.tsx` tree-shaken `<Icon>`, `typewriter-text.tsx`, `icons.generated.tsx`). `src/lib/ui/icon-registry.ts` + `navigation.ts` deleted as duplicates. `cn` re-exported from `@/lib/utils`. Verified typecheck + 386 tests green (2026-11-05). |
+| UI components | ✅ **Migrated to `@fusorb/facet-components@3.2.1`** | shadcn/ui primitives purged; consumers use the package's native `<Icon name=… />` registry. The 3 temporary app-specific wrappers (`icon.tsx`, `typewriter-text.tsx`, `icons.generated.tsx`) were **deleted** in the F1 teardown (2026-11-11) - `src/components/` now holds only `stub-page.tsx` + `public-navbar.tsx`. |
 | Auth UI | ✅ **Migrated to `@fusorb/facet-auth@2.1.0`** | Login/register/mfa pages use `SignIn`/`SignUp`/`MfaDialog`; `SgProvider` bridged to the Zustand store via `zustandTokenStorage` (commit `d6f6707`). In-repo `login-form`/`register-form`/`mfa-form` deleted; forgot/reset password forms now on `@fusorb/facet-auth` (ForgotPasswordForm/ResetPasswordForm). |
 | Layout | ✅ **Migrated to `@fusorb/facet-layout@1.7.2`** | `(auth)` group uses `AuthLayout`, `console/` directory uses `ConsoleLayout`; in-repo sidebar/topbar/tenant-switcher deleted. |
 | CSS tokens | ✅ **Migrated to `@fusorb/facet-tokens@1.5.1`** | `tokens.css` imported before `globals.css` in `layout.tsx`; `:root` block removed from globals.css; sovgrant keeps its indigo primary via override. |
 | Mail templates | ✅ **Migrated to `@fusorb/facet-emails@1.1.4`** (Phase 7) | `src/core/mail` rewired to `toTemplateTree`/`EmailBrand`; 13 templates via facet-emails; preview server on `:3888`. |
 | Stores | ✅ **Migrated to `@fusorb/facet-store@1.0.4`** (Phase 8) | `src/store/` deleted; `useAuthStore`/`useTenantStore` from `@fusorb/facet-store` across ~26 hook sites. |
-| Tenant store hydration | ✅ Wired | `AuthProvider` calls `tenants.list()` on mount, populates `useTenantStore` with enriched tenant data |
+| Tenant store hydration | ⚠️ Wired, but **breaks across a reload** | `SessionBootstrap` calls `tenants.list()` after restore and populates `useTenantStore`; `AuthProvider` no longer exists (deleted in the F1 teardown). **Caveat:** after a page reload no access token can be obtained at all, so hydration silently no-ops and every later call 401s - see **P0-4** in `.agent/output.txt`. Must be fixed before F5. |
 | Tenant switcher UI | ✅ Built | `TenantSwitcher` component in Topbar - visible when user has 2+ tenants, triggers context switch |
 
 ### 🔵 Status - working tree (2026-08-21)
@@ -272,9 +275,9 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 
 ## Test coverage detail
 
-### 70 test files, 386 tests - modules with coverage
+### 69 test files, 381 tests - modules with coverage
 
-> All 70 files pass on `pnpm test`. Typecheck clean (`tsc --noEmit`).
+> All 69 files pass on `pnpm test`. Typecheck clean (`tsc --noEmit`).
 
 | Module | Test files | Tests | Coverage breadth |
 |--------|-----------|-------|-----------------|
@@ -339,7 +342,7 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 
 Current: `0.1.0` (package.json). Pre-release - no stability promises.
 
-- `0.1.0` ✅ **COMPLETE** (v1) - Backend complete: all Phase 0–8 + Phase E shipped; 70 test files / 386 tests, 0 code failures. Docker, security hardening, observability, LegalConsent + ExternalIdentifier gates all shipped.
+- `0.1.0` ✅ **COMPLETE** (v1) - Backend complete: all Phase 0–8 + Phase E shipped; 69 test files / 381 tests, 0 code failures. Docker, security hardening, observability, LegalConsent + ExternalIdentifier gates all shipped.
 - `0.2.0` 🔄 **ACTIVE (v2)** - SovPort companion app integration (end-to-end), CLI package extraction, integration tests against real Postgres. **API key management backend ✅ Done** (CRUD flows + routes, SHA-256 hashed bearer tokens, auth guard extension, migration + Tier 1 rollback tests).
 - `1.0.0` — Stable production milestone: full integration test suite, open-source release
 

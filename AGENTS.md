@@ -16,7 +16,7 @@ Version `0.1.0` in package.json (pre-release, no stability promises).
 Package manager is **pnpm**. Module system is **ESM only** (`"type": "module"`
 in package.json) - never emit `require()`/`module.exports`.
 
-**Test suite:** 70 files / 386 tests / 0 code failures on `pnpm test` (all passing clean on Windows; the count includes the 10 `packages/cli` tests - route-level + Prisma imports dominate). Migration-rollback Tier-2 is opt-in via `pnpm test:rollback` (needs a live Postgres). Typecheck clean (`tsc --noEmit`). Updated 2026-11-05.
+**Test suite:** 69 files / 381 tests / 0 code failures on `pnpm test` (all passing clean on Windows; the count includes the 10 `packages/cli` tests - route-level + Prisma imports dominate). Migration-rollback Tier-2 is opt-in via `pnpm test:rollback` (needs a live Postgres). Typecheck clean (`tsc --noEmit`); lint clean (0 errors, 413 warnings). Updated 2026-11-11 - down from 70/386 because the frontend teardown removed `src/sdk/sdk.test.ts`.
 
 ## Non-negotiable architecture rules (same - stable)
 
