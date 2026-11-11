@@ -130,7 +130,7 @@ Let us start executing.
 - [ ] **Set up production secrets management** - Move away from plain .env files for production
 
 ## P1 - High Priority
-- [ ] **Verify revocation enforcement** - Ensure revoked devices can't approve, update lastSeenAt on approval
+- [x] **Verify revocation enforcement** - Ensure revoked devices can't approve, update lastSeenAt on approval — **DONE (2026-11-11)**, commit `52aa73f`: `approve-device-approval.flow.ts` now requires proof-of-possession *and* restricts the approving device to the caller's own `revokedAt: null, trusted: true` row, updating `lastSeenAt` on success. Covered by 6 tests including the revoked/untrusted and cross-identity cases.
 - [ ] **Backup & restore setup** - Encrypted nightly pg_dump + tested restore procedure
 - [ ] **Update CORS for production domains** - Configure ALLOWED_ORIGINS properly
 - [ ] **Set up monitoring/alerts** - Basic uptime monitoring and alerts
