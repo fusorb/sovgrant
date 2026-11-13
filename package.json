@@ -59,7 +59,7 @@
     "@fusorb/facet-components": "3.2.2",
     "@fusorb/facet-emails": "1.1.4",
     "@fusorb/facet-layout": "1.7.2",
-    "@fusorb/facet-sdk": "4.0.0",
+    "@fusorb/facet-sdk": "4.0.1",
     "@fusorb/facet-store": "1.0.6",
     "@fusorb/facet-tokens": "1.5.1",
     "@node-saml/node-saml": "^5.1.0",
