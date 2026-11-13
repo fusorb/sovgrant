@@ -16,7 +16,7 @@ Version `0.1.0` in package.json (pre-release, no stability promises).
 Package manager is **pnpm**. Module system is **ESM only** (`"type": "module"`
 in package.json) - never emit `require()`/`module.exports`.
 
-**Test suite:** 71 files / 393 tests / 0 code failures on `pnpm test` (all passing clean on Windows; the count includes the 10 `packages/cli` tests - route-level + Prisma imports dominate). Migration-rollback Tier-2 is opt-in via `pnpm test:rollback` (needs a live Postgres **and** a shadow DB). Typecheck clean (`tsc --noEmit`); lint clean (0 errors, 413 warnings). Updated 2026-11-11 - down from 70/386, because the frontend teardown removed `src/sdk/sdk.test.ts`, then up again as `src/modules/oauth/routes/jwks.route.test.ts` landed.
+**Test suite:** 71 files / 393 tests / 0 code failures on `pnpm test` (all passing clean on Windows; the count includes the 10 `packages/cli` tests - route-level + Prisma imports dominate). Migration-rollback Tier-2 is opt-in via `pnpm test:rollback` (needs a live Postgres **and** a shadow DB). Typecheck clean (`tsc --noEmit`); lint clean (0 errors, 411 warnings). Updated 2026-11-11 - down from 70/386, because the frontend teardown removed `src/sdk/sdk.test.ts`, then up again as `src/modules/oauth/routes/jwks.route.test.ts` landed. Lint re-measured 2026-11-13 at 411 (was 413) after the facet-sdk 4.0.0 adoption - the four files that change touched report no warnings themselves.
 
 ## Non-negotiable architecture rules (same - stable)
 
