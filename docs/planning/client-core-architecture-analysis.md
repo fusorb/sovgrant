@@ -20,7 +20,7 @@ line, no cross-repo coordination, apps stay thin.
 ```
 facet monorepo (single versioning + publish)
 ├─ @fusorb/facet-sdk        headless client (pure fetch, zero UI)
-├─ @fusorb/facet-store      framework-agnostic stores (zustand) + injectable persistence [DONE - @fusorb/facet-store@1.0.4, src/store/ deleted]
+├─ @fusorb/facet-store      framework-agnostic stores (zustand) + injectable persistence [DONE - @fusorb/facet-store@1.0.6, src/store/ deleted]
 ├─ @fusorb/facet-cli        the CLI (docs/emails init, add, icons, pkg/doctor/update/up)
 ├─ @fusorb/facet-components UI kit (React + Radix, incl. animation family)
 ├─ @fusorb/facet-layout     shells (Console/Auth/Landing)
@@ -72,7 +72,7 @@ architecture convention:
 - **SDK**: pure fetch, dependency-free, typed domain classes
   (`AuthSdk`, `TenantSdk`, `VcSdk`, `OAuthSdk`, `PasskeySdk`, `IdpSdk`,
   ...). Works in browser, Node, edge. No React.
-- **Store** (shipped: `@fusorb/facet-store@1.0.4`): zustand stores extracted
+- **Store** (shipped: `@fusorb/facet-store@1.0.6`): zustand stores extracted
   from sovgrant (`auth.store`, `tenant.store`). Framework-agnostic. Token
   persistence via an injected adapter interface. React agnostic. The stores
   import only `create` + the `User`/`Tenant` types.

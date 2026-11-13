@@ -9,7 +9,7 @@
 
 ## 🟢 v1 — COMPLETE (0.1.0)
 
-Backend complete. All Phase 0–8 + Phase E shipped. 71 test files / 393 tests / 0 code failures. Typecheck clean on `tsc --noEmit`.
+Backend complete. All Phase 0–8 + Phase E shipped. 74 test files / 408 tests / 0 code failures. Typecheck clean on `tsc --noEmit`.
 
 | Area | Status | Notes |
 |------|--------|-------|
@@ -35,7 +35,7 @@ Backend complete. All Phase 0–8 + Phase E shipped. 71 test files / 393 tests /
 | LegalConsent gate | ✅ | Wired in `issue-credential.flow.ts` (E2) |
 | ExternalIdentifier gate | ✅ | Wired in `issue-credential.flow.ts` (E1) |
 | Frontend rebuild | ✅ | Facet migration Phases 0–6 + E complete (2026-08-19) |
-| SDK | ✅ | Published `@fusorb/facet-sdk@2.1.1`, class-based `AuthSdk`/`TenantSdk`/etc. |
+| SDK | ✅ | Published `@fusorb/facet-sdk@4.0.1`, class-based `AuthSdk`/`TenantSdk`/etc. |
 | CLI | ✅ | `packages/cli` (`@fusorb/sg-cli`, bins `sg` + `sovgrant`) — standalone (commander + clack); does not consume `@fusorb/facet-cli`'s core (facet-cli is a globally-installed tool, not a per-repo dependency) |
 
 **v1 is closed.** All items in `sg-v1-roadmap.md` are resolved. That file
@@ -57,7 +57,7 @@ contract stabilized for the CLI package.
 | 3 | CLI package extraction — move `packages/cli` to published `@fusorb/sg-cli` npm package | P1 | ⏸️ Scaffolded; pending API contract stability |
 | 4 | Integration tests against real Postgres (`pnpm test:rollback`) | P2 | ✅ **Running (2026-11-11)** — the Tier-2 guard was broken three ways (3s probe timeout, wrong empty-diff assertion, `npx` invocation) and silently no-op'd, so it had never verified anything; repaired, it now runs 5/5 against `sg` + `sg_shadow`. Make `ARC_ID_ROLLBACK_TEST=1` a pre-release gate. |
 | 5 | SDK `TenantSdk.create()` test coverage gap (P4.3) | P2 | ✅ Superseded — `src/sdk/sdk.test.ts` tested the deleted in-repo SDK and went with it in the frontend teardown (F1); the published facet SDK owns its own tests. |
-| 6 | Console dashboard — final cleanup (remaining SDK-direct imports in pages) | P3 | ✅ Obsolete — the pages that imported the SDK directly were deleted in F1. `src/hooks/` is now the only layer that imports `@/sdk`, which is what enforces the chain. |
+| 6 | Console dashboard — final cleanup (remaining SDK-direct imports in pages) | P3 | ✅ Obsolete — the pages that imported the SDK directly were deleted in F1. `src/hooks/` is now the only feature layer that imports `@/sdk` (the bootstrap providers are excepted by design), which is what enforces the chain. |
 | 7 | Billing UI — pricing from `src/config/plan-caps.ts` displayed via `BillingPage` (facet-components) | P2 | ⏳ Reopened — the old billing page went with the F1 teardown; `/console/billing` is a stub awaiting F5 wiring. |
 
 ### 0.2.1 — "Edge cleanup"
@@ -66,6 +66,9 @@ contract stabilized for the CLI package.
 |---|------|----------|
 | 1 | Remove dead `DELEGATION_GRANTED` / `DELEGATION_REVOKED` audit enum values | — ✅ DONE (2026-08-22, migration `20260822000000`) |
 | 2 | Remove remaining stale `create-tenant` hardcoded caps (replaced by `plan-caps.ts`) | — ✅ DONE |
+| 3 | Token-type discrimination (`token_use`) so an ID token can never verify as a bearer credential (P0-8) | P0 ✅ DONE (2026-11-13) |
+| 4 | Verify-then-key the rate limiter, and make rejections throw a real 429 instead of a 500 (P0-9) | P0 ✅ DONE (2026-11-13) |
+| 5 | RFC 7662 introspection: authenticate the caller; space-join `aud` so live tokens don't 500 (P0-10) | P0 ✅ DONE (2026-11-13) |
 
 > **Note**: The `plan-caps.ts` config (`src/config/plan-caps.ts`) is the single
 > source of truth for plan limits (tenants, members, audit days), shared between
@@ -107,7 +110,7 @@ contract stabilized for the CLI package.
 
 ## CLI + SDK packages
 
-- **SDK** — published `@fusorb/facet-sdk@2.1.1` (class-based `AuthSdk`,
+- **SDK** — published `@fusorb/facet-sdk@4.0.1` (class-based `AuthSdk`,
   `TenantSdk`, `OAuthSdk`, `CredentialSdk`, `WebhookSdk`). `src/sdk/index.ts`
   is a thin singleton that owns the `SgClient` + 401 auto-refresh (wired to
   the Zustand auth store) and re-exports the facet domain SDKs. It also sets

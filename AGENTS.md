@@ -16,7 +16,7 @@ Version `0.1.0` in package.json (pre-release, no stability promises).
 Package manager is **pnpm**. Module system is **ESM only** (`"type": "module"`
 in package.json) - never emit `require()`/`module.exports`.
 
-**Test suite:** 71 files / 393 tests / 0 code failures on `pnpm test` (all passing clean on Windows; the count includes the 10 `packages/cli` tests - route-level + Prisma imports dominate). Migration-rollback Tier-2 is opt-in via `pnpm test:rollback` (needs a live Postgres **and** a shadow DB). Typecheck clean (`tsc --noEmit`); lint clean (0 errors, 411 warnings). Updated 2026-11-11 - down from 70/386, because the frontend teardown removed `src/sdk/sdk.test.ts`, then up again as `src/modules/oauth/routes/jwks.route.test.ts` landed. Lint re-measured 2026-11-13 at 411 (was 413) after the facet-sdk 4.0.0 adoption - the four files that change touched report no warnings themselves.
+**Test suite:** 74 files / 408 tests / 0 code failures on `pnpm test` (all passing clean on Windows; the count includes the 10 `packages/cli` tests - route-level + Prisma imports dominate). Migration-rollback Tier-2 is opt-in via `pnpm test:rollback` (needs a live Postgres **and** a shadow DB). Typecheck clean (`tsc --noEmit`); lint clean (0 errors, 411 warnings). Updated 2026-11-11 - down from 70/386, because the frontend teardown removed `src/sdk/sdk.test.ts`, then up again as `src/modules/oauth/routes/jwks.route.test.ts` landed; re-counted 2026-11-13 at 74/408 when the security pass added `auth-guard.plugin.test.ts` (5), `rate-limit.plugin.test.ts` (3) and `introspect.route.test.ts` (7). Lint re-measured 2026-11-13 at 411 (was 413) after the facet-sdk 4.0.0 adoption - the four files that change touched report no warnings themselves.
 
 ## Non-negotiable architecture rules (same - stable)
 
@@ -55,6 +55,17 @@ in package.json) - never emit `require()`/`module.exports`.
    - The refresh token is an httpOnly cookie: the SDK client must send
      `credentials: "include"` (set via `fetchInit` in `src/sdk/index.ts`), or
      the cookie is neither stored nor sent and the whole refresh path is inert.
+   - **Token types are discriminated**: every access token carries
+     `token_use: "access"` (stamped by `TokenService.issue`) and the auth guard
+     rejects anything else. ID tokens are signed with the same key and must
+     never verify as bearer credentials.
+   - **The rate limiter buckets only on verified claims**: `rate-limit.plugin.ts`
+     verifies the Bearer token before using `sub`/`tid`. Trusting an unverified
+     `sub` let a forged token mint a fresh bucket per request and bypass every
+     per-route limit (login, magic-link, password reset).
+   - **`/oauth/introspect` authenticates its caller** (RFC 7662 §2.1): Basic
+     credentials are verified against the Client row's argon2 `clientSecret`;
+     public clients and bad credentials are 401, never a silent `active:false`.
 
 ## File naming
 
@@ -91,7 +102,10 @@ shipped. See `CLAUDE.md` for the full verified status table. Open work:
     (public / auth / console / invites / oauth).
   - **F4 hooks** (`c318198`): one hook per backend domain (24 files) plus
     `use-api-guard`, which centralises the "no session token -> 401" contract.
-    `src/hooks/` is the only layer that imports `@/sdk` - that is what enforces
+    `src/hooks/` is the only feature layer that imports `@/sdk` (the four
+    bootstrap provider files - `auth-bootstrap.tsx`, `session-bootstrap.tsx`,
+    `index.tsx`, `facet-auth-bridge.ts` - also call it, by design: they must
+    run above `SgProvider`). That split is what enforces
     page → component → hook → store → SDK → API.
   - **Provider stack**: `ThemeProvider → AuthBootstrap → SgProvider →
     SessionBootstrap → children + Toaster`. **`AuthBootstrap` must stay ABOVE
@@ -101,23 +115,25 @@ shipped. See `CLAUDE.md` for the full verified status table. Open work:
   - **F5 (open)**: page-by-page component wiring for the 40 stubs.
 - **Facet migration** - ✅
   **Phases 1–5 done.** Phase 1: SDK migrated to the published
-  **`@fusorb/facet-sdk@2.1.1`** - `src/sdk/index.ts` is a thin
+  **`@fusorb/facet-sdk@4.0.1`** - `src/sdk/index.ts` is a thin
   singleton wiring that owns the `SgClient` + 401 auto-refresh (wired
   to the Zustand auth store) and re-exports the facet domain SDKs; the
-  old in-repo factory-pattern `src/sdk/*.sdk.ts` files are deleted.
+  old in-repo factory-pattern `src/sdk/*.sdk.ts` files are deleted, and
+  the three contract adapters went on the 4.0.0 bump - only `apiKeys`
+  remains (upstream ships no `ApiKeySdk`).
   Phase 2: `@fusorb/facet-tokens/tokens.css` imported before
   `globals.css` in `layout.tsx`; `:root` token block removed from
   globals.css. Phase 3: `src/components/ui/` purged entirely - the 3 temporary app-specific wrappers (`icon.tsx`, `typewriter-text.tsx`, `icons.generated.tsx`) were deleted in the F1 teardown; all consumers
-  switched to **`@fusorb/facet-components@3.2.1`** (icons use the
+  switched to **`@fusorb/facet-components@3.2.2`** (icons use the
   package's native `<Icon name="…" />` registry - no local icon registry).
-  Phase 4: auth pages on **`@fusorb/facet-auth@2.1.0`** via `SgProvider` +
+  Phase 4: auth pages on **`@fusorb/facet-auth@2.1.2`** via `SgProvider` +
   `zustandTokenStorage` bridge (commit `d6f6707`); in-repo
   `login-form`/`register-form`/`mfa-form` deleted.
   Phase 5: layouts on **`@fusorb/facet-layout@1.7.2`** (`AuthLayout` +
   `ConsoleLayout`). Phase 6 purge is FULLY done (2026-08-19) - `src/components/auth/` deleted;
   `forgot-password-form`/`reset-password-form` now on `@fusorb/facet-auth` (ForgotPasswordForm/ResetPasswordForm).
-All seven facet packages pinned (exact): sdk 2.1.1, auth 2.1.0, components 3.2.1,
-   layout 1.7.2, tokens 1.5.1, emails 1.1.4, store 1.0.4.
+All seven facet packages pinned (exact): sdk 4.0.1, auth 2.1.2, components 3.2.2,
+   layout 1.7.2, tokens 1.5.1, emails 1.1.4, store 1.0.6.
    `@fusorb/facet-cli` is **not** a per-repo dependency — it is installed
    globally on the machine as a universal tool, so it never appears in
    `package.json`/`node_modules`. `packages/cli` (`@fusorb/sg-cli`) is standalone
@@ -130,6 +146,6 @@ All seven facet packages pinned (exact): sdk 2.1.1, auth 2.1.0, components 3.2.1
   bin `sg`): init/doctor/migrate/setup/revert, Postgres + Cockroach adapters,
   safe overwrite/revert, secret generation, --dry-run/--force/--yes. 10 tests
   passing. Phase 2 (Mongo/Mongoose/Dynamo + auth-UI scaffolding) pending.
-  SDK consumed as published `@fusorb/facet-sdk@2.1.1`.
+  Ships no `@fusorb/facet-sdk` dependency - its scaffold templates emit facet-sdk wiring into consumer repos, and `doctor` detects which facet packages those repos have.
 - **LegalConsent** - ✅ Done (2026-08-19): gate wired into `issue-credential.flow.ts` (E2) — VC issuance blocked when the tenant policy requires consent and none is recorded.
 - **ExternalIdentifier.verified → VC issuance** - ✅ Done (2026-08-19): gate wired into `issue-credential.flow.ts` (E1) — subject DID must resolve to an Identity with ≥1 verified external identifier before issuance.
