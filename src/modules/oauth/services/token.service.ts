@@ -169,6 +169,10 @@ export class TokenService {
         scope: scopes.join(" "),
         aud: audience,
         plan,
+        // Type discriminator: the auth guard rejects any token that is not
+        // marked as an access token, because the ID token below is signed
+        // with the same key and would otherwise verify as a bearer token.
+        token_use: "access",
         ...(tenantId ? { tid: tenantId } : {}),
         ...(authLevel ? { aal: authLevel } : {}),
       } satisfies Partial<AccessTokenClaims> & { plan: string; sid: string },
@@ -182,6 +186,10 @@ export class TokenService {
     if (identity) {
       idClaims = {
         sub: identityId,
+        // Type discriminator - see AccessTokenClaims.token_use. An ID token
+        // is a verifiable credential for the CLIENT, not a bearer token for
+        // the API; the auth guard rejects it as one.
+        token_use: "id",
         iss: issuer,
         aud: clientId,
         jti: idJti,

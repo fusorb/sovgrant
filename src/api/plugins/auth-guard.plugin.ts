@@ -107,6 +107,17 @@ export const authGuardPlugin = fp(
           throw ApiError.unauthorized("Malformed token payload signature");
         }
 
+        // ── Token-type check ─────────────────────────────────────────────────
+        // Access and ID tokens are signed with the same key, so verification
+        // alone cannot tell them apart. Without this check an ID token (1h
+        // TTL, not covered by the logout revocation paths) would be accepted
+        // here as a valid access token. TokenService.issue() stamps every
+        // access token with token_use: "access"; anything else - including a
+        // token with no marker - is rejected.
+        if (payload.token_use !== "access") {
+          throw ApiError.unauthorized("Invalid token type");
+        }
+
         // ── JTI revocation check - two-tier ──────────────────────────────────
         // Tier 1: Redis blocklist - O(1), no DB hit when Redis is available.
         // Tier 2: DB RevokedJti - authoritative fallback.

@@ -23,6 +23,7 @@
 import fp from "fastify-plugin";
 import type { FastifyInstance } from "fastify";
 import rateLimit from "@fastify/rate-limit";
+import { ApiError } from "@/core/errors";
 
 export const rateLimitPlugin = fp(
   async (fastify: FastifyInstance) => {
@@ -31,47 +32,44 @@ export const rateLimitPlugin = fp(
       max: 200,
       timeWindow: "1 minute",
 
-      keyGenerator: (req) => {
-        // Try to extract identity claims from the JWT payload if already decoded.
-        // auth-guard.plugin.ts sets req.identity after verifying the JWT, but
-        // rate limiting runs BEFORE preHandlers - so we read from req.user
-        // (set by jwtVerify) if available, not req.identity.
-        //
-        // We do a best-effort decode here WITHOUT verification - we're just
-        // generating a bucket key, not making a security decision. The actual
-        // signature verification happens in requireUser.
-        try {
-          const authHeader = req.headers.authorization;
-          if (authHeader?.startsWith("Bearer ")) {
-            const token = authHeader.slice(7);
-            // Decode payload (middle segment) without verifying signature.
-            // Used purely for rate-limit bucketing.
-            const payloadB64 = token.split(".")[1];
-            if (payloadB64) {
-              const payload = JSON.parse(
-                Buffer.from(payloadB64, "base64url").toString("utf8"),
-              );
-              const sub = payload.sub as string | undefined;
-              const tid = payload.tid as string | undefined;
-              if (sub) {
-                // Authenticated key: identity[:tenant]
-                return tid ? `${sub}:${tid}` : sub;
-              }
+      keyGenerator: async (req) => {
+        // Bucket authenticated requests by identity (identityId[:tenantId]),
+        // reading the claims from a VERIFIED token only. Claims on an
+        // unverified token are attacker-controlled: trusting `sub` outright
+        // let a forged Bearer token with a novel sub mint a fresh bucket per
+        // request, bypassing this global limit and every per-route one
+        // (login, magic-link, password reset, ...). Verification happens
+        // once more in the auth guard for protected routes - cheap next to
+        // the request it protects, and the only way this hook (which runs
+        // BEFORE preHandlers) can know who is calling.
+        const authHeader = req.headers.authorization;
+        if (authHeader?.startsWith("Bearer ")) {
+          try {
+            const payload = (await fastify.jwt.verify(
+              authHeader.slice(7),
+            )) as { sub?: string; tid?: string };
+            const sub = payload?.sub;
+            const tid = payload?.tid;
+            if (sub) {
+              return tid ? `${sub}:${tid}` : sub;
             }
+          } catch {
+            // Invalid or expired token - not an authenticated caller,
+            // fall through to IP keying.
           }
-        } catch {
-          // Malformed JWT or not a JWT - fall through to IP keying.
         }
         return req.ip;
       },
 
-      errorResponseBuilder: (_req, context) => ({
-        success: false,
-        error: "TOO_MANY_REQUESTS",
-        message: `Rate limit exceeded. Try again in ${Math.ceil(context.ttl / 1000)} seconds.`,
-        retryAfter: Math.ceil(context.ttl / 1000),
-      }),
+      // The plugin THROWS whatever this returns, so it must be an Error the
+      // app's error handler can classify. The previous plain-object return was
+      // unclassifiable: every rejection in production surfaced as a 500 (and an
+      // "unhandled runtime failure" log) instead of the intended 429.
+      errorResponseBuilder: (_req, context) =>
+        ApiError.tooManyRequests(
+          `Rate limit exceeded. Try again in ${Math.ceil(context.ttl / 1000)} seconds.`,
+        ),
     });
   },
-  { name: "sg:rate-limit" },
+  { name: "sg:rate-limit", dependencies: ["sg:jwt"] },
 );

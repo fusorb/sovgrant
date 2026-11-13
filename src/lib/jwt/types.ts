@@ -8,6 +8,12 @@ export interface AccessTokenClaims {
   aud: string[]; // audience (resource servers)
   scope: string; // space-separated scopes
   tid?: string; // tenantId
+  // Token-type discriminator. Access and ID tokens are signed with the SAME
+  // key, so signature verification alone cannot tell them apart. Every
+  // access token carries token_use: "access" (TokenService.issue) and the
+  // auth guard rejects anything else - without it an ID token (1h TTL, not
+  // covered by logout revocation) would be accepted as a bearer credential.
+  token_use: "access";
   // Authentication Assurance Level. "aal1" = single factor (password,
   // magic link, social/SSO). "aal2" = MFA or passkey completed.
   // Absent (not null) for non-human grants — e.g. client_credentials —
