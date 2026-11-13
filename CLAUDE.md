@@ -57,7 +57,7 @@ sovgrant/
 │   ├── components/    # Only StubPage + PublicNavbar - everything else comes from facet
 │   ├── hooks/         # One hook per backend domain - the ONLY layer that imports @/sdk
 │   ├── providers/     # ThemeProvider -> AuthBootstrap -> SgProvider -> SessionBootstrap -> Toaster
-│   ├── sdk/           # SgClient singleton + facet domain SDKs + contract adapters
+│   ├── sdk/           # SgClient singleton + facet domain SDKs (single SDK boundary)
 │   └── test-utils/    # Vitest setup + mock DB helpers
 ├── prisma/
 │   ├── schema.prisma  # Single source of truth - 47 models

@@ -61,9 +61,9 @@ applications/tokens → organization (members, policy, projects, signing keys, S
 - Auth-gated routes behave correctly signed-out *and* after a hard reload.
 - `pnpm typecheck` / `pnpm lint` / `pnpm test` green; counts in the docs updated.
 
-**Watch out for:** the pages that need endpoints the SDK still gets wrong — use
-the `externalIds` / `devices` / `policies` adapters in `src/sdk/index.ts`, not the
-SDK methods (see SDK-1).
+**Watch out for:** nothing SDK-side any more — `@fusorb/facet-sdk` 4.0.0 is correct
+for every endpoint the pages need, and the adapters this note used to point at are
+gone (see SDK-1, done).
 
 ---
 
@@ -83,22 +83,27 @@ green; new flow tests where behaviour was previously untested.
 
 ---
 
-## SDK-1 — adopt `@fusorb/facet-sdk` 3.0.0 when it publishes (blocked upstream)
+## SDK-1 — adopt `@fusorb/facet-sdk` 4.0.0 — DONE (2026-11-13)
 
-The drift is fixed (deviceId) or specified (the rest) upstream; see
-`../facet/docs/planning/sdk-canonical-fix-plan.md` G8–G10 and the message prepared
-for the facet agent in `.agent/output.txt`.
+The SDK published **4.0.0**, not the 3.0.0 this plan expected — and that mattered:
+3.0.0 fixed only part of the drift (`confirmExternalId` still posted
+`{ verification }` instead of `{ code }`, and `getPolicy` was still typed non-null),
+so deleting the adapters on that bump would have shipped two broken calls. The
+published `dist` was re-checked first; see
+`../facet/docs/planning/sdk-canonical-fix-plan.md` G11–G14 and the P1-4 entry in
+`.agent/output.txt`.
 
-**Then:**
-1. Bump the exact pin in `package.json` (currently `2.1.1`).
-2. **Delete the three adapters** in `src/sdk/index.ts` (`externalIds`, `devices`,
-   `policies`) and point the hooks back at the SDK methods. Re-check the published
-   shapes before deleting — some of them were still wrong as of 3.0.0 planning.
-3. Optionally wire `identity.approveDeviceApproval` (nothing calls it today).
-4. Tell SovPort to drop its raw-fetch workaround
-   (`src/app/.../approve.tsx`, comment naming the SDK gap).
+**Done:**
+1. Exact pin bumped `3.0.0` → `4.0.0`.
+2. The three adapters (`externalIds`, `devices`, `policies`) are **deleted** from
+   `src/sdk/index.ts`; `use-external-ids` / `use-devices` / `use-policy` call
+   `IdentitySdk` / `TenantSdk` directly. `ExternalIdType` stays as an app-side union,
+   because the SDK types the identifier type as a plain `string` while the route
+   accepts exactly six values.
+3. `approveDeviceApproval` is in use — in **SovPort**, which is already on 4.0.0.
+4. SovPort's raw-fetch workaround is already gone (no `fetch(` under its `src`).
 
-**Acceptance:** adapters gone, hooks still typecheck, suite green, pin bumped.
+**Verified:** `tsc --noEmit` clean against 4.0.0.
 
 ---
 
@@ -142,7 +147,7 @@ release, and its `ci` job will now pass thanks to the changesets.
 | CI-1 | done | — |
 | F5 | next agent session | — |
 | P1-1 | agent (large) | — |
-| SDK-1 | agent | facet-sdk 3.0.0 publish |
+| SDK-1 | done | — |
 | P1-2 | facet maintainers | — |
 | P1-3 | product decision | design questions unanswered |
 | OPS-1 / OPS-2 | user | — |

@@ -25,7 +25,7 @@ import {
   type ApiError,
   type ApiResponse,
   type AuditListParams,
-  type JsonObject,
+  type TenantPolicy,
   type User,
 } from "@fusorb/facet-sdk";
 import { useAuthStore, useTenantStore } from "@fusorb/facet-store";
@@ -143,8 +143,8 @@ export const passkeys = new PasskeySdk(client);
 export const idp = new IdpSdk(client);
 
 // ── API keys ────────────────────────────────────────────────────────────────
-// facet-sdk 2.1.1 ships no ApiKeySdk, but the backend exposes the api-key
-// module. Until an ApiKeySdk lands upstream, adapt the generic client.
+// facet-sdk ships no ApiKeySdk, but the backend exposes the api-key module.
+// Until an ApiKeySdk lands upstream, adapt the generic client.
 // (Tracked as P1-2 in .agent/output.txt.)
 
 export interface ApiKeyRecord {
@@ -174,15 +174,12 @@ export const apiKeys = {
   revoke: (id: string) => client.del<void>(`/api-keys/${id}`),
 };
 
-// ── Adapters for endpoints whose facet-sdk contract drifted from the API ────
-// The published SDK types for these three domains do not match the backend
-// schemas, so the SDK methods either send a payload the route's zod rejects or
-// describe the response wrongly. They go through the generic client instead,
-// with contracts taken from the route validators. (Tracked as P1-4.)
+// ── Route contract types ────────────────────────────────────────────────────
+// facet-sdk types `linkExternalId`'s `type` as a plain string, while
+// POST /identity/external-ids accepts exactly these six values (the route's
+// EXTERNAL_ID_TYPES enum). Keeping the union here means a wrong identifier type
+// fails at compile time instead of as a 400 at runtime.
 
-// External identifiers. POST /identity/external-ids expects
-// { type, value, displayValue? } and hashes the value server-side; the SDK
-// sends { provider, externalId }, which the validator rejects.
 export type ExternalIdType =
   | "email"
   | "phone"
@@ -191,88 +188,9 @@ export type ExternalIdType =
   | "passport"
   | "driver_license";
 
-export interface ExternalIdRecord {
-  id: string;
-  type: string;
-  displayValue: string | null;
-  verified: boolean;
-  createdAt: string;
-}
-
-export const externalIds = {
-  list: () => client.get<ExternalIdRecord[]>("/identity/external-ids"),
-  link: (data: { type: ExternalIdType; value: string; displayValue?: string }) =>
-    client.post<ExternalIdRecord>("/identity/external-ids", data),
-  unlink: (id: string) => client.del<void>(`/identity/external-ids/${id}`),
-  requestVerification: (id: string) =>
-    client.post<{ success: boolean; type: string }>(
-      `/identity/external-ids/${id}/verify`,
-    ),
-  confirmVerification: (id: string, code: string) =>
-    client.post<{ id: string; verified: boolean }>(
-      `/identity/external-ids/${id}/confirm`,
-      { code },
-    ),
-};
-
-// Devices. GET /identity/devices returns
-// { id, platform, browser, createdAt, lastSeenAt }; the SDK types Device as
-// { id, name, platform, lastUsedAt, createdAt } - so `name` is always
-// undefined and `lastUsedAt` never exists.
-export interface DeviceRecord {
-  id: string;
-  platform: string | null;
-  browser: string | null;
-  createdAt: string;
-  lastSeenAt: string;
-}
-
-export const devices = {
-  list: () => client.get<DeviceRecord[]>("/identity/devices"),
-  revoke: (id: string) => client.del<void>(`/identity/devices/${id}`),
-};
-
-// Tenant policy. PATCH /tenants/:tenantId/policy accepts the six fields below
-// and zod strips everything else, so the SDK's passwordRules / loginMethods
-// were silently discarded rather than rejected. GET returns the raw
-// TenantPolicy row, or null when the tenant has no policy yet.
-export interface TenantPolicyRecord {
-  id: string;
-  tenantId: string;
-  requireMfa: boolean;
-  requireLegalConsent: boolean;
-  sessionTtlMinutes: number;
-  allowedEmailDomains: string[];
-  maxSessionsPerUser: number;
-  allowPasskeys: boolean;
-  passwordRules: JsonObject | null;
-  loginMethods: JsonObject;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export type TenantPolicyUpdate = Partial<
-  Pick<
-    TenantPolicyRecord,
-    | "requireMfa"
-    | "requireLegalConsent"
-    | "sessionTtlMinutes"
-    | "allowedEmailDomains"
-    | "maxSessionsPerUser"
-    | "allowPasskeys"
-  >
->;
-
-export const policies = {
-  get: (tenantId: string) =>
-    client.get<TenantPolicyRecord | null>(`/tenants/${tenantId}/policy`),
-  update: (tenantId: string, data: TenantPolicyUpdate) =>
-    client.patch<TenantPolicyRecord>(`/tenants/${tenantId}/policy`, data),
-};
-
 // ── Re-exports ──────────────────────────────────────────────────────────────
 
 export const sgClient = client;
 
 export { REFRESH_COOKIE_NAME, REFRESH_COOKIE_OPTIONS };
-export type { AuditListParams, ApiError, ApiResponse, User };
+export type { AuditListParams, ApiError, ApiResponse, TenantPolicy, User };
