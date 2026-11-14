@@ -6,8 +6,8 @@
 // the wrong tenant's membership if an identity had multiple pending invites.
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { EmailTokenService } from "@/modules/auth/services/email-token.service";
-import { ApiError } from "@/core/errors";
+import { flowExecutor } from "@/core/flows";
+import { acceptInviteFlow } from "../flows/accept-invite.flow";
 
 export async function inviteRoute(fastify: FastifyInstance) {
   fastify.post(
@@ -38,13 +38,18 @@ export async function inviteRoute(fastify: FastifyInstance) {
     async (req, reply) => {
       const { token } = req.body as { token: string };
 
-      // 1. Consume the TENANT_INVITE EmailToken (atomic — marks consumed=true)
-      const emailTokenService = new EmailTokenService(fastify.db);
-      let tokenRecord: Awaited<ReturnType<typeof emailTokenService.consume>>;
+      const result = await flowExecutor.run(
+        acceptInviteFlow,
+        { token },
+        {
+          identityId: undefined,
+          tenantId: null,
+          ip: req.ip,
+          userAgent: req.headers["user-agent"],
+        },
+      );
 
-      try {
-        tokenRecord = await emailTokenService.consume(token, "TENANT_INVITE");
-      } catch {
+      if (result.kind === "expired") {
         return reply.status(410).send({
           success: false,
           error: "INVITE_EXPIRED_OR_USED",
@@ -54,46 +59,17 @@ export async function inviteRoute(fastify: FastifyInstance) {
         });
       }
 
-      // 2. Resolve the membership.
-      //    FIX: use tokenRecord.tenantId to target the exact membership row.
-      //    Falls back to findFirst on identityId if tenantId wasn't stored
-      //    (tokens issued before this fix).
-      const whereClause = tokenRecord.tenantId
-        ? {
-            identityId: tokenRecord.identityId,
-            tenantId: tokenRecord.tenantId,
-            status: "PENDING" as const,
-          }
-        : { identityId: tokenRecord.identityId, status: "PENDING" as const };
-
-      const membership = await fastify.db.tenantMembership.findFirst({
-        where: whereClause,
-        orderBy: { createdAt: "desc" },
-        include: { tenant: { select: { name: true, slug: true } } },
-      });
-
-      if (!membership) {
-        // Check if they're already active (e.g. admin activated manually)
-        const active = await fastify.db.tenantMembership.findFirst({
-          where: {
-            identityId: tokenRecord.identityId,
-            ...(tokenRecord.tenantId ? { tenantId: tokenRecord.tenantId } : {}),
-            status: "ACTIVE",
+      if (result.kind === "already_active") {
+        return reply.send({
+          success: true,
+          data: {
+            message: "You are already an active member of this organisation",
+            tenantSlug: result.tenantSlug,
           },
-          orderBy: { createdAt: "desc" },
-          include: { tenant: { select: { slug: true } } },
         });
+      }
 
-        if (active) {
-          return reply.send({
-            success: true,
-            data: {
-              message: "You are already an active member of this organisation",
-              tenantSlug: active.tenant.slug,
-            },
-          });
-        }
-
+      if (result.kind === "not_found") {
         return reply.status(404).send({
           success: false,
           error: "MEMBERSHIP_NOT_FOUND",
@@ -103,17 +79,11 @@ export async function inviteRoute(fastify: FastifyInstance) {
         });
       }
 
-      // 3. Activate the membership
-      await fastify.db.tenantMembership.update({
-        where: { id: membership.id },
-        data: { status: "ACTIVE" },
-      });
-
       return reply.send({
         success: true,
         data: {
-          message: `You have joined ${membership.tenant.name}`,
-          tenantSlug: membership.tenant.slug,
+          message: result.message,
+          tenantSlug: result.tenantSlug,
         },
       });
     },

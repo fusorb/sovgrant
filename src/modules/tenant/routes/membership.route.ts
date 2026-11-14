@@ -2,33 +2,10 @@
 import type { FastifyInstance } from "fastify";
 import { flowExecutor } from "@/core/flows";
 import { addMemberFlow } from "../flows/add-member.flow";
+import { listMembersFlow } from "../flows/list-members.flow";
 import { removeMemberFlow } from "../flows/remove-member.flow";
 import { AddMemberSchema } from "../validators/tenant.schemas";
-import { presentMembershipWithIdentity } from "../presenters/membership.presenter";
-import { ApiError } from "@/core/errors";
 import { z } from "zod";
-
-// ── Membership gate ─────────────────────────────────────────────────────────
-// Mirrors the pattern in tenant.route.ts's GET /:slug: the caller must be an
-// ACTIVE member of this tenant, or an ACTIVE member of SYSTEM (platform admin).
-// Unlike the slug lookup, the caller already knows tenantId here (it came from
-// their own tenant switcher), so 403 (not 404) is the correct response.
-async function assertTenantMember(
-  fastify: FastifyInstance,
-  identityId: string,
-  tenantId: string,
-) {
-  const membership = await fastify.db.tenantMembership.findFirst({
-    where: {
-      identityId,
-      tenantId: { in: [tenantId, "SYSTEM"] },
-      status: "ACTIVE",
-    },
-  });
-  if (!membership) {
-    throw ApiError.forbidden("You are not a member of this tenant");
-  }
-}
 
 export async function membershipRoute(fastify: FastifyInstance) {
   // GET /:tenantId/members
@@ -53,23 +30,18 @@ export async function membershipRoute(fastify: FastifyInstance) {
     async (req, reply) => {
       const { tenantId } = req.params as { tenantId: string };
 
-      await assertTenantMember(fastify, req.identity.id, tenantId);
-
-      const memberships = await fastify.db.tenantMembership.findMany({
-        where: { tenantId },
-        include: {
-          role: { select: { name: true } },
-          identity: {
-            select: { id: true, primaryEmail: true, name: true, picture: true },
-          },
+      const result = await flowExecutor.run(
+        listMembersFlow,
+        { tenantId },
+        {
+          identityId: req.identity.id,
+          tenantId,
+          ip: req.ip,
+          userAgent: req.headers["user-agent"],
         },
-        orderBy: { createdAt: "asc" },
-      });
+      );
 
-      return reply.send({
-        success: true,
-        data: memberships.map(presentMembershipWithIdentity),
-      });
+      return reply.send({ success: true, data: result });
     },
   );
 
