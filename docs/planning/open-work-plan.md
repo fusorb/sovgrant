@@ -114,6 +114,11 @@ published `dist` was re-checked first; see
 The `api-key` module has no SDK class in facet (their G4). Interim is the `apiKeys`
 adapter. No local action; raise upstream.
 
+**Status (2026-11-13):** built upstream and **committed as facet `5af9c0a`**
+(`ApiKeySdk`: list/create/revoke + types + 4 body-asserting tests + a `minor`
+changeset). Publish rides the release train → `4.1.x`; then delete the interim
+`apiKeys` adapter in `src/sdk/index.ts` and close this item.
+
 ## P1-3 — delegation (deferred by design, do not resurrect as-is)
 
 `AccessDelegation` was dropped by migration `20261111000000` because nothing
