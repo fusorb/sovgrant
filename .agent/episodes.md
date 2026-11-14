@@ -618,3 +618,66 @@ was promoted to done in EP 13; EP 09's Phase 2 is still **open**, not **done**.
 
 Lesson: evolution, not perfection. Ship the manual fix so you can measure it, then
   automate the thing that hurt. The next bug becomes EP 18.
+
+================================================================================
+
+EP 18 -- F5 Wired, P1-1 Began, and the Six New Flows Got Their Tests
+--------------------------------------------------------------------------------
+What broke:
+   The 2026-11-14 execution plan assumed facet-sdk 4.1.x was unpublished, so the
+   api-key adapter could not be removed, and F5 (40 stub pages) still had no
+   backend-critical wiring order verified end-to-end. The user corrected the sdk pin:
+   4.1.0 was already published AND installed. The audit's "unpublished" premise was
+   stale. On top of that, the first P1-1 slices moved business logic out of tenant
+   and identity routes into flows -- but **no colocated tests were written for any of
+   the new flows** (`did.route.test.ts` and the member add/remove flows were the only
+   pre-existing coverage). The user called this out directly: "if the colocated tests
+   are necessary or recommended... did you write them for the new files, or the old
+   without it."
+
+How we fixed it:
+   - F5 wired all 40 stub routes to `@fusorb/facet-*` (components, layout's
+     PageHeader, auth's useAuth) and the existing hooks, preserving
+     `page → view → hook → store → SDK → API`; 0 `StubPage` references remain and
+     `src/components/stub-page.tsx` is deleted. Committed `1b7d676`.
+   - P1-2 closed properly against 4.1.0: `src/sdk/index.ts` uses `new ApiKeySdk(client)`,
+     re-exports the ApiKey types, and `use-api-keys.ts` consumes them. `ExternalIdType`
+     stays because the route accepts six values while the SDK types it as string.
+   - P1-1 tenant slices (project, did, tenant, policy, list-tenants, invite,
+     membership, signing-key, onboarding): routes are thin - guards and zod stay in
+     the route, DB via `ctx.db` in flows, audits and response shapes verbatim. Nine
+     commits through `1037e86`; guards preserved including `requirePlan("PRO")` +
+     `requirePermission("did:manage")` on the DID provision and the 410
+     `INVITE_EXPIRED_OR_USED` on accept.
+   - P1-1 identity slice (`aaacce6`): profile + admin routes thin; six new flows
+     (get/update/delete profile, list-identities-admin, suspend, update-identity-status).
+     Delete-profile and suspend/status pair session/accessToken/refreshToken
+     revocation with `revokedJti` (TTL from `expiresAt`) plus best-effort Redis block;
+     audits kept exactly - no log on ACTIVE reinstatement; suspension email preserved.
+     `FlowContext` gained `requestId` so guards' `req.id` reaches the audit log
+     (executor falls back to `randomUUID()`).
+   - **Colocated tests written for all six new identity flows** (11 tests): 401
+     paths, the revocation quadruple, revokedJti TTL from `expiresAt` (verified with
+     fake timers: 60s/45s/30s), audit actions asserted including absence on ACTIVE
+     reinstatement, Redis block TTL, and suspension-notify behavior.
+
+What survived:
+   - F5 is complete and deletion-verified (`stub-page.tsx` gone; grep clean).
+   - The identity slice proves the P1-1 pattern holds on a revocation path, not
+     just CRUD.
+   - Tests now cover the six new flows instead of relying on incidental coverage.
+
+State:
+   F5 done (`1b7d676`). P1-2 closed. P1-1 in flight: tenant + identity slices done;
+   `auth/routes/{password,session,mfa,passkey,magic-link,social}`, `oauth/routes/{clients,
+   tokens}`, `webhooks/.../webhook-config`, `idp/routes/idp` remain. Suite counts are
+   re-measured as part of committing this episode.
+
+Lesson:
+   Two corrections the user had to make by hand: (1) verify the dependency's actual
+   published state before building a plan on its absence - the "unpublished" premise
+   cost a whole audit finding; (2) a refactor PR that adds files without tests for
+   the new files is incomplete even when the untouched suite stays green. The mock-db
+   test pattern (assert ApiError paths, assert every model the flow reads/writes,
+   assert revokedJti TTL from expiresAt with fake timers) is the template for the
+   remaining P1-1 slices.

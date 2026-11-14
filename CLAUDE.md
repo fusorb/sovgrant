@@ -23,7 +23,7 @@ Fastify + Prisma + Next.js 16 monorepo (pnpm, ESM-only).
 - Email via Resend (13 templates, React Email components; static template gallery at :3888, auth emails delivered to recipient inbox)
 - SMS via Brevo (transactional SMS for MFA codes + security alerts)
 
-**Test suite: 76 files / 417 tests / 0 code failures** - all passing clean (`pnpm test`; the count includes the 10 `packages/cli` tests). Updated 2026-11-13; re-counted at 76/417 after the device-approval poll pass (2 new files, 9 new tests).
+**Test suite: 81 files / 424 tests / 0 code failures** - all passing clean (`pnpm test`; the count includes the 10 `packages/cli` tests). Updated 2026-11-14; re-counted at 81/424 (from 76/417) after the identity P1-1 slice added 5 files / 11 tests (plus `update-profile.flow.test.ts` rewritten for the flow signature). Typecheck clean. Identity flows now carry colocated tests: 12 → 17 files, 58 → 65 tests.
 
 ---
 
@@ -54,7 +54,7 @@ sovgrant/
 │   │   ├── webhooks/  # endpoint config + delivery event routes
 │   │   └── api-key/   # CRUD flows + routes, SHA-256 hashed bearer tokens
 │   ├── app/           # Next.js App Router - (public) / (auth) / console / invites / oauth
-│   ├── components/    # Only StubPage + PublicNavbar - everything else comes from facet
+│   ├── components/    # Only `public-navbar.tsx` app-side; everything else comes from facet
 │   ├── hooks/         # One hook per backend domain - only feature layer importing @/sdk
 │   ├── providers/     # ThemeProvider -> AuthBootstrap -> SgProvider -> SessionBootstrap -> Toaster
 │   ├── sdk/           # SgClient singleton + facet domain SDKs (single SDK boundary)
@@ -101,7 +101,7 @@ pnpm dev:workers         # Background workers only
 pnpm typecheck
 pnpm lint
 pnpm format
-pnpm test                # 417 tests, 76 files, all passing
+pnpm test                # 424 tests, 81 files, all passing
 pnpm test:watch
 pnpm test:coverage
 pnpm build:api
@@ -112,7 +112,7 @@ pnpm build:web
   ports are free. Memory: `NODE_OPTIONS='--max-old-space-size=4096'` for web.
 - `pnpm build:api` (tsup) uses Unix `rm -rf dist`; on Windows cmd use Git Bash/WSL
   or add `rimraf`. Prefer `pnpm cli:build` (same caveat applies to packages/cli).
-- Vitest runs fine on Windows for sovgrant (76 files / 417 tests). The facet repo's
+- Vitest runs fine on Windows for sovgrant (81 files / 424 tests). The facet repo's
   vitest workspace has Windows glob issues — run facet tests via WSL/Git Bash.
 - CORS: `ALLOWED_ORIGINS` must include the frontend origin; sovport dev origin
   (`http://localhost:8081` for Expo) should be added when wiring the wallet.
@@ -274,9 +274,9 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 
 ## Test coverage detail
 
-### 76 test files, 417 tests - modules with coverage
+### 81 test files, 424 tests - modules with coverage
 
-> All 76 files pass on `pnpm test`. Typecheck clean (`tsc --noEmit`).
+> All 81 files pass on `pnpm test`. Typecheck clean (`tsc --noEmit`).
 
 | Module | Test files | Tests | Coverage breadth |
 |--------|-----------|-------|-----------------|
@@ -284,7 +284,7 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 | `credentials` | 10 | 69 | issue/verify/offer/revoke/list flows + route-level (offer, list, verify-session, verify-present) + status-list service |
 | `oauth` | 8 | 60 | authorize.flow, token-exchange.flow, token-refresh.flow, token-revoke.flow, revoke-token-by-id.flow + token.service + `jwks.route` (relying-party verification contract) + `introspect.route` (RFC 7662 caller auth) |
 | `tenant` | 7 | 28 | create-tenant, add-member, remove-member, provision-tenant-did + did.route + cross-tenant-isolation (HTTP + unit) |
-| `identity` | 12 | 58 | register-wallet-did, delete-account, update-profile, link/list/unlink-external-id, verify-identifier, confirm-identifier, approve-device-approval, poll-device-approval + external-id.verify route + device-approval poll route |
+| `identity` | 17 | 65 | register-wallet-did, delete-account, update-profile, get/update/delete-profile, list-identities-admin, suspend-identity, update-identity-status, link/list/unlink-external-id, verify-identifier, confirm-identifier, approve-device-approval, poll-device-approval + external-id.verify route + device-approval poll route |
 | `api-key` | 4 | 16 | api-key.service + create/list/revoke flows |
 | `idp` | 1 | 3 | federatedLogin service |
 | `billing` | 1 | 11 | subscription.route (Paystack + Stripe webhooks) |
@@ -306,8 +306,8 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 | `auth/services/step-up.service.ts` | Low | Elevation logic tested via mfa-verify + switch-context flows |
 | `credentials/services/signing.service.ts` | Medium | SD-JWT dispatcher, tested via issue-credential.flow.test (12 tests) |
 | `credentials/services/did.service.ts` | Low | did:web construction, tested via did.route.test + provision-tenant-did.flow.test |
-| `identity/routes/admin.route.ts` | Medium | Identity status management, SYSTEM-ADMIN gated |
-| `identity/routes/profile.route.ts` | Low | Tested via update-profile + delete-account flows |
+| `identity/routes/admin.route.ts` | Medium | Route dispatch untested; backing flows covered (`list-identities-admin`, `suspend-identity`, `update-identity-status`) incl. revocation quadruple + revokedJti TTL |
+| `identity/routes/profile.route.ts` | Low | Route dispatch untested; backing flows covered (`get/update/delete-profile`) |
 | `identity/routes/delegation.route.ts` | Low | Simple CRUD |
 | `tenant/services/membership.service.ts` | Low | Tested via add-member + remove-member flows |
 | `tenant/services/onboarding.service.ts` | Low | Tenant onboarding |
@@ -344,7 +344,7 @@ Every `src/modules/<n>/` owns: `flows/` `routes/` `services/` `repositories/` `v
 
 Current: `0.1.0` (package.json). Pre-release - no stability promises.
 
-- `0.1.0` ✅ **COMPLETE** (v1) - Backend complete: all Phase 0–8 + Phase E shipped; 76 test files / 417 tests, 0 code failures. Docker, security hardening, observability, LegalConsent + ExternalIdentifier gates all shipped. Guard-level security pass 2026-11-13: P0-8 (token-type discrimination), P0-9 (rate-limit keying + real 429s), P0-10 (introspection caller auth).
+- `0.1.0` ✅ **COMPLETE** (v1) - Backend complete: all Phase 0–8 + Phase E shipped; 81 test files / 424 tests, 0 code failures. Docker, security hardening, observability, LegalConsent + ExternalIdentifier gates all shipped. Guard-level security pass 2026-11-13: P0-8 (token-type discrimination), P0-9 (rate-limit keying + real 429s), P0-10 (introspection caller auth). Frontend rebuild F5 complete 2026-11-14; P1-1 in flight (tenant + identity slices done).
 - `0.2.0` 🔄 **ACTIVE (v2)** - SovPort companion app integration (end-to-end), CLI package extraction, integration tests against real Postgres. **API key management backend ✅ Done** (CRUD flows + routes, SHA-256 hashed bearer tokens, auth guard extension, migration + Tier 1 rollback tests).
 - `1.0.0` — Stable production milestone: full integration test suite, open-source release
 

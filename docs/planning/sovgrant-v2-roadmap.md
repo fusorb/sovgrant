@@ -9,7 +9,7 @@
 
 ## 🟢 v1 — COMPLETE (0.1.0)
 
-Backend complete. All Phase 0–8 + Phase E shipped. 76 test files / 417 tests / 0 code failures. Typecheck clean on `tsc --noEmit`.
+Backend complete. All Phase 0–8 + Phase E shipped. 81 test files / 424 tests / 0 code failures. Typecheck clean on `tsc --noEmit`. Frontend rebuild complete 2026-11-14 (F1–F5 landed; `StubPage` fully removed). P1-1 in flight: tenant + identity slices landed 2026-11-14; `auth`, `oauth/clients`, `webhook-config`, `idp` routes remain.
 
 | Area | Status | Notes |
 |------|--------|-------|
@@ -58,7 +58,7 @@ contract stabilized for the CLI package.
 | 4 | Integration tests against real Postgres (`pnpm test:rollback`) | P2 | ✅ **Running (2026-11-11)** — the Tier-2 guard was broken three ways (3s probe timeout, wrong empty-diff assertion, `npx` invocation) and silently no-op'd, so it had never verified anything; repaired, it now runs 5/5 against `sg` + `sg_shadow`. Make `ARC_ID_ROLLBACK_TEST=1` a pre-release gate. |
 | 5 | SDK `TenantSdk.create()` test coverage gap (P4.3) | P2 | ✅ Superseded — `src/sdk/sdk.test.ts` tested the deleted in-repo SDK and went with it in the frontend teardown (F1); the published facet SDK owns its own tests. |
 | 6 | Console dashboard — final cleanup (remaining SDK-direct imports in pages) | P3 | ✅ Obsolete — the pages that imported the SDK directly were deleted in F1. `src/hooks/` is now the only feature layer that imports `@/sdk` (the bootstrap providers are excepted by design), which is what enforces the chain. |
-| 7 | Billing UI — pricing from `src/config/plan-caps.ts` displayed via `BillingPage` (facet-components) | P2 | ⏳ Reopened — the old billing page went with the F1 teardown; `/console/billing` is a stub awaiting F5 wiring. |
+| 7 | Billing UI — pricing from `src/config/plan-caps.ts` displayed via `BillingPage` (facet-components) | P2 | ✅ Page wired (2026-11-14, F5) — `/console/billing` uses facet components + the `useBilling` hook (no `@/sdk` in the view), showing current tenant subscription plan/status. **Note:** it renders subscription state, not a pricing table from `plan-caps.ts` — the pricing-display half of this item is still open if wanted. |
 
 ### 0.2.1 — "Edge cleanup"
 

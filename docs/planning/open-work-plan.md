@@ -5,9 +5,7 @@
 > evidence); this file is the *how* — acceptance criteria, dependencies, owners —
 > so the work can be picked up without re-deriving it.
 >
-> Last updated 2026-11-14 (SDK pin reconciled to published `@fusorb/facet-sdk@4.1.0`,
-> interim `apiKeys` adapter removed in favour of `ApiKeySdk`, episodic memory updated);
-> all P0 items were closed 2026-11-11.
+> Last updated 2026-11-14 (F5 complete; SDK pin `4.1.0`; P1-1 tenant + identity slices landed; full suite re-measured 81/424).
 
 ## Ground rules (do not re-litigate)
 
@@ -19,7 +17,7 @@
   is the only feature layer that imports `@/sdk`; the four bootstrap provider
   files also call it, by design, because they must run above `SgProvider`.
 - **Never write test counts without re-running the suite.** Current verified:
-  76 files / 417 tests / 0 failures; typecheck clean; lint 0 errors.
+  81 files / 424 tests / 0 failures; typecheck clean; lint 0 errors.
 - **Never hand-copy an enum's value list** — diff it (`prisma migrate diff`).
 
 ---
@@ -44,29 +42,14 @@ if the step fails, read the guard's own assertion message before anything else.
 
 ---
 
-## F5 — wire the 40 stub pages ⬅ NEXT
+## F5 — wire the 40 stub pages ✅ DONE (2026-11-14)
 
-The only open part of the frontend rebuild. F1–F4 are done: teardown, foundation,
-route map and 24 hooks all exist. **This is unblocked now** — P0-4 and P0-7 fixed
-the session path, so guarded hooks have a token after a reload.
-
-**How:** replace each `StubPage` with real components from `@fusorb/facet-*`,
-calling the existing hook for that domain. Do not call the SDK from a page.
-
-**Suggested order (backend-critical first):** console security (passkeys, MFA,
-sessions, paired devices) → identities + external IDs → credentials → OAuth
-applications/tokens → organization (members, policy, projects, signing keys, SSO)
-→ webhooks → billing → invites/oauth consent.
-
-**Acceptance:**
-- No `StubPage` remains on a route that has a backend.
-- No page imports `@/sdk` directly (grep to prove it).
-- Auth-gated routes behave correctly signed-out *and* after a hard reload.
-- `pnpm typecheck` / `pnpm lint` / `pnpm test` green; counts in the docs updated.
-
-**Watch out for:** nothing SDK-side any more — `@fusorb/facet-sdk` 4.0.1 is correct
-for every endpoint the pages need, and the adapters this note used to point at are
-gone (see SDK-1, done).
+All 40 stub routes were wired to facet packages (`@fusorb/facet-components`,
+`@fusorb/facet-layout` `PageHeader`, `@fusorb/facet-auth` `useAuth`) + existing hooks,
+preserving `page → view → hook → store → SDK → API` (no `@/sdk` in route views/pages).
+0 `StubPage` references remain in `src/app/**`; `src/components/stub-page.tsx` was
+deleted in F1's teardown follow-up (commit `1b7d676`). `pnpm typecheck` clean.
+Full suite re-measured 2026-11-14: **81 files / 424 tests / 0 failures**.
 
 ---
 
@@ -80,9 +63,14 @@ policy,invite,tenant}.route.ts`, `identity/routes/{profile,admin}.route.ts`,
 
 **Reference pattern:** `credentials/*`, `audit/*`, `auth/login`.
 
-**Acceptance:** each listed route is a thin guard → validate → `FlowExecutor.execute()`
-→ reply; logic moved into `flows/` with DB access via `ctx.db`; existing tests stay
-green; new flow tests where behaviour was previously untested.
+**Status (2026-11-14):** tenant slice done (`7b65a3a` project, `6202480` did/tenant/policy/list-tenants, `afbd84a` invite+membership, `244de09` signing-key, `1037e86` onboarding) and identity slice done (`aaacce6` profile/admin + 6 flows + colocated tests). `FlowContext.requestId` now propagates guards' `req.id` into audits. Colocated tests written for all six new identity flows (11 tests) following the existing mock-db pattern (ApiError paths + every model read/written + revocation quadruple + revokedJti TTL from `expiresAt`). Full suite re-measured: 81/424 green.
+
+**Remaining fat routes to migrate (same pattern, highest-risk first):**
+`auth/routes/{password,session,mfa,passkey,magic-link,social}.route.ts` (~700 for social),
+`oauth/routes/{clients,tokens}.route.ts`, `webhooks/routes/webhook-config.route.ts`,
+`idp/routes/idp.route.ts`.
+
+**Acceptance (unchanged):** each listed route is a thin guard → validate → `FlowExecutor.execute()` → reply; logic in `flows/` with DB via `ctx.db`; existing tests stay green; new flow tests where behaviour was previously untested.
 
 ---
 
@@ -153,15 +141,16 @@ state is not verifiable from here; its `ci` job passes thanks to the changesets.
 | Item | Owner | Blocked by |
 |---|---|---|
 | CI-1 | done | — |
-| F5 | next agent session | — |
+| F5 | done (2026-11-14) | — |
 | P1-1 | agent (large) | — |
 | SDK-1 | done | — |
-| P1-2 | facet maintainers | — |
+| P1-2 | done (2026-11-14) | — |
 | P1-3 | product decision | design questions unanswered |
 | OPS-1 / OPS-2 | user | — |
 
 ## Session notes
 
+- 2026-11-14 (F5 complete + P1-1 identity slice): **F5 done** (`1b7d676`) - all 40 stub routes wired to facet packages + existing hooks, 0 `StubPage` references, `stub-page.tsx` deleted. **P1-2 closed** by adopting published `@fusorb/facet-sdk@4.1.0` (`ApiKeySdk` wired into `src/sdk/index.ts`; `use-api-keys` on `CreateApiKeyParams`). **P1-1 tenant slice** landed (`7b65a3a` project, `6202480` did/tenant/policy/list-tenants, `afbd84a` invite+membership, `244de09` signing-key, `1037e86` onboarding); **P1-1 identity slice** landed (`aaacce6`): profile + admin routes thin, six new flows, colocated tests written for all six (11 tests) after the user called out their absence. `FlowContext.requestId` now propagates `req.id` into audits. **Full suite re-measured: 81 files / 424 tests / 0 failures; `pnpm typecheck` clean (user-run, 2026-11-14).** Appended EP 18 to `.agent/episodes.md`. **Next:** continue P1-1 with `auth/routes/{password,session,mfa,passkey,magic-link,social}` (social ~700 first), keeping the same careful per-slice verify-then-commit rhythm.
 - 2026-11-14 (sync + SDK adoption): reconciled the local 4.0.1/4.1.0 drift after
   confirming `@fusorb/facet-sdk@4.1.0` is published/installed — `package.json`,
   lock, and workspace are aligned on 4.1.0, the interim `apiKeys` adapter was

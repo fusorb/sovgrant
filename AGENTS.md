@@ -16,7 +16,7 @@ Version `0.1.0` in package.json (pre-release, no stability promises).
 Package manager is **pnpm**. Module system is **ESM only** (`"type": "module"`
 in package.json) - never emit `require()`/`module.exports`.
 
-**Test suite:** 76 files / 417 tests / 0 code failures on `pnpm test` (all passing clean on Windows; the count includes the 10 `packages/cli` tests - route-level + Prisma imports dominate). Migration-rollback Tier-2 is opt-in via `pnpm test:rollback` (needs a live Postgres **and** a shadow DB). Typecheck clean (`tsc --noEmit`); lint clean (0 errors, 411 warnings). Updated 2026-11-11 - down from 70/386, because the frontend teardown removed `src/sdk/sdk.test.ts`, then up again as `src/modules/oauth/routes/jwks.route.test.ts` landed; re-counted 2026-11-13 at 74/408 when the security pass added `auth-guard.plugin.test.ts` (5), `rate-limit.plugin.test.ts` (3) and `introspect.route.test.ts` (7). Lint re-measured 2026-11-13 at 411 (was 413) after the facet-sdk 4.0.0 adoption - the four files that change touched report no warnings themselves. Re-counted again 2026-11-13 at 76/417 when the device-approval poll pass added `poll-device-approval.flow.test.ts` (7) and `device-approval.route.test.ts` (2). SDK bumped to 4.1.0 and the interim `apiKeys` adapter replaced with `ApiKeySdk` on 2026-11-14 (typecheck clean; suite/lint not re-run for that mechanical adoption).
+**Test suite:** 81 files / 424 tests / 0 code failures on `pnpm test` (all passing clean on Windows; the count includes the 10 `packages/cli` tests - route-level + Prisma imports dominate). Migration-rollback Tier-2 is opt-in via `pnpm test:rollback` (needs a live Postgres **and** a shadow DB). Typecheck clean (`tsc --noEmit`); lint clean (0 errors, 411 warnings). Updated 2026-11-14 - re-measured on the tree as committed in `aaacce6`. The delta from 76/417 (2026-11-13) is 5 new files / 11 tests, all in the identity P1-1 slice: `get-profile.flow.test.ts` (2), `delete-profile.flow.test.ts` (2), `list-identities-admin.flow.test.ts` (1), `suspend-identity.flow.test.ts` (1), `update-identity-status.flow.test.ts` (3), and `update-profile.flow.test.ts` rewritten for the flow-native signature. Lint not re-run in this pass; the 411-warning figure stands as the user's 2026-11-13 measurement.
 
 ## Non-negotiable architecture rules (same - stable)
 
@@ -96,8 +96,7 @@ shipped. See `CLAUDE.md` for the full verified status table. Open work:
 - **Docker deployment** - ✅ Done. Multi-stage `Dockerfile` (node:22-alpine),
   `docker-compose.yml` (Postgres 17 + Redis 7 + API + workers), `.dockerignore`,
   auto-migrate entrypoint, `.env.example`. `docker compose up -d` to run.
-- **Frontend rebuild** - F1–F4 landed 2026-11-11; **F5 (page wiring) is the only
-  open part**.
+- **Frontend rebuild** - ✅ **F1–F5 all landed (F5 on 2026-11-14).**
   - **F1 teardown** (`f334674`): the pre-facet surface is deleted - legacy page
     components, the 16 in-repo hooks, the in-repo SDK and its test, provider
     wrappers (incl. `AuthProvider`), and the local icon / table / shell
@@ -117,7 +116,11 @@ shipped. See `CLAUDE.md` for the full verified status table. Open work:
     `SgProvider`**: `SgProvider` only attempts the refresh-cookie exchange when
     its storage already holds an access token, so no component inside it can
     bootstrap a session after a reload (P0-4/P0-7 in `.agent/output.txt`).
-  - **F5 (open)**: page-by-page component wiring for the 40 stubs.
+  - **F5 (done 2026-11-14, `1b7d676`)**: all 40 stub routes wired to facet
+    packages (`@fusorb/facet-components`, `@fusorb/facet-layout` `PageHeader`,
+    `@fusorb/facet-auth` `useAuth`) + existing hooks, preserving
+    `page → view → hook → store → SDK → API`; 0 `StubPage` references remain and
+    `src/components/stub-page.tsx` is deleted.
 - **Facet migration** - ✅
   **Phases 1–5 done.** Phase 1: SDK migrated to the published
   **`@fusorb/facet-sdk@4.1.0`** - `src/sdk/index.ts` is a thin
