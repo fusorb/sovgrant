@@ -22,9 +22,13 @@ import {
   WebhooksSdk,
   PasskeySdk,
   IdpSdk,
+  ApiKeySdk,
   type ApiError,
+  type ApiKey,
   type ApiResponse,
   type AuditListParams,
+  type CreateApiKeyParams,
+  type CreatedApiKey,
   type TenantPolicy,
   type User,
 } from "@fusorb/facet-sdk";
@@ -141,38 +145,7 @@ export const oauth = new OAuthSdk(client);
 export const webhooks = new WebhooksSdk(client);
 export const passkeys = new PasskeySdk(client);
 export const idp = new IdpSdk(client);
-
-// ── API keys ────────────────────────────────────────────────────────────────
-// facet-sdk ships no ApiKeySdk, but the backend exposes the api-key module.
-// Until an ApiKeySdk lands upstream, adapt the generic client.
-// (Tracked as P1-2 in .agent/output.txt.)
-
-export interface ApiKeyRecord {
-  id: string;
-  name: string;
-  keyPrefix: string;
-  scopes: string[];
-  status: string;
-  lastUsedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreatedApiKey {
-  id: string;
-  key: string; // plaintext - returned once, never stored
-  name: string;
-  keyPrefix: string;
-  scopes: string[];
-  createdAt: string;
-}
-
-export const apiKeys = {
-  list: () => client.get<ApiKeyRecord[]>("/api-keys"),
-  create: (data: { name: string; scopes?: string[] }) =>
-    client.post<CreatedApiKey>("/api-keys/create", data),
-  revoke: (id: string) => client.del<void>(`/api-keys/${id}`),
-};
+export const apiKeys = new ApiKeySdk(client);
 
 // ── Route contract types ────────────────────────────────────────────────────
 // facet-sdk types `linkExternalId`'s `type` as a plain string, while
@@ -193,4 +166,13 @@ export type ExternalIdType =
 export const sgClient = client;
 
 export { REFRESH_COOKIE_NAME, REFRESH_COOKIE_OPTIONS };
-export type { AuditListParams, ApiError, ApiResponse, TenantPolicy, User };
+export type {
+  ApiError,
+  ApiKey,
+  ApiResponse,
+  AuditListParams,
+  CreateApiKeyParams,
+  CreatedApiKey,
+  TenantPolicy,
+  User,
+};

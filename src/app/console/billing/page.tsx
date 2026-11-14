@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { BillingView } from "./billing-view";
 
 export const metadata = buildMetadata({
   title: "Billing",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Billing" description="Subscription and plan" />;
+  return <BillingView />;
 }

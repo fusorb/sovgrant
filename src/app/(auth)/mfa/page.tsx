@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { MfaView } from "./mfa-view";
 
 export const metadata = buildMetadata({
   title: "Two-factor authentication",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Two-factor authentication" description="Complete your verification" />;
+  return <MfaView />;
 }

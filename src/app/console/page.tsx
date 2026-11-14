@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { ConsoleDashboardView } from "./console-dashboard-view";
 
 export const metadata = buildMetadata({
   title: "Dashboard",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Dashboard" description="Overview of your workspace" />;
+  return <ConsoleDashboardView />;
 }

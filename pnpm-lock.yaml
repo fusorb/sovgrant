@@ -219,11 +219,11 @@ importers:
         specifier: 1.7.2
         version: 1.7.2(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@fusorb/facet-sdk':
-        specifier: 4.0.1
-        version: 4.0.1
+        specifier: 4.1.0
+        version: 4.1.0
       '@fusorb/facet-store':
         specifier: 1.0.6
-        version: 1.0.6(@fusorb/facet-sdk@4.0.1)(@types/react@19.2.18)(immer@11.1.16)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+        version: 1.0.6(@fusorb/facet-sdk@4.1.0)(@types/react@19.2.18)(immer@11.1.16)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
       '@fusorb/facet-tokens':
         specifier: 1.5.1
         version: 1.5.1
@@ -1018,8 +1018,8 @@ packages:
       react: ^19
       react-dom: ^19
 
-  '@fusorb/facet-sdk@4.0.1':
-    resolution: {integrity: sha512-ecio2VwrxKWIP9r49m2GYFZcG9yNTpIMkow6wxJrFNHHV2IWZpgiUXdiIKjbeP2WBk0b11s46N++CMcNgT96/Q==}
+  '@fusorb/facet-sdk@4.1.0':
+    resolution: {integrity: sha512-GhG7wvacQm0Z06bhyvZZ52ZdqWF+KgamXcn1ogkFddgopr9HEswJX3e1X1ak23jpSVHdupUltxSVzKjrY78BeQ==}
     engines: {node: '>=20'}
 
   '@fusorb/facet-store@1.0.6':
@@ -6337,7 +6337,7 @@ snapshots:
   '@fusorb/facet-auth@2.1.2(@standard-schema/spec@1.1.0)(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(effect@3.20.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(valibot@1.4.2(typescript@5.9.3))':
     dependencies:
       '@fusorb/facet-components': 3.2.2(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@fusorb/facet-sdk': 4.0.1
+      '@fusorb/facet-sdk': 4.1.0
       '@hookform/resolvers': 5.7.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(effect@3.20.0)(react-hook-form@7.83.0(react@19.2.4))(valibot@1.4.2(typescript@5.9.3))(zod@4.4.3)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
@@ -6437,11 +6437,11 @@ snapshots:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
 
-  '@fusorb/facet-sdk@4.0.1': {}
+  '@fusorb/facet-sdk@4.1.0': {}
 
-  '@fusorb/facet-store@1.0.6(@fusorb/facet-sdk@4.0.1)(@types/react@19.2.18)(immer@11.1.16)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))':
+  '@fusorb/facet-store@1.0.6(@fusorb/facet-sdk@4.1.0)(@types/react@19.2.18)(immer@11.1.16)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))':
     dependencies:
-      '@fusorb/facet-sdk': 4.0.1
+      '@fusorb/facet-sdk': 4.1.0
       zustand: 5.0.14(@types/react@19.2.18)(immer@11.1.16)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
     transitivePeerDependencies:
       - '@types/react'

@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { TenantsView } from "./tenants-view";
 
 export const metadata = buildMetadata({
   title: "Tenants",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Tenants" description="Workspaces you belong to" />;
+  return <TenantsView />;
 }

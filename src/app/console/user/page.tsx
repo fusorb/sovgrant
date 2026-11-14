@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { UserView } from "./user-view";
 
 export const metadata = buildMetadata({
   title: "Account",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Account" description="Profile, security, and password" />;
+  return <UserView />;
 }

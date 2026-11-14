@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { SsoView } from "./sso-view";
 
 export const metadata = buildMetadata({
   title: "SSO connections",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="SSO connections" description="Enterprise identity providers" />;
+  return <SsoView />;
 }

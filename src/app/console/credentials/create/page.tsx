@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { CreateCredentialView } from "./create-credential-view";
 
 export const metadata = buildMetadata({
   title: "Issue credential",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Issue credential" description="Create a verifiable credential" />;
+  return <CreateCredentialView />;
 }

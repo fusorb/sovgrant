@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { DidView } from "./did-view";
 
 export const metadata = buildMetadata({
   title: "DID",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="DID" description="did:web identity for this tenant" />;
+  return <DidView />;
 }

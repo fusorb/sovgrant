@@ -524,6 +524,83 @@ Lesson: a contract nobody can observe failing is a contract you do not have.
 
 ================================================================================
 
+EP 17 -- Three Guards That Trusted the Wrong Thing, a Poll That Said Too Much,
+         and the Adapter That Outlived Its Gap
+--------------------------------------------------------------------------------
+What broke:
+  Two different kinds of drift surfaced in the 2026-11-13 audit.
+
+  (a) **Guard-level security (P0-8 / P0-9 / P0-10).** Route tests mock
+      `fastify.auth`, so they could never see the auth guard, the rate limiter,
+      or the introspection route's caller checks. Three holes hid there:
+      - Token-type confusion (P0-8): access and ID tokens share a signing key and
+        `sub`+`jti`, so the guard accepted an ID token as a bearer credential. ID
+        tokens have 1h TTL and were not covered by logout/revocation (which blocks
+        access-token JTIs), so the "weaker" token outlived the real one.
+      - Rate limiting keyed on unverified claims (P0-9): the key generator
+        base64-decoded the Bearer token and bucketed by raw `sub`, so a forged
+        `Bearer x.<random-sub>.y` minted a fresh bucket per request - defeating
+        every per-route limit (login, magic-link, password reset). A second defect
+        made every rejection throw a plain object the error handler could not
+        classify, so 429s surfaced as 500s.
+      - Introspection trusted the caller (P0-10): `/oauth/introspect` (RFC 7662
+        §2.1) checked only that Basic auth existed, never that it was valid, so
+        any caller could read any token's metadata; and the live-token branch
+        returned `aud` as an array against a string schema, 500-ing real tokens.
+
+  (b) **Device-approval poll leaked context (SovPort handoff).**
+      `GET /identity/device-approvals/:challenge` was the only unauthenticated
+      route in that file. The challenge is a bearer secret (32 random bytes) and
+      must not double as a browsing-context oracle; the poll had to authenticate
+      the caller and reveal requester ip/userAgent/email only to the owning
+      identity, and only while pending.
+
+  (c) **SDK drift vs. published reality (P1-2 closure).** `@fusorb/facet-sdk`
+      4.1.0 shipped `ApiKeySdk` upstream (facet `5af9c0a`), but sovgrant still
+      carried the interim generic-client `apiKeys` adapter, and the workspace had
+      a half-applied local state (lock/workspace on 4.1.0, `package.json` still
+      pinned 4.0.1) that looked like a bump without being one.
+
+How we fixed it:
+  - P0-8: `TokenService.issue` stamps `token_use: "access" | "id"`; the guard
+    requires `"access"` and rejects unmarked/ID tokens. Dedicated
+    `auth-guard.plugin.test.ts` (5 tests) - not a route-mock test.
+  - P0-9: key generator verifies the Bearer token via `fastify.jwt.verify`
+    before trusting `sub`/`tid`, falling back to IP keying; rejections now throw
+    `ApiError.tooManyRequests` (real 429). `rate-limit.plugin.test.ts` (3).
+  - P0-10: Basic credentials verified against the Client row's argon2 secret
+    (public clients and bad creds → 401, never `active:false`); `aud` is
+    space-joined per RFC 7662. `introspect.route.test.ts` (7).
+  - Poll: `requireUser` on the route; flow returns requester context only to a
+    session of the same identity while pending, with a `select` projection.
+    `poll-device-approval.flow.test.ts` (7) + `device-approval.route.test.ts` (2).
+    Counts re-measured: 76 files / 417 tests / 0 failures, typecheck clean.
+  - 4.1.0 sync (2026-11-14): confirmed published/installed 4.1.0 exports
+    `ApiKeySdk` with the backend's shapes; aligned `package.json`/lock/workspace,
+    replaced the interim adapter in `src/sdk/index.ts` and `src/hooks/use-api-keys.ts`
+    with `ApiKeySdk`, updated living docs, and verified `pnpm typecheck` clean.
+
+What survived:
+  The invariants are now explicit and tested at the layer that enforces them:
+  token kind is part of the credential, rate limits key on verified identity, the
+  introspection oracle authenticates its reader, and a bearer challenge does not
+  reveal who is signing in. The SDK is a single wiring point again - no
+  app-maintained API-key shim where an upstream class exists.
+
+State: complete. P0-8/9/10 and the poll hardening shipped 2026-11-13; P1-2 closed
+  in-repo on 2026-11-14 against published `@fusorb/facet-sdk@4.1.0`. Cross-repo:
+  SovPort must send Bearer on the poll and run pair→MFA→approve e2e; Relnex
+  (`041e9a8`) already enforces `token_use: "access"` at its JWKS anchor.
+
+Lesson: a route suite that mocks the guard proves the route, not the gate. Any
+  security property enforced by a plugin, a key generator, or an unauthenticated
+  edge needs its own test that exercises that layer directly. And a dependency
+  "bump" is not real until pin, lock, workspace, installed artifact, and the
+  code that consumes it all agree - a half-applied bump is drift wearing a
+  version number.
+
+================================================================================
+
 ## The Rule Chain (why these episodes exist)
 --------------------------------------------------------------------------------
   MANUAL        -- a fix lives in someone's head or an unshared script.
@@ -540,4 +617,4 @@ is a lie. Most episodes above promoted one fix at least one rung. EP 06's histor
 was promoted to done in EP 13; EP 09's Phase 2 is still **open**, not **done**.
 
 Lesson: evolution, not perfection. Ship the manual fix so you can measure it, then
-  automate the thing that hurt. The next bug becomes EP 15.
+  automate the thing that hurt. The next bug becomes EP 18.

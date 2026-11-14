@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { WebhooksView } from "./webhooks-view";
 
 export const metadata = buildMetadata({
   title: "Webhooks",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Webhooks" description="Event delivery endpoints" />;
+  return <WebhooksView />;
 }

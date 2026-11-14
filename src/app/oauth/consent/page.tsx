@@ -1,5 +1,6 @@
+import { Suspense } from "react";
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { ConsentView } from "./consent-view";
 
 export const metadata = buildMetadata({
   title: "Authorize application",
@@ -8,5 +9,9 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Authorize application" description="Review requested access" />;
+  return (
+    <Suspense fallback={null}>
+      <ConsentView />
+    </Suspense>
+  );
 }

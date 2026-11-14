@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { ResetPasswordView } from "./reset-password-view";
 
 export const metadata = buildMetadata({
   title: "Reset password",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Reset password" description="Choose a new password" />;
+  return <ResetPasswordView />;
 }

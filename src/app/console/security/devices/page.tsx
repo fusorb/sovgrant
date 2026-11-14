@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { DevicesView } from "./devices-view";
 
 export const metadata = buildMetadata({
   title: "Devices",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Devices" description="Registered devices" />;
+  return <DevicesView />;
 }

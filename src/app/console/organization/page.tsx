@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { OrganizationView } from "./organization-view";
 
 export const metadata = buildMetadata({
   title: "Organization",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Organization" description="Workspace overview and settings" />;
+  return <OrganizationView />;
 }

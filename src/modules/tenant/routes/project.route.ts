@@ -1,22 +1,19 @@
 // src/modules/tenant/routes/project.route.ts
 //
-// NEW MODULE. Mounted under the existing /tenants prefix (see tenant.plugin.ts),
-// following the exact same convention as signing-key.route.ts and did.route.ts.
+// Mounted under /tenants (see tenant.plugin.ts), same convention as
+// signing-key.route.ts and did.route.ts. Routes are thin: auth/validation
+// → FlowExecutor → reply. Business logic lives in flows.
 //
 // Canonical paths:
-//   POST   /tenants/:tenantId/projects             — create a project
-//   GET    /tenants/:tenantId/projects             — list projects (optionally ?category=)
-//   GET    /tenants/:tenantId/projects/:projectId  — get one project + its clients/flows
-//   PATCH  /tenants/:tenantId/projects/:projectId  — update name/category
-//   DELETE /tenants/:tenantId/projects/:projectId  — delete a project
-//
-// Authorization: any active tenant member can list/read; only members with
-// the project:manage permission can create/update/delete.
+//   POST   /tenants/:tenantId/projects
+//   GET    /tenants/:tenantId/projects
+//   GET    /tenants/:tenantId/projects/:projectId
+//   PATCH  /tenants/:tenantId/projects/:projectId
+//   DELETE /tenants/:tenantId/projects/:projectId
 
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { auditService } from "@/modules/audit/services/audit.service";
-import { ProjectService } from "../services/project.service";
+import { flowExecutor } from "@/core/flows";
 import {
   CreateProjectSchema,
   UpdateProjectSchema,
@@ -24,9 +21,14 @@ import {
   TenantParamsSchema,
   ListProjectsQuerySchema,
 } from "../validators/project.schemas";
+import { createProjectFlow } from "../flows/create-project.flow";
+import { listProjectsFlow } from "../flows/list-projects.flow";
+import { getProjectFlow } from "../flows/get-project.flow";
+import { updateProjectFlow } from "../flows/update-project.flow";
+import { deleteProjectFlow } from "../flows/delete-project.flow";
 
 export async function projectRoute(fastify: FastifyInstance) {
-  // ── POST /:tenantId/projects ────────────────────────────────────────────
+  // ── POST /:tenantId/projects ─────────────────────────────────────────────
   fastify.post(
     "/:tenantId/projects",
     {
@@ -49,28 +51,22 @@ export async function projectRoute(fastify: FastifyInstance) {
       const { tenantId } = req.params as { tenantId: string };
       const body = req.body as z.infer<typeof CreateProjectSchema>;
 
-      const projectService = new ProjectService(fastify.db);
-      const project = await projectService.create(tenantId, body);
-
-      void auditService
-        .log({
-          action: "TENANT_UPDATED",
+      const project = await flowExecutor.run(
+        createProjectFlow,
+        { tenantId, ...body },
+        {
           identityId: req.identity.id,
           tenantId,
           ip: req.ip,
-          metadata: {
-            event: "project_created",
-            projectId: project.id,
-            slug: project.slug,
-          },
-        })
-        .catch(() => {});
+          userAgent: req.headers["user-agent"],
+        },
+      );
 
       return reply.status(201).send({ success: true, data: project });
     },
   );
 
-  // ── GET /:tenantId/projects ─────────────────────────────────────────────
+  // ── GET /:tenantId/projects ──────────────────────────────────────────────
   fastify.get(
     "/:tenantId/projects",
     {
@@ -91,15 +87,22 @@ export async function projectRoute(fastify: FastifyInstance) {
       const { tenantId } = req.params as { tenantId: string };
       const { category } = req.query as { category?: string };
 
-      const projectService = new ProjectService(fastify.db);
-      await projectService.assertMembership(tenantId, req.identity.id);
+      const projects = await flowExecutor.run(
+        listProjectsFlow,
+        { tenantId, category },
+        {
+          identityId: req.identity.id,
+          tenantId,
+          ip: req.ip,
+          userAgent: req.headers["user-agent"],
+        },
+      );
 
-      const projects = await projectService.list(tenantId, category);
       return reply.send({ success: true, data: projects });
     },
   );
 
-  // ── GET /:tenantId/projects/:projectId ──────────────────────────────────
+  // ── GET /:tenantId/projects/:projectId ───────────────────────────────────
   fastify.get(
     "/:tenantId/projects/:projectId",
     {
@@ -116,20 +119,20 @@ export async function projectRoute(fastify: FastifyInstance) {
       },
     },
     async (req, reply) => {
-      const { tenantId, projectId } = req.params as {
-        tenantId: string;
-        projectId: string;
-      };
+      const params = req.params as { tenantId: string; projectId: string };
 
-      const projectService = new ProjectService(fastify.db);
-      await projectService.assertMembership(tenantId, req.identity.id);
+      const project = await flowExecutor.run(getProjectFlow, params, {
+        identityId: req.identity.id,
+        tenantId: params.tenantId,
+        ip: req.ip,
+        userAgent: req.headers["user-agent"],
+      });
 
-      const project = await projectService.getById(tenantId, projectId);
       return reply.send({ success: true, data: project });
     },
   );
 
-  // ── PATCH /:tenantId/projects/:projectId ────────────────────────────────
+  // ── PATCH /:tenantId/projects/:projectId ─────────────────────────────────
   fastify.patch(
     "/:tenantId/projects/:projectId",
     {
@@ -155,24 +158,22 @@ export async function projectRoute(fastify: FastifyInstance) {
       };
       const body = req.body as z.infer<typeof UpdateProjectSchema>;
 
-      const projectService = new ProjectService(fastify.db);
-      const project = await projectService.update(tenantId, projectId, body);
-
-      void auditService
-        .log({
-          action: "TENANT_UPDATED",
+      const project = await flowExecutor.run(
+        updateProjectFlow,
+        { tenantId, projectId, ...body },
+        {
           identityId: req.identity.id,
           tenantId,
           ip: req.ip,
-          metadata: { event: "project_updated", projectId },
-        })
-        .catch(() => {});
+          userAgent: req.headers["user-agent"],
+        },
+      );
 
       return reply.send({ success: true, data: project });
     },
   );
 
-  // ── DELETE /:tenantId/projects/:projectId ───────────────────────────────
+  // ── DELETE /:tenantId/projects/:projectId ────────────────────────────────
   fastify.delete(
     "/:tenantId/projects/:projectId",
     {
@@ -192,23 +193,14 @@ export async function projectRoute(fastify: FastifyInstance) {
       },
     },
     async (req, reply) => {
-      const { tenantId, projectId } = req.params as {
-        tenantId: string;
-        projectId: string;
-      };
+      const params = req.params as { tenantId: string; projectId: string };
 
-      const projectService = new ProjectService(fastify.db);
-      await projectService.delete(tenantId, projectId);
-
-      void auditService
-        .log({
-          action: "TENANT_UPDATED",
-          identityId: req.identity.id,
-          tenantId,
-          ip: req.ip,
-          metadata: { event: "project_deleted", projectId },
-        })
-        .catch(() => {});
+      await flowExecutor.run(deleteProjectFlow, params, {
+        identityId: req.identity.id,
+        tenantId: params.tenantId,
+        ip: req.ip,
+        userAgent: req.headers["user-agent"],
+      });
 
       return reply.send({ success: true });
     },

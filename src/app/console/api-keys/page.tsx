@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { ApiKeysView } from "./api-keys-view";
 
 export const metadata = buildMetadata({
   title: "API keys",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="API keys" description="Machine-to-machine credentials" />;
+  return <ApiKeysView />;
 }

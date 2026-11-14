@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { ProjectsView } from "./projects-view";
 
 export const metadata = buildMetadata({
   title: "Projects",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Projects" description="Group resources under a project" />;
+  return <ProjectsView />;
 }

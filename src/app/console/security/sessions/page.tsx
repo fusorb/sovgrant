@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { SessionsView } from "./sessions-view";
 
 export const metadata = buildMetadata({
   title: "Sessions",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Sessions" description="Active authenticated sessions" />;
+  return <SessionsView />;
 }

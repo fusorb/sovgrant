@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { AuditView } from "./audit-view";
 
 export const metadata = buildMetadata({
   title: "Audit log",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Audit log" description="Security and access events" />;
+  return <AuditView />;
 }

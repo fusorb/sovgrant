@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { VerifyEmailView } from "./verify-email-view";
 
 export const metadata = buildMetadata({
   title: "Verify email",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Verify email" description="Confirm your email address" />;
+  return <VerifyEmailView />;
 }

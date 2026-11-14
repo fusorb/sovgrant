@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { ForgotPasswordView } from "./forgot-password-view";
 
 export const metadata = buildMetadata({
   title: "Forgot password",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Forgot password" description="Reset your password" />;
+  return <ForgotPasswordView />;
 }

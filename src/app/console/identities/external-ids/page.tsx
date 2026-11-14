@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { ExternalIdsView } from "./external-ids-view";
 
 export const metadata = buildMetadata({
   title: "External identifiers",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="External identifiers" description="Linked cross-system identifiers" />;
+  return <ExternalIdsView />;
 }

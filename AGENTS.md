@@ -16,7 +16,7 @@ Version `0.1.0` in package.json (pre-release, no stability promises).
 Package manager is **pnpm**. Module system is **ESM only** (`"type": "module"`
 in package.json) - never emit `require()`/`module.exports`.
 
-**Test suite:** 76 files / 417 tests / 0 code failures on `pnpm test` (all passing clean on Windows; the count includes the 10 `packages/cli` tests - route-level + Prisma imports dominate). Migration-rollback Tier-2 is opt-in via `pnpm test:rollback` (needs a live Postgres **and** a shadow DB). Typecheck clean (`tsc --noEmit`); lint clean (0 errors, 411 warnings). Updated 2026-11-11 - down from 70/386, because the frontend teardown removed `src/sdk/sdk.test.ts`, then up again as `src/modules/oauth/routes/jwks.route.test.ts` landed; re-counted 2026-11-13 at 74/408 when the security pass added `auth-guard.plugin.test.ts` (5), `rate-limit.plugin.test.ts` (3) and `introspect.route.test.ts` (7). Lint re-measured 2026-11-13 at 411 (was 413) after the facet-sdk 4.0.0 adoption - the four files that change touched report no warnings themselves. Re-counted again 2026-11-13 at 76/417 when the device-approval poll pass added `poll-device-approval.flow.test.ts` (7) and `device-approval.route.test.ts` (2).
+**Test suite:** 76 files / 417 tests / 0 code failures on `pnpm test` (all passing clean on Windows; the count includes the 10 `packages/cli` tests - route-level + Prisma imports dominate). Migration-rollback Tier-2 is opt-in via `pnpm test:rollback` (needs a live Postgres **and** a shadow DB). Typecheck clean (`tsc --noEmit`); lint clean (0 errors, 411 warnings). Updated 2026-11-11 - down from 70/386, because the frontend teardown removed `src/sdk/sdk.test.ts`, then up again as `src/modules/oauth/routes/jwks.route.test.ts` landed; re-counted 2026-11-13 at 74/408 when the security pass added `auth-guard.plugin.test.ts` (5), `rate-limit.plugin.test.ts` (3) and `introspect.route.test.ts` (7). Lint re-measured 2026-11-13 at 411 (was 413) after the facet-sdk 4.0.0 adoption - the four files that change touched report no warnings themselves. Re-counted again 2026-11-13 at 76/417 when the device-approval poll pass added `poll-device-approval.flow.test.ts` (7) and `device-approval.route.test.ts` (2). SDK bumped to 4.1.0 and the interim `apiKeys` adapter replaced with `ApiKeySdk` on 2026-11-14 (typecheck clean; suite/lint not re-run for that mechanical adoption).
 
 ## Non-negotiable architecture rules (same - stable)
 
@@ -120,12 +120,13 @@ shipped. See `CLAUDE.md` for the full verified status table. Open work:
   - **F5 (open)**: page-by-page component wiring for the 40 stubs.
 - **Facet migration** - ✅
   **Phases 1–5 done.** Phase 1: SDK migrated to the published
-  **`@fusorb/facet-sdk@4.0.1`** - `src/sdk/index.ts` is a thin
+  **`@fusorb/facet-sdk@4.1.0`** - `src/sdk/index.ts` is a thin
   singleton wiring that owns the `SgClient` + 401 auto-refresh (wired
-  to the Zustand auth store) and re-exports the facet domain SDKs; the
-  old in-repo factory-pattern `src/sdk/*.sdk.ts` files are deleted, and
-  the three contract adapters went on the 4.0.0 bump - only `apiKeys`
-  remains (upstream ships no `ApiKeySdk`).
+  to the Zustand auth store) and re-exports the facet domain SDKs (incl.
+  `ApiKeySdk`; the interim `apiKeys` adapter was removed on 2026-11-14 now
+  that 4.1.0 is published/installed); the old in-repo factory-pattern
+  `src/sdk/*.sdk.ts` files are deleted, and the three contract adapters
+  (`externalIds`, `devices`, `policies`) went on the 4.0.0 bump.
   Phase 2: `@fusorb/facet-tokens/tokens.css` imported before
   `globals.css` in `layout.tsx`; `:root` token block removed from
   globals.css. Phase 3: `src/components/ui/` purged entirely - the 3 temporary app-specific wrappers (`icon.tsx`, `typewriter-text.tsx`, `icons.generated.tsx`) were deleted in the F1 teardown; all consumers
@@ -137,7 +138,7 @@ shipped. See `CLAUDE.md` for the full verified status table. Open work:
   Phase 5: layouts on **`@fusorb/facet-layout@1.7.2`** (`AuthLayout` +
   `ConsoleLayout`). Phase 6 purge is FULLY done (2026-08-19) - `src/components/auth/` deleted;
   `forgot-password-form`/`reset-password-form` now on `@fusorb/facet-auth` (ForgotPasswordForm/ResetPasswordForm).
-All seven facet packages pinned (exact): sdk 4.0.1, auth 2.1.2, components 3.2.2,
+All seven facet packages pinned (exact): sdk 4.1.0, auth 2.1.2, components 3.2.2,
    layout 1.7.2, tokens 1.5.1, emails 1.1.4, store 1.0.6.
    `@fusorb/facet-cli` is **not** a per-repo dependency — it is installed
    globally on the machine as a universal tool, so it never appears in

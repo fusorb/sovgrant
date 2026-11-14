@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { ApplicationsView } from "./applications-view";
 
 export const metadata = buildMetadata({
   title: "OAuth applications",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="OAuth applications" description="Registered OAuth clients" />;
+  return <ApplicationsView />;
 }

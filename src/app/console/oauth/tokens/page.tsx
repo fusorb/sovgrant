@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { TokensView } from "./tokens-view";
 
 export const metadata = buildMetadata({
   title: "OAuth tokens",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="OAuth tokens" description="Issued access tokens" />;
+  return <TokensView />;
 }

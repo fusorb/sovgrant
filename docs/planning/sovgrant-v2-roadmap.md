@@ -35,7 +35,7 @@ Backend complete. All Phase 0–8 + Phase E shipped. 76 test files / 417 tests /
 | LegalConsent gate | ✅ | Wired in `issue-credential.flow.ts` (E2) |
 | ExternalIdentifier gate | ✅ | Wired in `issue-credential.flow.ts` (E1) |
 | Frontend rebuild | ✅ | Facet migration Phases 0–6 + E complete (2026-08-19) |
-| SDK | ✅ | Published `@fusorb/facet-sdk@4.0.1`, class-based `AuthSdk`/`TenantSdk`/etc. |
+| SDK | ✅ | Published `@fusorb/facet-sdk@4.1.0`, class-based `AuthSdk`/`TenantSdk`/`ApiKeySdk`/etc. |
 | CLI | ✅ | `packages/cli` (`@fusorb/sg-cli`, bins `sg` + `sovgrant`) — standalone (commander + clack); does not consume `@fusorb/facet-cli`'s core (facet-cli is a globally-installed tool, not a per-repo dependency) |
 
 **v1 is closed.** All items in `sg-v1-roadmap.md` are resolved. That file
@@ -110,14 +110,15 @@ contract stabilized for the CLI package.
 
 ## CLI + SDK packages
 
-- **SDK** — published `@fusorb/facet-sdk@4.0.1` (class-based `AuthSdk`,
-  `TenantSdk`, `OAuthSdk`, `CredentialSdk`, `WebhookSdk`). `src/sdk/index.ts`
-  is a thin singleton that owns the `SgClient` + 401 auto-refresh (wired to
-  the Zustand auth store) and re-exports the facet domain SDKs. It also sets
-  `fetchInit.credentials = "include"` (the refresh token is an httpOnly cookie;
-  without this the browser discards it on a cross-origin call) and carries
-  `externalIds` / `devices` / `policies` adapters where the published types
-  drift from the API schemas.
+- **SDK** — published `@fusorb/facet-sdk@4.1.0` (class-based `AuthSdk`,
+  `TenantSdk`, `OAuthSdk`, `CredentialSdk`, `WebhookSdk`, `ApiKeySdk`, etc.).
+  `src/sdk/index.ts` is a thin singleton that owns the `SgClient` + 401
+  auto-refresh (wired to the Zustand auth store) and re-exports the facet domain
+  SDKs. It also sets `fetchInit.credentials = "include"` (the refresh token is
+  an httpOnly cookie; without this the browser discards it on a cross-origin
+  call). The `externalIds` / `devices` / `policies` adapters and the interim
+  `apiKeys` adapter were removed as the published SDK fixed those contracts
+  (4.0.0 / 4.1.0).
 - **CLI** — Phase 1 implemented in `packages/cli` (`@fusorb/sg-cli`, bin `sg`):
   init/doctor/migrate/setup/revert, Postgres + Cockroach adapters, safe
   overwrite/revert, secret generation, --dry-run/--force/--yes. Tests: 10

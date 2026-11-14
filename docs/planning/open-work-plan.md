@@ -5,8 +5,9 @@
 > evidence); this file is the *how* — acceptance criteria, dependencies, owners —
 > so the work can be picked up without re-deriving it.
 >
-> Last updated 2026-11-13 (doc-drift reconciliation after the facet-sdk 4.0.0
-> adoption); all P0 items were closed 2026-11-11.
+> Last updated 2026-11-14 (SDK pin reconciled to published `@fusorb/facet-sdk@4.1.0`,
+> interim `apiKeys` adapter removed in favour of `ApiKeySdk`, episodic memory updated);
+> all P0 items were closed 2026-11-11.
 
 ## Ground rules (do not re-litigate)
 
@@ -85,7 +86,7 @@ green; new flow tests where behaviour was previously untested.
 
 ---
 
-## SDK-1 — adopt `@fusorb/facet-sdk` 4.0.0 — DONE (2026-11-13)
+## SDK-1 — adopt `@fusorb/facet-sdk` 4.0.0/4.1.0 — DONE (2026-11-13 / 2026-11-14)
 
 The SDK published **4.0.0**, not the 3.0.0 this plan expected — and that mattered:
 3.0.0 fixed only part of the drift (`confirmExternalId` still posted
@@ -95,7 +96,7 @@ published `dist` was re-checked first; see
 `../facet/docs/planning/sdk-canonical-fix-plan.md` G11–G14 and the P1-4 entry in
 `.agent/output.txt`.
 
-**Done:**
+**Done (4.0.0, 2026-11-13):**
 1. Exact pin bumped `3.0.0` → `4.0.0`.
 2. The three adapters (`externalIds`, `devices`, `policies`) are **deleted** from
    `src/sdk/index.ts`; `use-external-ids` / `use-devices` / `use-policy` call
@@ -105,19 +106,19 @@ published `dist` was re-checked first; see
 3. `approveDeviceApproval` is in use — in **SovPort**, which is already on 4.0.0.
 4. SovPort's raw-fetch workaround is already gone (no `fetch(` under its `src`).
 
-**Verified:** `tsc --noEmit` clean against 4.0.0.
+**Done (4.1.0, 2026-11-14):** `@fusorb/facet-sdk@4.1.0` is published/installed; the
+interim `apiKeys` adapter in `src/sdk/index.ts` and `src/hooks/use-api-keys.ts` was
+replaced with `ApiKeySdk` (P1-2 closed in-repo). `pnpm typecheck` clean.
 
 ---
 
-## P1-2 — `ApiKeySdk` upstream (S)
+## P1-2 — `ApiKeySdk` upstream — DONE (2026-11-14)
 
-The `api-key` module has no SDK class in facet (their G4). Interim is the `apiKeys`
-adapter. No local action; raise upstream.
-
-**Status (2026-11-13):** built upstream and **committed as facet `5af9c0a`**
-(`ApiKeySdk`: list/create/revoke + types + 4 body-asserting tests + a `minor`
-changeset). Publish rides the release train → `4.1.x`; then delete the interim
-`apiKeys` adapter in `src/sdk/index.ts` and close this item.
+Upstream built and committed as facet `5af9c0a` (`ApiKeySdk`: list/create/revoke +
+types + 4 body-asserting tests). `@fusorb/facet-sdk@4.1.0` is published/installed in
+this repo; the interim `apiKeys` adapter was removed from `src/sdk/index.ts` and
+`src/hooks/use-api-keys.ts` now uses `ApiKeySdk`/`CreateApiKeyParams`. `pnpm typecheck`
+clean on 2026-11-14.
 
 ## P1-3 — delegation (deferred by design, do not resurrect as-is)
 
@@ -161,18 +162,23 @@ state is not verifiable from here; its `ci` job passes thanks to the changesets.
 
 ## Session notes
 
+- 2026-11-14 (sync + SDK adoption): reconciled the local 4.0.1/4.1.0 drift after
+  confirming `@fusorb/facet-sdk@4.1.0` is published/installed — `package.json`,
+  lock, and workspace are aligned on 4.1.0, the interim `apiKeys` adapter was
+  replaced with `ApiKeySdk` in `src/sdk/index.ts` + `src/hooks/use-api-keys.ts`,
+  and the living docs (`AGENTS.md`, `CLAUDE.md`, roadmap, this plan) were updated.
+  `pnpm typecheck` clean (2026-11-14). Appended EP 17 to `.agent/episodes.md` to
+  record the 2026-11-13 guard/poll work and the 4.1.0 sync. **Next:** F5 page wiring.
 - 2026-11-13 (audit + doc-drift pass): full audit re-verified the suite (then
   71 files / 393 tests / 0 failures - 74/408 after the security pass below,
-  `tsc --noEmit` clean) and reconciled the
+  76/417 after the device-approval poll pass, `tsc --noEmit` clean) and reconciled the
   living docs with the facet-sdk 4.0.0 adoption — the facet pins in `AGENTS.md`,
   `CLAUDE.md`, the roadmap and `client-core-architecture-analysis.md` now match
-  `package.json` (sdk 4.0.1 / auth 2.1.2 / components 3.2.2 / store 1.0.6 - the
-  sdk pin moved 4.0.0 → 4.0.1 mid-session by a concurrent writer, and the suite
-  below ran against the installed 4.0.1), the
-  "three contract adapters" claims are replaced with the real state (only
-  `apiKeys` remains), and the "hooks are the ONLY layer importing `@/sdk`"
-  phrasing now names the four bootstrap-provider exceptions. Lint could not be
-  re-run in this session (eslint stalls loading its config graph on this box);
+  the then-current pin (sdk 4.0.1 / auth 2.1.2 / components 3.2.2 / store 1.0.6),
+  the "three contract adapters" claims are replaced with the real state (later
+  closed fully by 4.1.0 `ApiKeySdk`), and the "hooks are the ONLY layer importing
+  `@/sdk`" phrasing names the four bootstrap-provider exceptions. Lint could not be
+  re-run in that session (eslint stalls loading its config graph on this box);
   the 411-warning figure remains the user's 2026-11-13 measurement.
 - 2026-11-13 (security pass): closed three guard-level gaps that no route test
   could see (route tests mock `fastify.auth`) - **P0-8** token-type confusion

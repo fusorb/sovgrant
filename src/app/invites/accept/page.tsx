@@ -1,5 +1,6 @@
+import { Suspense } from "react";
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { AcceptInviteView } from "./accept-invite-view";
 
 export const metadata = buildMetadata({
   title: "Accept invitation",
@@ -8,5 +9,9 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Accept invitation" description="Join a workspace" />;
+  return (
+    <Suspense fallback={null}>
+      <AcceptInviteView />
+    </Suspense>
+  );
 }

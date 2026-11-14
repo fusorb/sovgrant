@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/config/brand";
-import { StubPage } from "@/components/stub-page";
+import { RegisterView } from "./register-view";
 
 export const metadata = buildMetadata({
   title: "Create account",
@@ -8,5 +8,5 @@ export const metadata = buildMetadata({
 });
 
 export default function Page() {
-  return <StubPage title="Create account" description="Start with SovGrant" />;
+  return <RegisterView />;
 }
