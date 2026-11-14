@@ -3,13 +3,12 @@
 // GET /api/v1/tenants — list all organisations the authenticated user
 // has an ACTIVE membership in. Returns enriched tenant data including
 // the user's role within each tenant.
-//
-// No Flow needed: this is a simple read query with no side effects,
-// no transaction, and no complex business logic.
 
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
+import { flowExecutor } from "@/core/flows";
+import { listTenantsFlow } from "../flows/list-tenants.flow";
 
 export async function listTenantsRoute(fastify: FastifyInstance) {
   fastify.withTypeProvider<ZodTypeProvider>().get(
@@ -39,36 +38,18 @@ export async function listTenantsRoute(fastify: FastifyInstance) {
       },
     },
     async (req, reply) => {
-      const memberships = await fastify.db.tenantMembership.findMany({
-        where: { identityId: req.identity.id, status: "ACTIVE" },
-        include: {
-          tenant: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-              sector: true,
-              createdAt: true,
-              subscription: { select: { plan: true } },
-            },
-          },
-          role: { select: { name: true } },
+      const result = await flowExecutor.run(
+        listTenantsFlow,
+        {},
+        {
+          identityId: req.identity.id,
+          tenantId: null,
+          ip: req.ip,
+          userAgent: req.headers["user-agent"],
         },
-        orderBy: { createdAt: "asc" },
-      });
+      );
 
-      return reply.send({
-        success: true,
-        data: memberships.map((m) => ({
-          id: m.tenant.id,
-          name: m.tenant.name,
-          slug: m.tenant.slug,
-          sector: m.tenant.sector,
-          plan: m.tenant.subscription?.plan ?? "FREE",
-          role: m.role.name,
-          createdAt: m.tenant.createdAt.toISOString(),
-        })),
-      });
+      return reply.send({ success: true, data: result });
     },
   );
 }

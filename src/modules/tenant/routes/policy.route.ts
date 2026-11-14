@@ -2,7 +2,9 @@
 // NOTE: Mounted under /tenants prefix — full paths are /tenants/:tenantId/policy
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { TenantService } from "../services/tenant.service";
+import { flowExecutor } from "@/core/flows";
+import { getTenantPolicyFlow } from "../flows/get-tenant-policy.flow";
+import { updateTenantPolicyFlow } from "../flows/update-tenant-policy.flow";
 
 export async function policyRoute(fastify: FastifyInstance) {
   // GET /tenants/:tenantId/policy
@@ -24,14 +26,18 @@ export async function policyRoute(fastify: FastifyInstance) {
     async (req, reply) => {
       const { tenantId } = req.params as { tenantId: string };
 
-      const tenantService = new TenantService(fastify.db);
-      await tenantService.assertMembership(tenantId, req.identity.id);
+      const result = await flowExecutor.run(
+        getTenantPolicyFlow,
+        { tenantId },
+        {
+          identityId: req.identity.id,
+          tenantId,
+          ip: req.ip,
+          userAgent: req.headers["user-agent"],
+        },
+      );
 
-      const policy = await fastify.db.tenantPolicy.findFirst({
-        where: { tenantId },
-      });
-
-      return reply.send({ success: true, data: policy ?? null });
+      return reply.send({ success: true, data: result });
     },
   );
 
@@ -66,29 +72,18 @@ export async function policyRoute(fastify: FastifyInstance) {
       const { tenantId } = req.params as { tenantId: string };
       const body = req.body as Record<string, any>;
 
-      // Upsert — create if none exists, update if one does
-      const policy = await fastify.db.tenantPolicy.upsert({
-        where: { tenantId },
-        update: body,
-        create: {
-          tenantId,
-          ...body,
-          loginMethods: body.loginMethods ?? {}, // Provide a default if missing
-        },
-      });
-
-      await fastify.db.auditLog.create({
-        data: {
-          actionId: "TENANT_POLICY_UPDATED",
-          tenantId,
+      const result = await flowExecutor.run(
+        updateTenantPolicyFlow,
+        { tenantId, data: body },
+        {
           identityId: req.identity.id,
+          tenantId,
           ip: req.ip,
           userAgent: req.headers["user-agent"],
-          metadata: body,
         },
-      });
+      );
 
-      return reply.send({ success: true, data: policy });
+      return reply.send({ success: true, data: result });
     },
   );
 }
