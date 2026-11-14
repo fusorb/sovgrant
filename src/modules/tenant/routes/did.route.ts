@@ -13,8 +13,8 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { flowExecutor } from "@/core/flows";
+import { getTenantDidFlow } from "../flows/get-tenant-did.flow";
 import { provisionTenantDidFlow } from "../flows/provision-tenant-did.flow";
-import { TenantService } from "../services/tenant.service";
 
 export async function tenantDidRoute(fastify: FastifyInstance) {
   // POST /tenants/:tenantId/did
@@ -51,11 +51,6 @@ export async function tenantDidRoute(fastify: FastifyInstance) {
       const { tenantId } = req.params as { tenantId: string };
       const { domain } = req.body as { domain: string };
 
-      // Business logic lives in the flow: it binds the DID document to the
-      // tenant's real ACTIVE TenantSigningKey (the same key that signs VCs),
-      // creating one if none exists. The previous inline handler generated a
-      // throwaway keypair, discarded the private half, and published a
-      // mismatched verification method - so issued VCs never verified.
       const result = await flowExecutor.run(
         provisionTenantDidFlow,
         { tenantId, domain },
@@ -94,23 +89,18 @@ export async function tenantDidRoute(fastify: FastifyInstance) {
     async (req, reply) => {
       const { tenantId } = req.params as { tenantId: string };
 
-      const tenantService = new TenantService(fastify.db);
-      await tenantService.assertMembership(tenantId, req.identity.id);
+      const result = await flowExecutor.run(
+        getTenantDidFlow,
+        { tenantId },
+        {
+          identityId: req.identity.id,
+          tenantId,
+          ip: req.ip,
+          userAgent: req.headers["user-agent"],
+        },
+      );
 
-      const did = await fastify.db.decentralizedIdentifier.findUnique({
-        where: { tenantId },
-      });
-      if (!did) {
-        return reply.status(404).send({
-          success: false,
-          error: "NOT_FOUND",
-          message: "No DID provisioned for this tenant",
-        });
-      }
-      return reply.send({
-        success: true,
-        data: { did: did.id, document: did.didDocument },
-      });
+      return reply.send({ success: true, data: result });
     },
   );
 }
