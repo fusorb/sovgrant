@@ -56,7 +56,7 @@
 | Backup & restore | TODO | Set up encrypted nightly pg_dump to off-site storage + tested restore | Critical for production |
 | CORS for production domains | TODO | Update ALLOWED_ORIGINS for actual domains | |
 | Monitoring/alerts | TODO | Set up uptime monitoring, basic alerts | Can use free services initially |
-| Proper Ed25519 signing in SovPort | TODO | Upgrade from simplified signing to proper Ed25519 | Security improvement |
+| Proper Ed25519 signing in SovPort | ✅ DONE (2026-11-11) | Real Ed25519 crypto + device-approval signing landed in SovPort (`91be7a4`); re-verified against sovgrant `dcda05b` on 2026-11-13 | Security improvement |
 
 ## Medium Priority (P2) - Post-launch polish
 
@@ -134,7 +134,7 @@ Let us start executing.
 - [ ] **Backup & restore setup** - Encrypted nightly pg_dump + tested restore procedure
 - [ ] **Update CORS for production domains** - Configure ALLOWED_ORIGINS properly
 - [ ] **Set up monitoring/alerts** - Basic uptime monitoring and alerts
-- [ ] **Improve SovPort Ed25519 signing** - Replace simplified signing with proper crypto
+- [x] **Improve SovPort Ed25519 signing** - DONE (2026-11-11, SovPort `91be7a4` real Ed25519 crypto + device-approval signing); the wallet's crypto was re-verified against sovgrant `dcda05b` on 2026-11-13
 
 ## P2 - Polish
 - [ ] **Add more tests for device approval** - Increase coverage

@@ -810,7 +810,11 @@ model DeviceApproval {
 }
 
 model Session {
-  id             String   @id @default(cuid())
+  // id IS the session token (generateToken(64), 86 chars) - session.service
+  // always sets it explicitly. Deliberately no @default(): a cuid would never
+  // fire and only misleads readers (the min(40) sessionId schemas look broken
+  // until you know the id is the token).
+  id             String   @id
   identityId     String
   localAccountId String?
   ip             String?
