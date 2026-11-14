@@ -1,11 +1,11 @@
 // src/modules/tenant/routes/signing-key.route.ts
 // NOTE: Mounted under /tenants prefix — full paths are /tenants/:tenantId/signing-keys
 import type { FastifyInstance } from "fastify";
-import { generateKeyPair, exportSPKI, exportPKCS8 } from "jose";
-import { randomUUID } from "crypto";
 import { z } from "zod";
-import { ApiError } from "@/core/errors";
-import { TenantService } from "../services/tenant.service";
+import { flowExecutor } from "@/core/flows";
+import { createSigningKeyFlow } from "../flows/create-signing-key.flow";
+import { listSigningKeysFlow } from "../flows/list-signing-keys.flow";
+import { revokeSigningKeyFlow } from "../flows/revoke-signing-key.flow";
 
 export async function signingKeyRoute(fastify: FastifyInstance) {
   // ── POST /:tenantId/signing-keys ─────────────────────────────────────────
@@ -41,53 +41,18 @@ export async function signingKeyRoute(fastify: FastifyInstance) {
     async (req, reply) => {
       const { tenantId } = req.params as { tenantId: string };
 
-      const algorithm = "ES256";
-      const { publicKey, privateKey } = await generateKeyPair(algorithm);
-
-      const publicKeySpki = await exportSPKI(publicKey);
-      const privateKeyPkcs8 = await exportPKCS8(privateKey);
-      const kid = randomUUID();
-
-      const cleanPublicBase64 = publicKeySpki
-        .replace(/-----BEGIN [^-]+-----|-----END [^-]+-----/g, "")
-        .replace(/[\r\n\s]/g, "");
-
-      const cleanPrivateBase64 = privateKeyPkcs8
-        .replace(/-----BEGIN [^-]+-----|-----END [^-]+-----/g, "")
-        .replace(/[\r\n\s]/g, "");
-
-      const signingKey = await fastify.db.tenantSigningKey.create({
-        data: {
-          tenantId,
-          kid,
-          algorithm,
-          publicKey: Buffer.from(cleanPublicBase64, "base64"),
-          privateKey: Buffer.from(cleanPrivateBase64, "base64"),
-          status: "ACTIVE",
-        },
-      });
-
-      await fastify.db.auditLog.create({
-        data: {
-          actionId: "SIGNING_KEY_CREATED",
-          tenantId,
+      const result = await flowExecutor.run(
+        createSigningKeyFlow,
+        { tenantId },
+        {
           identityId: req.identity.id,
+          tenantId,
           ip: req.ip,
           userAgent: req.headers["user-agent"],
-          metadata: { kid, algorithm },
         },
-      });
+      );
 
-      return reply.status(201).send({
-        success: true,
-        data: {
-          kid: signingKey.kid,
-          algorithm: signingKey.algorithm,
-          publicKey: publicKeySpki,
-          status: signingKey.status,
-          createdAt: signingKey.createdAt.toISOString(),
-        },
-      });
+      return reply.status(201).send({ success: true, data: result });
     },
   );
 
@@ -110,22 +75,18 @@ export async function signingKeyRoute(fastify: FastifyInstance) {
     async (req, reply) => {
       const { tenantId } = req.params as { tenantId: string };
 
-      const tenantService = new TenantService(fastify.db);
-      await tenantService.assertMembership(tenantId, req.identity.id);
-
-      const keys = await fastify.db.tenantSigningKey.findMany({
-        where: { tenantId, status: "ACTIVE" },
-        select: {
-          kid: true,
-          algorithm: true,
-          status: true,
-          createdAt: true,
-          expiresAt: true,
-          kmsProvider: true,
+      const result = await flowExecutor.run(
+        listSigningKeysFlow,
+        { tenantId },
+        {
+          identityId: req.identity.id,
+          tenantId,
+          ip: req.ip,
+          userAgent: req.headers["user-agent"],
         },
-      });
+      );
 
-      return reply.send({ success: true, data: keys });
+      return reply.send({ success: true, data: result });
     },
   );
 
@@ -159,29 +120,18 @@ export async function signingKeyRoute(fastify: FastifyInstance) {
         kid: string;
       };
 
-      const updateResult = await fastify.db.tenantSigningKey.updateMany({
-        where: { tenantId, kid, status: "ACTIVE" },
-        data: { status: "REVOKED" },
-      });
-
-      if (updateResult.count === 0) {
-        throw ApiError.notFound(
-          "Active signing key not found or already revoked",
-        );
-      }
-
-      await fastify.db.auditLog.create({
-        data: {
-          actionId: "SIGNING_KEY_REVOKED",
-          tenantId,
+      const result = await flowExecutor.run(
+        revokeSigningKeyFlow,
+        { tenantId, kid },
+        {
           identityId: req.identity.id,
+          tenantId,
           ip: req.ip,
           userAgent: req.headers["user-agent"],
-          metadata: { kid },
         },
-      });
+      );
 
-      return reply.send({ success: true, message: "Signing key revoked" });
+      return reply.send(result);
     },
   );
 }
