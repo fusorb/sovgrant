@@ -9,7 +9,7 @@
 
 ## 🟢 v1 — COMPLETE (0.1.0)
 
-Backend complete. All Phase 0–8 + Phase E shipped. 74 test files / 408 tests / 0 code failures. Typecheck clean on `tsc --noEmit`.
+Backend complete. All Phase 0–8 + Phase E shipped. 76 test files / 417 tests / 0 code failures. Typecheck clean on `tsc --noEmit`.
 
 | Area | Status | Notes |
 |------|--------|-------|

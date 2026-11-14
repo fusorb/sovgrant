@@ -18,7 +18,7 @@
   is the only feature layer that imports `@/sdk`; the four bootstrap provider
   files also call it, by design, because they must run above `SgProvider`.
 - **Never write test counts without re-running the suite.** Current verified:
-  74 files / 408 tests / 0 failures; typecheck clean; lint 0 errors.
+  76 files / 417 tests / 0 failures; typecheck clean; lint 0 errors.
 - **Never hand-copy an enum's value list** — diff it (`prisma migrate diff`).
 
 ---

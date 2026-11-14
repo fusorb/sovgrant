@@ -38,7 +38,7 @@ SovGrant is a **Fastify + PostgreSQL (Prisma)** backend with a **Next.js 16** ad
 
 ### Verification
 
-- **74 test files / 408 tests / 0 failures** (`pnpm test`)
+- **76 test files / 417 tests / 0 failures** (`pnpm test`)
 - **Typecheck clean** (`tsc --noEmit`)
 - **Lint clean (0 errors)** (`pnpm lint`). Generated trees (`prisma/generated`, `dist`, `coverage`) are ignored; `no-explicit-any`, `no-unused-vars` and `react-hooks/set-state-in-effect` report as warnings while their existing debt is paid down.
 - **Migration chain integrity** verified (no-drift rollback tests)

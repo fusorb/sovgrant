@@ -44,9 +44,16 @@ export async function deviceApprovalRoute(fastify: FastifyInstance) {
   withZod.get(
     "/device-approvals/:challenge",
     {
+      preHandler: fastify.auth.requireUser,
       schema: {
         tags: ["SovPort Integration"],
         summary: "Poll device approval status",
+        description:
+          "Polling is authenticated: while pending, the requesting session's " +
+          "ip/userAgent and the identity's email are returned only to a session " +
+          "of the same identity (the approver), so a challenge string alone " +
+          "cannot disclose where a sign-in came from.",
+        security: [{ bearerAuth: [] }],
         params: z.object({ challenge: z.string() }),
         response: {
           200: z.object({ success: z.boolean(), data: z.any() }),
@@ -55,7 +62,7 @@ export async function deviceApprovalRoute(fastify: FastifyInstance) {
     },
     async (req) => {
       const result = await (flowExecutor as any).run(pollDeviceApprovalFlow, { challenge: (req.params as any).challenge }, {
-        identityId: undefined,
+        identityId: (req.identity as any)?.id,
         tenantId: null,
         ip: req.ip,
         userAgent: req.headers["user-agent"],
