@@ -1,11 +1,12 @@
 // src/modules/identity/routes/profile.route.ts
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { Prisma } from "@prisma-client";
+import { flowExecutor } from "@/core/flows";
 import { presentIdentity } from "../presenters/identity.presenter";
 import { UpdateProfileSchema } from "../validators/identity.schemas";
-import { auditService } from "@/modules/audit/services/audit.service";
-import { blockJtiBestEffort } from "@/lib/security/revoke-access-token";
+import { getProfileFlow } from "../flows/get-profile.flow";
+import { updateProfileFlow } from "../flows/update-profile.flow";
+import { deleteProfileFlow } from "../flows/delete-profile.flow";
 
 export async function profileRoute(fastify: FastifyInstance) {
   // GET /profile
@@ -24,14 +25,12 @@ export async function profileRoute(fastify: FastifyInstance) {
       },
     },
     async (req, reply) => {
-      const identity = await fastify.db.identity.findUniqueOrThrow({
-        where: { id: req.identity.id },
-        include: {
-          memberships: {
-            where: { status: "ACTIVE" },
-            include: { role: true },
-          },
-        },
+      const identity = await flowExecutor.run(getProfileFlow, undefined, {
+        identityId: req.identity.id,
+        tenantId: req.identity.tenantId,
+        ip: req.ip,
+        userAgent: req.headers["user-agent"],
+        requestId: req.id,
       });
 
       return reply.send({
@@ -40,7 +39,7 @@ export async function profileRoute(fastify: FastifyInstance) {
           ...presentIdentity(identity),
           plan: req.identity.plan,
           tenantId: req.identity.tenantId,
-          memberships: identity.memberships.map((m) => ({
+          memberships: identity.memberships.map((m: any) => ({
             tenantId: m.tenantId,
             role: m.role.name,
             status: m.status,
@@ -69,31 +68,13 @@ export async function profileRoute(fastify: FastifyInstance) {
     async (req, reply) => {
       const body = req.body as z.infer<typeof UpdateProfileSchema>;
 
-      const identity = await fastify.db.identity.update({
-        where: { id: req.identity.id },
-        data: {
-          name: body.name,
-          picture: body.picture,
-          metadata: body.metadata
-            ? (body.metadata as Prisma.InputJsonValue)
-            : undefined,
-        },
-        include: {
-          memberships: {
-            where: { status: "ACTIVE" },
-            include: { role: true },
-          },
-        },
+      const identity = await flowExecutor.run(updateProfileFlow, body, {
+        identityId: req.identity.id,
+        tenantId: req.identity.tenantId,
+        ip: req.ip,
+        userAgent: req.headers["user-agent"],
+        requestId: req.id,
       });
-
-      void auditService
-        .log({
-          action: "PROFILE_UPDATED",
-          identityId: req.identity.id,
-          ip: req.ip,
-          metadata: { fields: Object.keys(body) },
-        })
-        .catch(() => {});
 
       return reply.send({ success: true, data: presentIdentity(identity) });
     },
@@ -101,8 +82,6 @@ export async function profileRoute(fastify: FastifyInstance) {
 
   // DELETE /profile
   // requireElevated: destroys the account, all sessions, and all tokens.
-  // A compromised bearer token alone is not sufficient — the user must have
-  // re-authenticated within the last 15 minutes via POST /auth/step-up.
   fastify.delete(
     "/profile",
     {
@@ -118,56 +97,13 @@ export async function profileRoute(fastify: FastifyInstance) {
       },
     },
     async (req, reply) => {
-      const identityId = req.identity.id;
-
-      const identity = await fastify.db.identity.findUniqueOrThrow({
-        where: { id: identityId },
-        select: { primaryEmail: true, name: true },
+      await flowExecutor.run(deleteProfileFlow, undefined, {
+        identityId: req.identity.id,
+        tenantId: req.identity.tenantId,
+        ip: req.ip,
+        userAgent: req.headers["user-agent"],
+        requestId: req.id,
       });
-
-      // Revoke all live sessions and tokens — must blocklist JTIs in
-      // revokedJti table + Redis so the auth guard rejects them immediately.
-      const liveTokens = await fastify.db.accessToken.findMany({
-        where: { identityId, revoked: false, jti: { not: null } },
-        select: { jti: true, expiresAt: true },
-      });
-
-      await fastify.db.$transaction([
-        fastify.db.session.updateMany({
-          where: { identityId, valid: true },
-          data: { valid: false },
-        }),
-        fastify.db.accessToken.updateMany({
-          where: { identityId, revoked: false },
-          data: { revoked: true },
-        }),
-        fastify.db.refreshToken.updateMany({
-          where: { identityId, revoked: false },
-          data: { revoked: true },
-        }),
-        ...liveTokens.map((t) =>
-          fastify.db.revokedJti.create({
-            data: { jti: t.jti!, expiresAt: t.expiresAt },
-          }),
-        ),
-      ]);
-
-      // Redis blocklist fast-path - the durable revokedJti rows were written
-      // in the transaction above, so this is best-effort only.
-      for (const t of liveTokens) {
-        blockJtiBestEffort(t.jti!, t.expiresAt);
-      }
-
-      await fastify.db.identity.delete({ where: { id: identityId } });
-
-      void auditService
-        .log({
-          action: "USER_DELETED",
-          identityId,
-          ip: req.ip,
-          metadata: { email: identity.primaryEmail },
-        })
-        .catch(() => {});
 
       return reply.send({
         success: true,

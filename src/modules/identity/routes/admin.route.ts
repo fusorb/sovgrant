@@ -2,68 +2,10 @@
 
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { auditService } from "@/modules/audit/services/audit.service";
-import { ApiError } from "@/core/errors";
-import type { AuditLogAction } from "@prisma-client";
-import { blockJti } from "@/lib/security/jti-blocklist";
-
-async function revokeAllSessions(
-  fastify: FastifyInstance,
-  identityId: string,
-): Promise<void> {
-  // Collect live access tokens before revoking — the auth guard checks
-  // revokedJti table + Redis, not accessToken.revoked. Without this,
-  // suspended/banned users' tokens remain valid until expiry.
-  const liveTokens = await fastify.db.accessToken.findMany({
-    where: { identityId, revoked: false, jti: { not: null } },
-    select: { jti: true, expiresAt: true },
-  });
-
-  await fastify.db.$transaction([
-    fastify.db.refreshToken.updateMany({
-      where: { identityId, revoked: false },
-      data: { revoked: true, rotatedAt: new Date() },
-    }),
-    fastify.db.session.updateMany({
-      where: { identityId, valid: true },
-      data: { valid: false },
-    }),
-    fastify.db.accessToken.updateMany({
-      where: { identityId, revoked: false },
-      data: { revoked: true },
-    }),
-    ...liveTokens.map((t) =>
-      fastify.db.revokedJti.create({
-        data: { jti: t.jti!, expiresAt: t.expiresAt },
-      }),
-    ),
-  ]);
-
-  // Redis blocklist — non-blocking
-  for (const t of liveTokens) {
-    const remainingTtlMs = t.expiresAt.getTime() - Date.now();
-    const remainingTtlSec = Math.max(Math.ceil(remainingTtlMs / 1000), 1);
-    void blockJti(t.jti!, remainingTtlSec).catch(() => {});
-  }
-}
-
-/**
- * Map a restrictive status change to the correct AuditLogAction.
- * Returns null for ACTIVE (reactivation) — no enum member exists for it;
- * caller omits the audit log rather than logging a misleading action.
- */
-function statusToAuditAction(status: string): AuditLogAction | null {
-  switch (status) {
-    case "SUSPENDED":
-      return "IDENTITY_SUSPENDED";
-    case "BANNED":
-      return "IDENTITY_BANNED";
-    default:
-      // ACTIVE reinstatement — no corresponding audit action in the enum.
-      // Log nothing rather than log a wrong action.
-      return null;
-  }
-}
+import { flowExecutor } from "@/core/flows";
+import { listIdentitiesAdminFlow } from "../flows/list-identities-admin.flow";
+import { suspendIdentityFlow } from "../flows/suspend-identity.flow";
+import { updateIdentityStatusFlow } from "../flows/update-identity-status.flow";
 
 export async function adminRoute(fastify: FastifyInstance) {
   // GET /identity/admin
@@ -100,35 +42,25 @@ export async function adminRoute(fastify: FastifyInstance) {
       },
     },
     async (req, reply) => {
-      const { limit, page, status, search } = req.query as any;
-      const where: any = {};
-      if (status) where.status = status;
-      if (search)
-        where.OR = [
-          { primaryEmail: { contains: search, mode: "insensitive" } },
-          { name: { contains: search, mode: "insensitive" } },
-        ];
-      const [identities, total] = await Promise.all([
-        fastify.db.identity.findMany({
-          where,
-          skip: (page - 1) * limit,
-          take: limit,
-          orderBy: { createdAt: "desc" },
-          select: {
-            id: true,
-            primaryEmail: true,
-            name: true,
-            status: true,
-            emailVerified: true,
-            createdAt: true,
-          },
-        }),
-        fastify.db.identity.count({ where }),
-      ]);
+      const query = req.query as {
+        limit: number;
+        page: number;
+        status?: "ACTIVE" | "SUSPENDED" | "BANNED" | "PENDING" | "DELETED";
+        search?: string;
+      };
+
+      const result = await flowExecutor.run(listIdentitiesAdminFlow, query, {
+        identityId: req.identity.id,
+        tenantId: req.identity.tenantId,
+        ip: req.ip,
+        userAgent: req.headers["user-agent"],
+        requestId: req.id,
+      });
+
       return reply.send({
         success: true,
-        data: identities,
-        meta: { total, page, limit },
+        data: result.identities,
+        meta: { total: result.total, page: result.page, limit: result.limit },
       });
     },
   );
@@ -151,42 +83,21 @@ export async function adminRoute(fastify: FastifyInstance) {
       },
     },
     async (req, reply) => {
-      const { id } = req.params as any;
-      const { reason } = req.body as any;
+      const { id } = req.params as { id: string };
+      const { reason } = req.body as { reason?: string };
 
-      const identity = await fastify.db.identity.update({
-        where: { id },
-        data: { status: "SUSPENDED" },
-        select: { primaryEmail: true, name: true },
-      });
+      await flowExecutor.run(
+        suspendIdentityFlow,
+        { id, reason },
+        {
+          identityId: req.identity.id,
+          tenantId: req.identity.tenantId,
+          ip: req.ip ?? "0.0.0.0",
+          userAgent: req.headers["user-agent"],
+          requestId: req.id,
+        },
+      );
 
-      await revokeAllSessions(fastify, id);
-
-      await auditService.log({
-        action: "SESSION_REVOKED_ALL",
-        identityId: id,
-        ip: req.ip ?? "0.0.0.0",
-        requestId: req.id,
-        metadata: { reason: "account_suspended" },
-      });
-
-      if (identity.primaryEmail) {
-        const { notificationService } =
-          await import("@/lib/notifications/notification.service");
-        void notificationService
-          .sendAccountSuspended(identity.primaryEmail, {
-            name: identity.name ?? undefined,
-            reason,
-          })
-          .catch(() => {});
-      }
-      await auditService.log({
-        action: "IDENTITY_SUSPENDED",
-        identityId: id,
-        ip: req.ip ?? "0.0.0.0",
-        requestId: req.id,
-        metadata: { reason },
-      });
       return reply.send({ success: true });
     },
   );
@@ -212,50 +123,23 @@ export async function adminRoute(fastify: FastifyInstance) {
       },
     },
     async (req, reply) => {
-      const { id } = req.params as any;
-      const { status, reason } = req.body as any;
+      const { id } = req.params as { id: string };
+      const { status, reason } = req.body as {
+        status: "ACTIVE" | "SUSPENDED" | "BANNED";
+        reason?: string;
+      };
 
-      const identity = await fastify.db.identity.update({
-        where: { id },
-        data: { status },
-        select: { primaryEmail: true, name: true },
-      });
-
-      if (status === "SUSPENDED" || status === "BANNED") {
-        await revokeAllSessions(fastify, id);
-
-        await auditService.log({
-          action: "SESSION_REVOKED_ALL",
-          identityId: id,
+      await flowExecutor.run(
+        updateIdentityStatusFlow,
+        { id, status, reason },
+        {
+          identityId: req.identity.id,
+          tenantId: req.identity.tenantId,
           ip: req.ip ?? "0.0.0.0",
+          userAgent: req.headers["user-agent"],
           requestId: req.id,
-          metadata: { reason: `account_${status.toLowerCase()}` },
-        });
-      }
-
-      if (status === "SUSPENDED" && identity.primaryEmail) {
-        const { notificationService } =
-          await import("@/lib/notifications/notification.service");
-        void notificationService
-          .sendAccountSuspended(identity.primaryEmail, {
-            name: identity.name ?? undefined,
-            reason,
-          })
-          .catch(() => {});
-      }
-
-      // Only log when a real restrictive action enum member exists.
-      // ACTIVE reinstatement has no enum counterpart — omit rather than mislog.
-      const auditAction = statusToAuditAction(status);
-      if (auditAction) {
-        await auditService.log({
-          action: auditAction,
-          identityId: id,
-          ip: req.ip ?? "0.0.0.0",
-          requestId: req.id,
-          metadata: { status, reason },
-        });
-      }
+        },
+      );
 
       return reply.send({ success: true });
     },

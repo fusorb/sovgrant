@@ -10,6 +10,7 @@ import { config } from "@/core/config";
 
 type InboundCtx = Omit<FlowContext, "requestId" | "db" | "tenantId"> & {
   tenantId?: string | null;
+  requestId?: string;
 };
 
 async function withTx<T>(
@@ -35,7 +36,7 @@ export class FlowExecutor {
     ctx: InboundCtx,
     opts?: { transaction?: boolean },
   ): Promise<O> {
-    const traceId = randomUUID();
+    const traceId = ctx.requestId ?? randomUUID();
     const start = Date.now();
     const useTransaction = opts?.transaction ?? true;
 
