@@ -1,28 +1,20 @@
 // src/modules/tenant/routes/onboarding.route.ts
 //
-// NEW MODULE. Two route groups in one file since they're small and tightly
-// related:
-//
-// Admin-facing (flow management), mounted under /tenants prefix like
-// project.route.ts:
+// Admin-facing (flow management), mounted under /tenants prefix:
 //   POST   /tenants/:tenantId/projects/:projectId/onboarding-flows
 //   GET    /tenants/:tenantId/projects/:projectId/onboarding-flows
 //   GET    /tenants/:tenantId/projects/:projectId/onboarding-flows/:flowId
 //   PATCH  /tenants/:tenantId/projects/:projectId/onboarding-flows/:flowId
 //   DELETE /tenants/:tenantId/projects/:projectId/onboarding-flows/:flowId
 //
-// End-user facing (progress), mounted under /identity/onboarding —
-// deliberately NOT under /tenants, since the calling identity is tracking
-// their OWN progress and doesn't need tenant-admin permissions to do so:
+// End-user facing (progress), mounted under /identity:
 //   POST   /identity/onboarding/start            { flowId }
 //   GET    /identity/onboarding/:progressId
 //   POST   /identity/onboarding/:progressId/advance   { stepId, data? }
 
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { auditService } from "@/modules/audit/services/audit.service";
-import { ProjectService } from "../services/project.service";
-import { OnboardingService } from "../services/onboarding.service";
+import { flowExecutor } from "@/core/flows";
 import {
   CreateOnboardingFlowSchema,
   UpdateOnboardingFlowSchema,
@@ -32,6 +24,14 @@ import {
   AdvanceProgressSchema,
   ProgressParamsSchema,
 } from "../validators/onboarding.schemas";
+import { createOnboardingFlowFlow } from "../flows/create-onboarding-flow.flow";
+import { listOnboardingFlowsFlow } from "../flows/list-onboarding-flows.flow";
+import { getOnboardingFlowFlow } from "../flows/get-onboarding-flow.flow";
+import { updateOnboardingFlowFlow } from "../flows/update-onboarding-flow.flow";
+import { deleteOnboardingFlowFlow } from "../flows/delete-onboarding-flow.flow";
+import { startOnboardingProgressFlow } from "../flows/start-onboarding-progress.flow";
+import { getOnboardingProgressFlow } from "../flows/get-onboarding-progress.flow";
+import { advanceOnboardingProgressFlow } from "../flows/advance-onboarding-progress.flow";
 
 // ── Admin: flow management, mounted under /tenants ──────────────────────────
 export async function onboardingFlowRoute(fastify: FastifyInstance) {
@@ -58,28 +58,18 @@ export async function onboardingFlowRoute(fastify: FastifyInstance) {
       };
       const body = req.body as z.infer<typeof CreateOnboardingFlowSchema>;
 
-      const projectService = new ProjectService(fastify.db);
-      // Confirm the project actually belongs to this tenant before attaching a flow.
-      await projectService.getById(tenantId, projectId);
-
-      const onboardingService = new OnboardingService(fastify.db);
-      const flow = await onboardingService.createFlow(projectId, body);
-
-      void auditService
-        .log({
-          action: "TENANT_UPDATED",
+      const result = await flowExecutor.run(
+        createOnboardingFlowFlow,
+        { ...body, tenantId, projectId },
+        {
           identityId: req.identity.id,
           tenantId,
           ip: req.ip,
-          metadata: {
-            event: "onboarding_flow_created",
-            projectId,
-            flowId: flow.id,
-          },
-        })
-        .catch(() => {});
+          userAgent: req.headers["user-agent"],
+        },
+      );
 
-      return reply.status(201).send({ success: true, data: flow });
+      return reply.status(201).send({ success: true, data: result });
     },
   );
 
@@ -103,13 +93,18 @@ export async function onboardingFlowRoute(fastify: FastifyInstance) {
         projectId: string;
       };
 
-      const projectService = new ProjectService(fastify.db);
-      await projectService.assertMembership(tenantId, req.identity.id);
-      await projectService.getById(tenantId, projectId);
+      const result = await flowExecutor.run(
+        listOnboardingFlowsFlow,
+        { tenantId, projectId },
+        {
+          identityId: req.identity.id,
+          tenantId,
+          ip: req.ip,
+          userAgent: req.headers["user-agent"],
+        },
+      );
 
-      const onboardingService = new OnboardingService(fastify.db);
-      const flows = await onboardingService.listFlows(projectId);
-      return reply.send({ success: true, data: flows });
+      return reply.send({ success: true, data: result });
     },
   );
 
@@ -132,13 +127,18 @@ export async function onboardingFlowRoute(fastify: FastifyInstance) {
         flowId: string;
       };
 
-      const projectService = new ProjectService(fastify.db);
-      await projectService.assertMembership(tenantId, req.identity.id);
-      await projectService.getById(tenantId, projectId);
+      const result = await flowExecutor.run(
+        getOnboardingFlowFlow,
+        { tenantId, projectId, flowId },
+        {
+          identityId: req.identity.id,
+          tenantId,
+          ip: req.ip,
+          userAgent: req.headers["user-agent"],
+        },
+      );
 
-      const onboardingService = new OnboardingService(fastify.db);
-      const flow = await onboardingService.getFlow(projectId, flowId);
-      return reply.send({ success: true, data: flow });
+      return reply.send({ success: true, data: result });
     },
   );
 
@@ -166,12 +166,18 @@ export async function onboardingFlowRoute(fastify: FastifyInstance) {
       };
       const body = req.body as z.infer<typeof UpdateOnboardingFlowSchema>;
 
-      const projectService = new ProjectService(fastify.db);
-      await projectService.getById(tenantId, projectId);
+      const result = await flowExecutor.run(
+        updateOnboardingFlowFlow,
+        { ...body, tenantId, projectId, flowId },
+        {
+          identityId: req.identity.id,
+          tenantId,
+          ip: req.ip,
+          userAgent: req.headers["user-agent"],
+        },
+      );
 
-      const onboardingService = new OnboardingService(fastify.db);
-      const flow = await onboardingService.updateFlow(projectId, flowId, body);
-      return reply.send({ success: true, data: flow });
+      return reply.send({ success: true, data: result });
     },
   );
 
@@ -198,11 +204,17 @@ export async function onboardingFlowRoute(fastify: FastifyInstance) {
         flowId: string;
       };
 
-      const projectService = new ProjectService(fastify.db);
-      await projectService.getById(tenantId, projectId);
+      await flowExecutor.run(
+        deleteOnboardingFlowFlow,
+        { tenantId, projectId, flowId },
+        {
+          identityId: req.identity.id,
+          tenantId,
+          ip: req.ip,
+          userAgent: req.headers["user-agent"],
+        },
+      );
 
-      const onboardingService = new OnboardingService(fastify.db);
-      await onboardingService.deleteFlow(projectId, flowId);
       return reply.send({ success: true });
     },
   );
@@ -224,13 +236,20 @@ export async function onboardingProgressRoute(fastify: FastifyInstance) {
       },
     },
     async (req, reply) => {
-      const { flowId } = req.body as z.infer<typeof StartProgressSchema>;
-      const onboardingService = new OnboardingService(fastify.db);
-      const progress = await onboardingService.startProgress(
-        req.identity.id,
-        flowId,
+      const body = req.body as z.infer<typeof StartProgressSchema>;
+
+      const result = await flowExecutor.run(
+        startOnboardingProgressFlow,
+        body,
+        {
+          identityId: req.identity.id,
+          tenantId: null,
+          ip: req.ip,
+          userAgent: req.headers["user-agent"],
+        },
       );
-      return reply.send({ success: true, data: progress });
+
+      return reply.send({ success: true, data: result });
     },
   );
 
@@ -248,12 +267,19 @@ export async function onboardingProgressRoute(fastify: FastifyInstance) {
     },
     async (req, reply) => {
       const { progressId } = req.params as { progressId: string };
-      const onboardingService = new OnboardingService(fastify.db);
-      const progress = await onboardingService.getProgress(
-        req.identity.id,
-        progressId,
+
+      const result = await flowExecutor.run(
+        getOnboardingProgressFlow,
+        { progressId },
+        {
+          identityId: req.identity.id,
+          tenantId: null,
+          ip: req.ip,
+          userAgent: req.headers["user-agent"],
+        },
       );
-      return reply.send({ success: true, data: progress });
+
+      return reply.send({ success: true, data: result });
     },
   );
 
@@ -275,13 +301,18 @@ export async function onboardingProgressRoute(fastify: FastifyInstance) {
       const { progressId } = req.params as { progressId: string };
       const body = req.body as z.infer<typeof AdvanceProgressSchema>;
 
-      const onboardingService = new OnboardingService(fastify.db);
-      const progress = await onboardingService.advanceProgress(
-        req.identity.id,
-        progressId,
-        body,
+      const result = await flowExecutor.run(
+        advanceOnboardingProgressFlow,
+        { ...body, progressId },
+        {
+          identityId: req.identity.id,
+          tenantId: null,
+          ip: req.ip,
+          userAgent: req.headers["user-agent"],
+        },
       );
-      return reply.send({ success: true, data: progress });
+
+      return reply.send({ success: true, data: result });
     },
   );
 }
