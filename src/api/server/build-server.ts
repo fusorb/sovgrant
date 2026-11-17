@@ -59,7 +59,7 @@ import { apiKeyPlugin } from "@/modules/api-key/api-key.plugin";
 export async function buildServer() {
   const server = Fastify({
     pluginTimeout: 60000,
-    trustProxy: config.base.trustProxy,
+    trustProxy: config.base.trustProxy as boolean | string | string[] | undefined,
     logger: config.base.isProduction
       ? { level: config.base.logLevel }
       : {

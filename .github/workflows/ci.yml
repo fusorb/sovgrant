@@ -53,6 +53,8 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/sovgrant_test
 
       - name: Generate Prisma client
         run: pnpm prisma:generate
