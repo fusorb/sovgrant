@@ -54,6 +54,7 @@ services:
     mem_limit: 512m
 
   workers:
+    image: ${API_IMAGE:-ghcr.io/fusorb/sovgrant-api:latest}
     build:
       context: .
       dockerfile: Dockerfile

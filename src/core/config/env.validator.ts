@@ -18,6 +18,10 @@ export const envSchema = z
       .default("http://localhost:3000/api/webhooks/sovgrant"),
     API_BASE_URL: z.string().url().default("http://localhost:4000"),
     ALLOWED_ORIGINS: z.string().default("http://localhost:3000"),
+    // Fastify `trustProxy`: "" (off), "true", a hop count ("1"), or an IP/CIDR
+    // list. Required behind a reverse proxy, otherwise every client shares the
+    // proxy's IP (one rate-limit bucket, wrong audit IPs).
+    TRUST_PROXY: z.string().default(""),
 
     // ── Social OAuth Providers ───────────────────────────────────────────────
     GOOGLE_CLIENT_ID: z.string().default(""),

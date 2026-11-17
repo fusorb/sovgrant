@@ -1,4 +1,5 @@
 import { rawEnv } from "./env.validator";
+import { parseTrustProxy } from "./trust-proxy";
 
 export const config = {
   base: {
@@ -7,6 +8,7 @@ export const config = {
     port: rawEnv.PORT,
     apiUrl: rawEnv.API_BASE_URL,
     allowedOrigins: rawEnv.ALLOWED_ORIGINS.split(",").map((url) => url.trim()),
+    trustProxy: parseTrustProxy(rawEnv.TRUST_PROXY),
     isProduction: rawEnv.NODE_ENV === "production",
     isDevelopment: rawEnv.NODE_ENV === "development",
     isTest: rawEnv.NODE_ENV === "test",
