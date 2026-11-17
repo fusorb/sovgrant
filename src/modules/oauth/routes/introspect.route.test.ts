@@ -15,7 +15,7 @@ import { introspectRoute } from "./introspect.route";
 import { hashPassword } from "@/modules/auth/services/password.service";
 
 const CLIENT_ID = "introspect-client";
-const CLIENT_SECRET = "s3cret-introspect-pw";
+const CLIENT_SECRET = "test-introspect-pw";
 const PUBLIC_CLIENT_ID = "public-spa-client";
 
 const db = {
