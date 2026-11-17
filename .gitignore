@@ -76,3 +76,5 @@ sovgrant_codebase_snapshot.txt
 docs/private/
 
 certs/
+# Command Code local state (tastes/settings) - machine-local, not repo content
+.commandcode
