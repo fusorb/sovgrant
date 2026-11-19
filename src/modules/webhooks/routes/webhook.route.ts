@@ -35,6 +35,9 @@ export async function webhookRoutes(fastify: FastifyInstance) {
             success: z.boolean(),
             received: z.boolean(),
           }),
+          401: z.object({
+            error: z.string(),
+          }),
         },
       },
     },
@@ -45,7 +48,8 @@ export async function webhookRoutes(fastify: FastifyInstance) {
           config.webhooks.signingSecret,
         )
       ) {
-        return reply.status(401).send({ error: "Unauthorized" });
+        reply.code(401);
+        return reply.send({ error: "Unauthorized" });
       }
 
       const { eventType, identityId, payload } = req.body as z.infer<

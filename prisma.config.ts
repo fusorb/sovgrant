@@ -1,8 +1,8 @@
 import "dotenv/config";
-import { defineConfig, env } from "prisma/config";
+import { definePrismaConfig } from "prisma/config";
 
 // Force load process env as an ultimate fallback if Prisma's native scanner chokes in MINGW64
-const databaseUrl = env("DATABASE_URL") || process.env.DATABASE_URL;
+const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
   throw new Error(
@@ -12,19 +12,13 @@ if (!databaseUrl) {
 }
 
 // Shadow database for `prisma migrate diff --from-migrations` (used by the
-// migration rollback test). Optional - Prisma 7's env() throws when a
-// variable is unset, so read it defensively and only fall back to the
+// migration rollback test). Optional - read defensively and fall back to the
 // process env / sibling-DB derivation when it is genuinely absent.
-let shadowEnv: string | undefined;
-try {
-  shadowEnv = env("SHADOW_DATABASE_URL") || undefined;
-} catch {
-  shadowEnv = undefined;
-}
+const shadowEnv = process.env.SHADOW_DATABASE_URL;
 const shadowDatabaseUrl =
-  process.env.SHADOW_DATABASE_URL || shadowEnv || databaseUrl.replace(/\/[^/]*\?/, "/sg_shadow?");
+  shadowEnv || databaseUrl.replace(/\/[^/]*\?/, "/sg_shadow?");
 
-export default defineConfig({
+export default definePrismaConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",

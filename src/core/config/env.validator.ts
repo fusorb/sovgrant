@@ -15,7 +15,7 @@ export const envSchema = z
     SOVGRANT_WEBHOOK_URL: z
       .string()
       .url()
-      .default("http://localhost:3000/api/webhooks/sovgrant"),
+      .default("http://localhost:3000/api/webhooks/sg"),
     API_BASE_URL: z.string().url().default("http://localhost:4000"),
     ALLOWED_ORIGINS: z.string().default("http://localhost:3000"),
     // Fastify `trustProxy`: "" (off), "true", a hop count ("1"), or an IP/CIDR
