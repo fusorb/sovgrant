@@ -22,6 +22,11 @@ export const envSchema = z
     // list. Required behind a reverse proxy, otherwise every client shares the
     // proxy's IP (one rate-limit bucket, wrong audit IPs).
     TRUST_PROXY: z.string().default(""),
+    // Optional bearer token to protect GET /metrics (Prometheus scrape). When
+    // unset, metrics are only reachable in non-production environments; in
+    // production an unset token fails closed (401) rather than leaking
+    // internals to the public internet.
+    METRICS_TOKEN: z.string().optional(),
 
     // ── Social OAuth Providers ───────────────────────────────────────────────
     GOOGLE_CLIENT_ID: z.string().default(""),
@@ -38,7 +43,12 @@ export const envSchema = z
 
     // JWT Config Tokens
     JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
-    JWT_ISSUER: z.string().default("sovgrant"),
+    // OIDC issuer identifier. Deliberately optional + lenient: any ambient
+    // value that is not an http(s) URL (e.g. the dev box's JWT_ISSUER=sovgrant,
+    // which cannot be overridden by an env file) is treated as absent, and
+    // every consumer falls back to API_BASE_URL. Strict .url() validation here
+    // previously crashed the whole API at boot on one dev machine.
+    JWT_ISSUER: z.string().optional(),
     JWT_ACCESS_TTL: z.string().default("15m"),
     JWT_REFRESH_TTL: z.string().default("7d"),
 

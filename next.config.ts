@@ -47,7 +47,7 @@ function resolveRhfImportEntry(): string {
 }
 
 // ── Shared alias table ───────────────────────────────────────────────────────
-// Applied to BOTH bundlers. The two facet CSS files must be resolved to their
+// Webpack-fallback only. The two facet CSS files must be resolved to their
 // real dist paths because the CSS `@import` resolver does not honor the
 // package `exports` map for subpath files; react-hook-form is pinned to its
 // full ESM entry (see resolveRhfImportEntry above).
@@ -59,6 +59,14 @@ const FACET_TAILWIND_CSS = path.join(
   PROJECT_ROOT,
   "node_modules/@fusorb/facet-tokens/dist/tailwind.css",
 );
+
+// Turbopack resolves package-export subpaths natively (tokens.css is mapped
+// in facet-tokens' "exports", and 'react-hook-form' resolves to its ESM entry),
+// so it must NOT receive absolute filesystem aliases: on Windows those become
+// \\?\ long-path prefixes that Turbopack rejects with "windows imports are
+// not implemented yet" (see build-server logs). The webpack fallback still needs
+// the absolute-path overrides, so it keeps the shared table below.
+const turbopackAliases: Record<string, string> = {};
 
 const sharedAliases: Record<string, string> = {
   "@fusorb/facet-tokens/tokens.css": FACET_TOKENS_CSS,
@@ -138,7 +146,7 @@ const nextConfig: NextConfig = {
   // from the pnpm-store layout sitting beside this repo.
   turbopack: {
     root: PROJECT_ROOT,
-    resolveAlias: sharedAliases,
+    resolveAlias: turbopackAliases,
   },
 
   allowedDevOrigins: ["169.254.94.46", "localhost:3000"],

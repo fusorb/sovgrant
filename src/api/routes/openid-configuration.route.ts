@@ -57,7 +57,7 @@ export async function openIdConfigurationRoute(fastify: FastifyInstance) {
     async (req) => {
       const base = config.base.apiUrl ?? `http://${req.hostname}`;
       return {
-        issuer: base,
+        issuer: config.security.jwt.issuer,
         authorization_endpoint: `${base}/api/v1/oauth/authorize`,
         token_endpoint: `${base}/api/v1/oauth/token`,
         userinfo_endpoint: `${base}/api/v1/oauth/userinfo`,

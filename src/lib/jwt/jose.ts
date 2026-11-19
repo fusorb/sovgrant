@@ -8,6 +8,7 @@ import {
   type JWTPayload,
 } from "jose";
 import { ApiError } from "@/core/errors";
+import { config } from "@/core/config";
 
 // Helper to resolve key content
 function getFileContent(keyOrPath: string): string {
@@ -44,7 +45,7 @@ export async function signJwt(
   const jwt = new SignJWT(payload)
     .setProtectedHeader({ alg, ...(options.kid ? { kid: options.kid } : {}) })
     .setIssuedAt()
-    .setIssuer(options.issuer ?? "sovgrant")
+    .setIssuer(options.issuer ?? config.security.jwt.issuer)
     .setExpirationTime(options.expiresIn);
 
   if (alg === "HS256") {
@@ -76,7 +77,7 @@ export async function verifyJwt<T extends JWTPayload>(
   if (alg === "HS256") {
     const secret = new TextEncoder().encode(keyOrSecret);
     const { payload } = await jwtVerify(token, secret, {
-      issuer: options?.issuer ?? "sovgrant",
+      issuer: options?.issuer ?? config.security.jwt.issuer,
       audience: options?.audience,
     });
     return payload as T;
@@ -84,7 +85,7 @@ export async function verifyJwt<T extends JWTPayload>(
     // RS256: Load PEM string
     const publicKey = await importSPKI(keyOrSecret, "RS256");
     const { payload } = await jwtVerify(token, publicKey, {
-      issuer: options?.issuer ?? "sovgrant",
+      issuer: options?.issuer ?? config.security.jwt.issuer,
       audience: options?.audience,
     });
     return payload as T;

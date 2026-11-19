@@ -9,6 +9,7 @@ export const config = {
     apiUrl: rawEnv.API_BASE_URL,
     allowedOrigins: rawEnv.ALLOWED_ORIGINS.split(",").map((url) => url.trim()),
     trustProxy: parseTrustProxy(rawEnv.TRUST_PROXY),
+    metricsToken: rawEnv.METRICS_TOKEN ?? null,
     isProduction: rawEnv.NODE_ENV === "production",
     isDevelopment: rawEnv.NODE_ENV === "development",
     isTest: rawEnv.NODE_ENV === "test",
@@ -49,7 +50,16 @@ export const config = {
       privateKey: rawEnv.PRIVATE_KEY_PEM,
       publicKey: rawEnv.PUBLIC_KEY_PEM,
       secret: rawEnv.JWT_SECRET,
-      issuer: rawEnv.JWT_ISSUER,
+      // OIDC issuer. JWT_ISSUER overrides discovery/token signing, but only
+      // when it is a valid URL — otherwise (unset, or an ambient non-URL value
+      // like the machine-level `sovgrant`) we fall back to API_BASE_URL, which
+      // OIDC expects an issuer to identify, keeping discovery and signatures
+      // consistent instead of crashing at boot.
+      issuer: (() => {
+        const candidate = rawEnv.JWT_ISSUER;
+        if (candidate && /^https?:\/\/.+/.test(candidate)) return candidate;
+        return rawEnv.API_BASE_URL;
+      })(),
       accessTtl: rawEnv.JWT_ACCESS_TTL,
       refreshTtl: rawEnv.JWT_REFRESH_TTL,
     },

@@ -39,6 +39,7 @@ const cfg = vi.hoisted(() => ({
   publicKey: "",
   privateKey: "",
   secret: "a".repeat(32),
+  issuer: "http://sovgrant.test",
   accessTtl: "15m",
   refreshTtl: "30d",
 }));
@@ -156,7 +157,7 @@ describe("GET /jwks — relying-party verification contract", () => {
 
     const { payload } = await jwtVerify(token, keySet, {
       algorithms: ["RS256"],
-      issuer: "sovgrant",
+      issuer: cfg.issuer,
     });
 
     expect(payload.sub).toBe("identity_1");

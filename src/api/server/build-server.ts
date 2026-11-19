@@ -126,6 +126,17 @@ export async function buildServer() {
   // ── Prometheus metrics ──────────────────────────────────────────────────────
   // Exposes GET /metrics in Prometheus exposition format. Auto-collects request
   // duration histograms, error rates, and request counts per route + method.
+  // /metrics leaks internals (routes, error rates, memory) — so it is gated:
+  //   - METRICS_TOKEN set → required as `Authorization: Bearer <token>` (401 otherwise)
+  //   - unset in production → closed off entirely (401)
+  //   - unset in dev/test → open (metrics are useful locally)
+  server.addHook("onRequest", async (request, reply) => {
+    if (request.routeOptions.url !== "/metrics") return;
+    const token = config.base.metricsToken;
+    if (token && request.headers.authorization === `Bearer ${token}`) return;
+    if (!token && !config.base.isProduction) return;
+    reply.code(401).send({ error: "Unauthorized" });
+  });
   await server.register(metrics, { endpoint: "/metrics" });
 
   // ── Infrastructure ─────────────────────────────────────────────────────────

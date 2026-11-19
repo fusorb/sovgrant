@@ -122,7 +122,7 @@ export class TokenService {
     }
 
     const now = new Date();
-    const issuer = "sovgrant";
+    const issuer = config.security.jwt.issuer;
 
     const privateKeyPem = resolvePemContent(config.security.jwt.privateKey);
     const publicKeyPem = resolvePemContent(config.security.jwt.publicKey);
