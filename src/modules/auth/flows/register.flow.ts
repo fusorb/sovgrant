@@ -56,49 +56,46 @@ export const registerFlow: Flow<Input, Output> = {
 
     const passwordHash = await hashPassword(input.password);
 
-    const { identity, verifyToken } = await ((ctx.db as any).$transaction(
-      async (tx: any) => {
-        const newIdentity = await tx.identity.create({
-          data: {
-            primaryEmail: input.email,
-            name: input.name,
-            status: "PENDING",
-            localAccount: {
-              create: { email: input.email, passwordHash },
-            },
-          },
-        });
-
-        const memberRole = await tx.role.findFirst({
-          where: { tenantId: SYSTEM_TENANT_ID, name: "MEMBER" },
-          select: { id: true },
-        });
-
-        if (memberRole) {
-          await tx.tenantMembership.create({
-            data: {
-              identityId: newIdentity.id,
-              tenantId: SYSTEM_TENANT_ID,
-              roleId: memberRole.id,
-              status: "ACTIVE",
-            },
-          });
-        } else {
-          ctx.logger?.warn(
-            "SYSTEM tenant MEMBER role not found — run prisma db seed",
-            { identityId: newIdentity.id },
-          );
-        }
-
-        const emailTokenService = new EmailTokenService(tx);
-        const token = await emailTokenService.issue(
-          newIdentity.id,
-          "VERIFY_EMAIL",
-        );
-
-        return { identity: newIdentity, verifyToken: token };
+    // FlowExecutor already runs this flow inside a managed transaction (ctx.db).
+    // Do not nest $transaction here — starting an interactive tx on a tx client
+    // can deadlock or fail with "Unable to start a transaction in the given time."
+    const identity = await ctx.db.identity.create({
+      data: {
+        primaryEmail: input.email,
+        name: input.name,
+        status: "PENDING",
+        localAccount: {
+          create: { email: input.email, passwordHash },
+        },
       },
-    ) as Promise<{ identity: any; verifyToken: string }>);
+    });
+
+    const memberRole = await ctx.db.role.findFirst({
+      where: { tenantId: SYSTEM_TENANT_ID, name: "MEMBER" },
+      select: { id: true },
+    });
+
+    if (memberRole) {
+      await ctx.db.tenantMembership.create({
+        data: {
+          identityId: identity.id,
+          tenantId: SYSTEM_TENANT_ID,
+          roleId: memberRole.id,
+          status: "ACTIVE",
+        },
+      });
+    } else {
+      ctx.logger?.warn(
+        "SYSTEM tenant MEMBER role not found — run prisma db seed",
+        { identityId: identity.id },
+      );
+    }
+
+    const emailTokenService = new EmailTokenService(ctx.db);
+    const verifyToken = await emailTokenService.issue(
+      identity.id,
+      "VERIFY_EMAIL",
+    );
 
     void notificationService.sendEmailVerification(input.email, verifyToken);
 
