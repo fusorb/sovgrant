@@ -38,6 +38,8 @@ jobs:
 
       - name: Generate Prisma client
         run: pnpm prisma:generate
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/sovgrant_test
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
