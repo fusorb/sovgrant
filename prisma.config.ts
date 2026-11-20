@@ -1,13 +1,13 @@
 import "dotenv/config";
-import { definePrismaConfig } from "prisma/config";
+import { defineConfig } from "prisma/config";
 
 // Force load process env as an ultimate fallback if Prisma's native scanner chokes in MINGW64
 const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
   throw new Error(
-    "CRITICAL: DATABASE_URL could not be resolved by Prisma engine or process environment.\n" +
-      "Please verify that your .env file exists at the root of your project and contains a valid connection string.",
+    "Prisma Config Error: DATABASE_URL is missing. " +
+      "Please ensure your .env file exists in the root directory.",
   );
 }
 
@@ -18,10 +18,11 @@ const shadowEnv = process.env.SHADOW_DATABASE_URL;
 const shadowDatabaseUrl =
   shadowEnv || databaseUrl.replace(/\/[^/]*\?/, "/sg_shadow?");
 
-export default definePrismaConfig({
+export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    seed: "tsx prisma/seed.ts",
   },
   datasource: {
     url: databaseUrl,

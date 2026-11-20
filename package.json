@@ -107,7 +107,7 @@
     "lint-staged": "^17.3.0",
     "postcss": "^8.5.26",
     "prettier": "^3.9.6",
-    "prisma": "^8.0.0-rc.34",
+    "prisma": "^7.9.1",
     "tailwindcss": "^4.3.3",
     "tsup": "^8.5.1",
     "tsx": "^4.23.12",
