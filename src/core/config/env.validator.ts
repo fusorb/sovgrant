@@ -58,8 +58,15 @@ export const envSchema = z
     WEBAUTHN_ORIGIN: z.string().url().default("http://localhost:3000"),
 
     // Upstash Redis Token Cache Layer (optional - falls back to in-memory)
-    UPSTASH_REDIS_REST_URL: z.string().url().optional(),
-    UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+    UPSTASH_REDIS_REST_URL: z.preprocess((v) => {
+      if (typeof v !== "string") return v;
+      const t = v.trim();
+      if (!t || t.includes("your-instance.upstash.io")) return undefined;
+      try { new URL(t); return t; } catch { return undefined; }
+    }, z.string().url().optional()),
+    UPSTASH_REDIS_REST_TOKEN: z.preprocess((v) =>
+      typeof v === "string" && (v.trim() === "" || v.includes("YOUR_UPSTASH")) ? undefined : v,
+    z.string().optional()),
 
     // Mail Delivery Communication Vector
     RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),
