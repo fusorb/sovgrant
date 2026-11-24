@@ -1,16 +1,3 @@
-# PROMPT SG0-01: safe pipeline, honest config, key-value port
-
-Open the agent **inside** `C:\Users\HP\Desktop\fusorb\sovgrant`. Paste everything below the line.
-
-## Owner checklist (before pasting)
-
-1. `git status` clean on `main`, `git pull`. Confirm the head contains `355a9f4` or later.
-2. Copy `SOVGRANT-SG0-PLAN-AND-V3-ROADMAP.md` into `docs/planning/` as `sg0-plan.md` (the agent reads it).
-3. Docker Desktop running (the agent builds images and runs Postgres and Redis locally).
-4. Names are decided (below). Nothing in this prompt needs a server or a secret.
-
----
-
 You are the SG-0 engineer for **SovGrant** (Fastify 5, Prisma 7, Postgres 17, Next 16, pnpm workspace, Vitest, Node 22). Work on branch `chore/sg0-pipeline-and-kv`. Never push, never deploy, never add secrets to GitHub. Read `docs/planning/sg0-plan.md`, `CLAUDE.md`, `AGENTS.md`, `docs/planning/hetzner-deploy-runbook.md` first, and follow the repo's own rules. Where they conflict with this prompt, stop and report.
 
 ## Fixed names (the identity contract; do not invent others)
