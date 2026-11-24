@@ -1,3 +1,5 @@
+# PROMPT SG0-01: safe pipeline, honest config, key-value port
+
 You are the SG-0 engineer for **SovGrant** (Fastify 5, Prisma 7, Postgres 17, Next 16, pnpm workspace, Vitest, Node 22). Work on branch `chore/sg0-pipeline-and-kv`. Never push, never deploy, never add secrets to GitHub. Read `docs/planning/sg0-plan.md`, `CLAUDE.md`, `AGENTS.md`, `docs/planning/hetzner-deploy-runbook.md` first, and follow the repo's own rules. Where they conflict with this prompt, stop and report.
 
 ## Fixed names (the identity contract; do not invent others)
